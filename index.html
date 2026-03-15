@@ -435,9 +435,42 @@
       color: #777;
     }
 
+    /* ── Institution logos ── */
+    .institution-logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .institution-logos a {
+      display: inline-flex;
+      align-items: center;
+      opacity: 0.85;
+      transition: opacity 0.2s ease;
+    }
+
+    .institution-logos a:hover {
+      opacity: 1;
+    }
+
+    .institution-logos img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+    }
+
     @media (max-width: 768px) {
       .publication-title {
         font-size: 1.5rem !important;
+      }
+      .institution-logos {
+        gap: 1.5rem;
+      }
+      .institution-logos img {
+        height: 36px;
       }
     }
 
@@ -511,7 +544,8 @@
           <a class="navbar-item" href="#method">Method</a>
           <a class="navbar-item" href="#results">Results</a>
           <a class="navbar-item" href="#dataset">Dataset</a>
-          <a class="navbar-item" href="#bibtex">BibTeX</a>
+          <!-- BibTeX nav link commented out along with section -->
+          <!-- <a class="navbar-item" href="#bibtex">BibTeX</a> -->
         </div>
       </div>
     </div>
@@ -572,15 +606,9 @@
             </div>
 
             <div style="margin-top:1.75rem;">
-              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
-                <span class="icon"><i class="fas fa-file-pdf"></i></span>
-                <span>Paper <span class="coming-soon">Soon</span></span>
-              </span>
+              <!-- Paper button removed as requested -->
 
-              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
-                <span class="icon"><i class="fas fa-file-lines"></i></span>
-                <span>Supplementary <span class="coming-soon">Soon</span></span>
-              </span>
+              <!-- Supplementary button removed as requested -->
 
               <a href="https://github.com/kesav-tih/M3Grounder" target="_blank" class="button is-dark is-rounded" style="margin:0.2rem;">
                 <span class="icon"><i class="fab fa-github"></i></span><span>Code</span>
@@ -854,172 +882,21 @@
     </div>
   </section>
 
-    <section class="section" id="dataset">
+  <!-- ═══════════════════════════════════════════════════════
+       SECTION ORDER: Benchmark Results first, then Results
+       ═══════════════════════════════════════════════════════ -->
+
+  <!-- Benchmark Results (moved before Results) -->
+  <section class="section section-alt" id="quantitative">
     <div class="container is-max-desktop">
-      <h2 class="title is-3 has-text-centered">GroundingDocQA Dataset &amp; Benchmark</h2>
 
-      <div class="notification is-warning is-light has-text-centered" style="margin-top:1rem; margin-bottom:2rem;">
-        <i class="fas fa-clock"></i>&ensp;
-        <strong>Dataset page coming soon.</strong>
-        We are preparing the GroundingDocQA dataset and benchmark for public release.
-        Check back here or watch the <a href="https://github.com/hrithiksagar-tih/M3Grounder" target="_blank">GitHub
-          repo</a> for updates.
-      </div>
+      <h2 class="title is-3 has-text-centered">Benchmark Results</h2>
 
-      <div class="columns" style="margin-top:0.5rem;">
-
-        <div class="column">
-          <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:2rem; background:#fff; height:100%;">
-            <h3 class="title is-4" style="color:#3273dc; margin-bottom:0.5rem;">
-              📦 GroundingDocQA
-            </h3>
-            <p style="font-size:0.9rem; color:#555; margin-bottom:1.5rem;">
-              Large-scale training dataset built with a novel data engine that handles complex layouts,
-              curved-text, and graphic-rich documents — annotated with pixel-level masks at three granularities.
-            </p>
-            <div class="columns is-multiline">
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num">200K</div>
-                  <div class="stat-lbl">Documents</div>
-                </div>
-              </div>
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num">2M</div>
-                  <div class="stat-lbl">QA Pairs</div>
-                </div>
-              </div>
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num" style="font-size:1.3rem;">Multi-<br>Span</div>
-                  <div class="stat-lbl">Annotation</div>
-                </div>
-              </div>
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num">3</div>
-                  <div class="stat-lbl">Mask Levels<br>(phrase, line, block)</div>
-                </div>
-              </div>
-            </div>
-            <div class="tag-row">
-              <span class="tag is-light">Text-rich docs</span>
-              <span class="tag is-light">Charts</span>
-              <span class="tag is-light">Forms &amp; tables</span>
-              <span class="tag is-light">Curved text</span>
-              <span class="tag is-light">Webpages</span>
-              <span class="tag is-light">Reports</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="column">
-          <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:2rem; background:#fff; height:100%;">
-            <h3 class="title is-4" style="color:#3273dc; margin-bottom:0.5rem;">
-              📊 GroundingDocQA-Bench
-            </h3>
-            <p style="font-size:0.9rem; color:#555; margin-bottom:1.5rem;">
-              Human-verified benchmark for systematic evaluation of grounding fidelity under
-              multi-span, multi-granular, and curved-text conditions with mask-level annotations.
-            </p>
-            <div class="columns is-multiline">
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num">2.5K</div>
-                  <div class="stat-lbl">Documents</div>
-                </div>
-              </div>
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num">5K</div>
-                  <div class="stat-lbl">QA Pairs</div>
-                </div>
-              </div>
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num" style="font-size:1.3rem;">Human</div>
-                  <div class="stat-lbl">Verified</div>
-                </div>
-              </div>
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num" style="font-size:1.3rem;">Curved</div>
-                  <div class="stat-lbl">Text Split (CS)</div>
-                </div>
-              </div>
-            </div>
-            <div class="tag-row">
-              <span class="tag is-link is-light">Single-span F₁</span>
-              <span class="tag is-link is-light">Multi-span F₁</span>
-              <span class="tag is-link is-light">Curved F₁ (CS)</span>
-              <span class="tag is-link is-light">G-Eval (AQ)</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div style="margin-top:2.5rem; text-align:center;">
-
-        <img src="static/images/figs/dataengine_final.png"
-            alt="GroundingDocQA data engine pipeline"
-            style="width:100%; max-width:900px; display:block; margin:auto;
-                    border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,0.08);">
-
-        <p class="fig-caption">
-          <strong>GroundingDocQA data engine.</strong>
-          The pipeline processes layout-aware, curved-text, and chart documents,
-          generating multi-span and multi-granular QA pairs with pixel-level mask
-          annotations at three levels (phrase, line, block). A human-in-the-loop
-          verification stage ensures annotation quality across all document types.
-        </p>
-
-      </div>
-    </div>
-  </section>
-
-
-  <section class="section section-alt" id="results">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3 has-text-centered">Results</h2>
       <p class="has-text-centered" style="color:#666; margin-bottom:2rem;">
         M3Grounder achieves state-of-the-art grounding performance across all evaluated benchmarks.
         Gains are most pronounced on curved and skewed text, where segmentation-based localization
         substantially outperforms bounding-box approaches.
       </p>
-
-      <div class="columns" style="margin-bottom:2.5rem;">
-        <div class="column">
-          <div class="stat-box">
-            <div class="stat-num">79.0</div>
-            <div class="stat-lbl">GDQA-Bench F₁<br><em style="color:#bbb;">(ours)</em></div>
-          </div>
-        </div>
-        <div class="column">
-          <div class="stat-box">
-            <div class="stat-num">73.3</div>
-            <div class="stat-lbl">DOGR-Bench F₁<br><em style="color:#bbb;">M3Grounder-Q</em></div>
-          </div>
-        </div>
-        <div class="column">
-          <div class="stat-box">
-            <div class="stat-num">87.5</div>
-            <div class="stat-lbl">Block-level F₁<br><em style="color:#bbb;">M3Grounder-Q</em></div>
-          </div>
-        </div>
-        <div class="column">
-          <div class="stat-box">
-            <div class="stat-num">+6.9</div>
-            <div class="stat-lbl">Over DOGR @ 8B<br><em style="color:#bbb;">same backbone scale</em></div>
-          </div>
-        </div>
-      </div>
-
-      <section class="section" id="quantitative">
-      <div class="container is-max-desktop">
-
-      <h2 class="title is-3 has-text-centered">Benchmark Results</h2>
 
       <table class="table is-striped is-hoverable is-fullwidth results-table">
       <thead>
@@ -1178,8 +1055,45 @@
       </tbody>
       </table>
 
+    </div>
+  </section>
+
+  <!-- Results (now after Benchmark Results) -->
+  <section class="section" id="results">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Results</h2>
+      <p class="has-text-centered" style="color:#666; margin-bottom:2rem;">
+        M3Grounder achieves state-of-the-art grounding performance across all evaluated benchmarks.
+        Gains are most pronounced on curved and skewed text, where segmentation-based localization
+        substantially outperforms bounding-box approaches.
+      </p>
+
+      <div class="columns" style="margin-bottom:2.5rem;">
+        <div class="column">
+          <div class="stat-box">
+            <div class="stat-num">79.0</div>
+            <div class="stat-lbl">GDQA-Bench F₁<br><em style="color:#bbb;">(ours)</em></div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="stat-box">
+            <div class="stat-num">73.3</div>
+            <div class="stat-lbl">DOGR-Bench F₁<br><em style="color:#bbb;">M3Grounder-Q</em></div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="stat-box">
+            <div class="stat-num">87.5</div>
+            <div class="stat-lbl">Block-level F₁<br><em style="color:#bbb;">M3Grounder-Q</em></div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="stat-box">
+            <div class="stat-num">+6.9</div>
+            <div class="stat-lbl">Over DOGR @ 8B<br><em style="color:#bbb;">same backbone scale</em></div>
+          </div>
+        </div>
       </div>
-      </section>
 
       <h3 class="title is-4">Multi-Granularity Results on GDQA-Bench</h3>
       <p style="color:#666; font-size:0.9rem; margin-bottom:0.75rem;">
@@ -1216,6 +1130,135 @@
   </section>
 
 
+    <section class="section section-alt" id="dataset">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">GroundingDocQA Dataset &amp; Benchmark</h2>
+
+      <div class="notification is-warning is-light has-text-centered" style="margin-top:1rem; margin-bottom:2rem;">
+        <i class="fas fa-clock"></i>&ensp;
+        <strong>Dataset page coming soon.</strong>
+        We are preparing the GroundingDocQA dataset and benchmark for public release.
+        Check back here or watch the <a href="https://github.com/hrithiksagar-tih/M3Grounder" target="_blank">GitHub
+          repo</a> for updates.
+      </div>
+
+      <div class="columns" style="margin-top:0.5rem;">
+
+        <div class="column">
+          <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:2rem; background:#fff; height:100%;">
+            <h3 class="title is-4" style="color:#3273dc; margin-bottom:0.5rem;">
+              📦 GroundingDocQA
+            </h3>
+            <p style="font-size:0.9rem; color:#555; margin-bottom:1.5rem;">
+              Large-scale training dataset built with a novel data engine that handles complex layouts,
+              curved-text, and graphic-rich documents — annotated with pixel-level masks at three granularities.
+            </p>
+            <div class="columns is-multiline">
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num">200K</div>
+                  <div class="stat-lbl">Documents</div>
+                </div>
+              </div>
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num">2M</div>
+                  <div class="stat-lbl">QA Pairs</div>
+                </div>
+              </div>
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num" style="font-size:1.3rem;">Multi-<br>Span</div>
+                  <div class="stat-lbl">Annotation</div>
+                </div>
+              </div>
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num">3</div>
+                  <div class="stat-lbl">Mask Levels<br>(phrase, line, block)</div>
+                </div>
+              </div>
+            </div>
+            <div class="tag-row">
+              <span class="tag is-light">Text-rich docs</span>
+              <span class="tag is-light">Charts</span>
+              <span class="tag is-light">Forms &amp; tables</span>
+              <span class="tag is-light">Curved text</span>
+              <span class="tag is-light">Webpages</span>
+              <span class="tag is-light">Reports</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:2rem; background:#fff; height:100%;">
+            <h3 class="title is-4" style="color:#3273dc; margin-bottom:0.5rem;">
+              📊 GroundingDocQA-Bench
+            </h3>
+            <p style="font-size:0.9rem; color:#555; margin-bottom:1.5rem;">
+              Human-verified benchmark for systematic evaluation of grounding fidelity under
+              multi-span, multi-granular, and curved-text conditions with mask-level annotations.
+            </p>
+            <div class="columns is-multiline">
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num">2.5K</div>
+                  <div class="stat-lbl">Documents</div>
+                </div>
+              </div>
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num">5K</div>
+                  <div class="stat-lbl">QA Pairs</div>
+                </div>
+              </div>
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num" style="font-size:1.3rem;">Human</div>
+                  <div class="stat-lbl">Verified</div>
+                </div>
+              </div>
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num" style="font-size:1.3rem;">Curved</div>
+                  <div class="stat-lbl">Text Split (CS)</div>
+                </div>
+              </div>
+            </div>
+            <div class="tag-row">
+              <span class="tag is-link is-light">Single-span F₁</span>
+              <span class="tag is-link is-light">Multi-span F₁</span>
+              <span class="tag is-link is-light">Curved F₁ (CS)</span>
+              <span class="tag is-link is-light">G-Eval (AQ)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:2.5rem; text-align:center;">
+
+        <img src="static/images/figs/dataengine_final.png"
+            alt="GroundingDocQA data engine pipeline"
+            style="width:100%; max-width:900px; display:block; margin:auto;
+                    border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,0.08);">
+
+        <p class="fig-caption">
+          <strong>GroundingDocQA data engine.</strong>
+          The pipeline processes layout-aware, curved-text, and chart documents,
+          generating multi-span and multi-granular QA pairs with pixel-level mask
+          annotations at three levels (phrase, line, block). A human-in-the-loop
+          verification stage ensures annotation quality across all document types.
+        </p>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       BibTeX section commented out — preserved in source
+       ═══════════════════════════════════════════════════════
   <section class="section section-alt" id="bibtex">
     <div class="container is-max-desktop">
       <div class="columns is-centered">
@@ -1246,11 +1289,26 @@
       </div>
     </div>
   </section>
+  -->
 
 
   <footer class="footer">
     <div class="container">
       <div class="content has-text-centered">
+
+        <!-- Institution / Conference Logos -->
+        <div class="institution-logos">
+          <a href="https://cvpr.thecvf.com/" target="_blank" rel="noopener noreferrer" title="CVPR">
+            <img src="/logos/cvpr_logo.png" alt="CVPR logo" />
+          </a>
+          <a href="https://www.iiit.ac.in/" target="_blank" rel="noopener noreferrer" title="IIIT Hyderabad">
+            <img src="/logos/iiiith_logo.jpg" alt="IIIT Hyderabad logo" />
+          </a>
+          <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen">
+            <img src="/logos/logo_bharatgen.png" alt="BharatGen logo" />
+          </a>
+        </div>
+
         <p>
           This page was built using the
           <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project
@@ -1278,7 +1336,7 @@
       });
     });
 
-    // Copy BibTeX
+    // Copy BibTeX (kept in JS in case section is re-enabled)
     function copyBibtex(btn) {
       const text = document.getElementById('bibtex-text').innerText;
       navigator.clipboard.writeText(text).then(() => {
