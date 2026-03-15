@@ -844,6 +844,27 @@
         Hierarchical Enclosure Loss enforces strict nesting:&ensp;<strong>phrase ⊂ line ⊂ block</strong>
       </div>
 
+      <!-- Bank statement example figure -->
+      <div style="margin-top:2rem; text-align:center;">
+
+        <img src="static/images/bank_example.png"
+            alt="Multi-granular grounding example on a bank statement"
+            style="width:100%; max-width:950px; display:block; margin:auto;
+                    border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,0.08);">
+
+        <p class="fig-caption">
+          <strong>Multi-granular grounding on financial documents.</strong>
+          M3Grounder grounds answer evidence at three hierarchical levels.
+          <span class="orange-circle-wide">C1</span> Phrase-level masks highlight
+          the precise token spans corresponding to extracted values.
+          <span class="orange-circle-wide">C2</span> Line-level masks capture the
+          surrounding transaction context, while
+          <span class="orange-circle-wide">C3</span> Block-level grounding retrieves
+          the broader statement region containing the relevant entries.
+        </p>
+
+      </div>
+
       <h3 class="title is-4 has-text-centered" style="margin-top:3rem;">Training Objectives</h3>
       <p class="has-text-centered" style="color:#666; margin-bottom:0.5rem; font-size:0.95rem;">
         M3Grounder is trained end-to-end with four complementary loss terms:
