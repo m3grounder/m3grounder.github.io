@@ -343,21 +343,19 @@
     }
 
     .qual-box {
-      height: 280px;
       background: #fafafa;
       border: 1px solid #e6e6e6;
       border-radius: 8px;
+      padding: 12px;
 
       display: flex;
       align-items: center;
       justify-content: center;
-
-      padding: 12px;
     }
 
     .qual-box img {
       max-width: 100%;
-      max-height: 100%;
+      height: auto;
       object-fit: contain;
     }
 
@@ -440,24 +438,54 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 2.5rem;
+      gap: 3rem;
       flex-wrap: wrap;
-      margin-bottom: 1.5rem;
+      margin-top: 2rem;
+      padding: 1.25rem 1.5rem;
+      background: #f7f9ff;
+      border: 1px solid #e4ecff;
+      border-radius: 12px;
     }
 
     .institution-logos a {
       display: inline-flex;
       align-items: center;
-      opacity: 0.85;
-      transition: opacity 0.2s ease;
+      opacity: 0.9;
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
 
     .institution-logos a:hover {
       opacity: 1;
+      transform: scale(1.05);
     }
 
     .institution-logos img {
-      height: 48px;
+      height: 72px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    /* footer logos (smaller, kept for structure) */
+    .footer-logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .footer-logos a {
+      display: inline-flex;
+      align-items: center;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+    }
+
+    .footer-logos a:hover { opacity: 1; }
+
+    .footer-logos img {
+      height: 36px;
       width: auto;
       object-fit: contain;
     }
@@ -466,11 +494,14 @@
       .publication-title {
         font-size: 1.5rem !important;
       }
+
       .institution-logos {
-        gap: 1.5rem;
+        gap: 1.75rem;
+        padding: 1rem;
       }
+
       .institution-logos img {
-        height: 36px;
+        height: 52px;
       }
     }
 
@@ -479,8 +510,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 2px solid #ff6b35; /* Changed to Orange */
-      color: #ff6b35; /* Changed to Orange */
+      border: 2px solid #ff6b35;
+      /* Changed to Orange */
+      color: #ff6b35;
+      /* Changed to Orange */
       border-radius: 50%;
       font-weight: 700;
       font-size: 0.8rem;
@@ -493,8 +526,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 2px solid #ff6b35; /* Changed to Orange */
-      color: #ff6b35; /* Changed to Orange */
+      border: 2px solid #ff6b35;
+      /* Changed to Orange */
+      color: #ff6b35;
+      /* Changed to Orange */
       border-radius: 12px;
       font-weight: 700;
       font-size: 0.8rem;
@@ -610,23 +645,40 @@
 
               <!-- Supplementary button removed as requested -->
 
-              <a href="https://github.com/m3grounder/m3grounder" target="_blank" class="button is-dark is-rounded" style="margin:0.2rem;">
+              <a href="https://github.com/m3grounder/m3grounder" target="_blank" class="button is-dark is-rounded"
+                style="margin:0.2rem;">
                 <span class="icon"><i class="fab fa-github"></i></span><span>Code</span>
               </a>
 
-              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
+              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;"
+                title="Coming soon">
                 <span class="icon"><i class="fas fa-database"></i></span>
                 <span>Dataset <span class="coming-soon">Soon</span></span>
               </span>
 
-              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
+              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;"
+                title="Coming soon">
                 <span class="icon">🤗</span><span>Models <span class="coming-soon">Soon</span></span>
               </span>
 
-              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
+              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;"
+                title="Coming soon">
                 <span class="icon"><i class="fas fa-newspaper"></i></span>
                 <span>arXiv <span class="coming-soon">Soon</span></span>
               </span>
+            </div>
+
+            <!-- ── Institution / Conference Logos ── -->
+            <div class="institution-logos">
+              <a href="https://cvpr.thecvf.com/" target="_blank" rel="noopener noreferrer" title="CVPR">
+                <img src="static/images/logos/cvpr_logo.png" alt="CVPR logo" />
+              </a>
+              <a href="https://www.iiit.ac.in/" target="_blank" rel="noopener noreferrer" title="IIIT Hyderabad">
+                <img src="static/images/logos/iiiith_logo.jpg" alt="IIIT Hyderabad logo" />
+              </a>
+              <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen">
+                <img src="static/images/logos/logo_bharatgen.png" alt="BharatGen logo" />
+              </a>
             </div>
 
           </div>
@@ -640,22 +692,22 @@
     <div class="container is-max-desktop">
       <img src="static/images/teaser.png" alt="M3Grounder teaser figure">
       <p class="fig-caption">
-      <strong>M3Grounder in action:</strong>
-      Each example shows a QA pair. The predicted answer text contains interleaved
-      <code>[GROUND]</code> tokens which map answer spans to corresponding grounding regions.
+        <strong>M3Grounder in action:</strong>
+        Each example shows a QA pair. The predicted answer text contains interleaved
+        <code>[GROUND]</code> tokens which map answer spans to corresponding grounding regions.
 
-      <span class="orange-circle">A</span>,
-      <span class="orange-circle">B</span>
-      demonstrate precise segmentation without spillover into irrelevant regions.
+        <span class="orange-circle">A</span>,
+        <span class="orange-circle">B</span>
+        demonstrate precise segmentation without spillover into irrelevant regions.
 
-      <span class="orange-circle">B</span>
-      shows effective grounding for dense, multi-span evidence in complex document layouts.
+        <span class="orange-circle">B</span>
+        shows effective grounding for dense, multi-span evidence in complex document layouts.
 
-      <span class="orange-circle-wide">C1</span>,
-      <span class="orange-circle-wide">C2</span>,
-      <span class="orange-circle-wide">C3</span>
-      illustrate multi-granular grounding, where the grounding scope expands hierarchically
-      (phrase \( \subset \) line \( \subset \) block).
+        <span class="orange-circle-wide">C1</span>,
+        <span class="orange-circle-wide">C2</span>,
+        <span class="orange-circle-wide">C3</span>
+        illustrate multi-granular grounding, where the grounding scope expands hierarchically
+        (phrase \( \subset \) line \( \subset \) block).
       </p>
     </div>
   </div>
@@ -719,7 +771,7 @@
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">Method</h2>
 
-      <img src="static/images/model_overview.png" alt="M3Grounder architecture overview"> 
+      <img src="static/images/model_overview.png" alt="M3Grounder architecture overview">
       <p class="fig-caption">
         <strong>Overview of M3Grounder.</strong>
         Given a document image and question, a VLM <strong>(1)</strong> encodes visual features and
@@ -832,7 +884,7 @@
 
 
   <section class="section" id="qualitative">
-    <div class="container is-max-desktop">
+    <div class="container is-max-widescreen">
 
       <h2 class="title is-3 has-text-centered">Qualitative Results</h2>
 
@@ -843,46 +895,44 @@
 
       <div class="columns is-multiline">
 
-        <div class="column is-half">
+        <div class="column is-full">
           <div class="qual-box">
             <img src="static/images/qual/Examples-Finance.png" loading="lazy">
           </div>
-          <p class="fig-caption">Precise multi-span grounding in financial reports, linking narrative claims to both textual evidence and tabular values.</p>
+          <p class="fig-caption">Precise multi-span grounding in financial reports, linking narrative claims to both
+            textual evidence and tabular values.</p>
         </div>
 
-        <div class="column is-half">
+        <div class="column is-full">
           <div class="qual-box">
             <img src="static/images/qual/Examples-Healthcare.png" loading="lazy">
           </div>
-          <p class="fig-caption">Medical report reasoning with grounded evidence, connecting abnormal lab measurements to diagnostic interpretation.</p>
+          <p class="fig-caption">Medical report reasoning with grounded evidence, connecting abnormal lab measurements
+            to diagnostic interpretation.</p>
         </div>
 
-      </div>
-
-
-      <div class="columns is-multiline">
-
-        <div class="column is-half">
+        <div class="column is-full">
           <div class="qual-box">
             <img src="static/images/qual/Examples-Legal.png" loading="lazy">
           </div>
-          <p class="fig-caption">Dense multi-span grounding in legal documents, retrieving multiple clauses that jointly satisfy a query.</p>
+          <p class="fig-caption">Dense multi-span grounding in legal documents, retrieving multiple clauses that jointly
+            satisfy a query.</p>
         </div>
 
-        <div class="column is-half">
+        <div class="column is-full">
           <div class="qual-box">
             <img src="static/images/qual/Examples-Transcript.png" loading="lazy">
           </div>
-          <p class="fig-caption">Structured evidence grounding in academic records, extracting identifiers and performance indicators across table rows.</p>
+          <p class="fig-caption">Structured evidence grounding in academic records, extracting identifiers and
+            performance indicators across table rows.</p>
         </div>
 
       </div>
-
 
     </div>
   </section>
 
-    <section class="section section-alt" id="dataset">
+  <section class="section section-alt" id="dataset">
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">GroundingDocQA Dataset &amp; Benchmark</h2>
 
@@ -990,9 +1040,7 @@
 
       <div style="margin-top:2.5rem; text-align:center;">
 
-        <img src="static/images/figs/dataengine_final.png"
-            alt="GroundingDocQA data engine pipeline"
-            style="width:100%; max-width:900px; display:block; margin:auto;
+        <img src="static/images/figs/dataengine_final.png" alt="GroundingDocQA data engine pipeline" style="width:100%; max-width:900px; display:block; margin:auto;
                     border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,0.08);">
 
         <p class="fig-caption">
@@ -1023,160 +1071,160 @@
       </p>
 
       <table class="table is-striped is-hoverable is-fullwidth results-table">
-      <thead>
-      <tr>
-      <th>Model</th>
-      <th>Params</th>
-      <th>
-        <div class="metric-header">
-          BD-Test
-          <span>F1<sub>g</sub></span>
-        </div>
-      </th>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Params</th>
+            <th>
+              <div class="metric-header">
+                BD-Test
+                <span>F1<sub>g</sub></span>
+              </div>
+            </th>
 
-      <th>
-        <div class="metric-header">
-          DOGR-Bench
-          <span>F1<sub>g</sub></span>
-        </div>
-      </th>
+            <th>
+              <div class="metric-header">
+                DOGR-Bench
+                <span>F1<sub>g</sub></span>
+              </div>
+            </th>
 
-      <th>
-        <div class="metric-header">
-          MMDocBench
-          <span>IoU</span>
-        </div>
-      </th>
+            <th>
+              <div class="metric-header">
+                MMDocBench
+                <span>IoU</span>
+              </div>
+            </th>
 
-      <th>
-        <div class="metric-header">
-          GDQA-Bench
-          <span>F1<sub>g</sub></span>
-        </div>
-      </th>
-      </tr>
-      </thead>
+            <th>
+              <div class="metric-header">
+                GDQA-Bench
+                <span>F1<sub>g</sub></span>
+              </div>
+            </th>
+          </tr>
+        </thead>
 
-      <tbody>
+        <tbody>
 
-      <tr>
-      <td>GPT-4o</td>
-      <td>-</td>
-      <td>2.3</td>
-      <td>2.9</td>
-      <td>2.5</td>
-      <td>3.4</td>
-      </tr>
+          <tr>
+            <td>GPT-4o</td>
+            <td>-</td>
+            <td>2.3</td>
+            <td>2.9</td>
+            <td>2.5</td>
+            <td>3.4</td>
+          </tr>
 
-      <tr>
-      <td>GPT-5</td>
-      <td>-</td>
-      <td>5.4</td>
-      <td>3.6</td>
-      <td>9.3</td>
-      <td>4.5</td>
-      </tr>
+          <tr>
+            <td>GPT-5</td>
+            <td>-</td>
+            <td>5.4</td>
+            <td>3.6</td>
+            <td>9.3</td>
+            <td>4.5</td>
+          </tr>
 
-      <tr>
-      <td>Gemini-2.5-Pro</td>
-      <td>-</td>
-      <td>70.0</td>
-      <td>59.3</td>
-      <td>49.4</td>
-      <td>43.4</td>
-      </tr>
+          <tr>
+            <td>Gemini-2.5-Pro</td>
+            <td>-</td>
+            <td>70.0</td>
+            <td>59.3</td>
+            <td>49.4</td>
+            <td>43.4</td>
+          </tr>
 
-      <tr>
-      <td>Gemma-3</td>
-      <td>12B</td>
-      <td>0.5</td>
-      <td>1.77</td>
-      <td>1.6</td>
-      <td>1.5</td>
-      </tr>
+          <tr>
+            <td>Gemma-3</td>
+            <td>12B</td>
+            <td>0.5</td>
+            <td>1.77</td>
+            <td>1.6</td>
+            <td>1.5</td>
+          </tr>
 
-      <tr>
-      <td>Kimi VL</td>
-      <td>16B</td>
-      <td>8.1</td>
-      <td>7.2</td>
-      <td>3.5</td>
-      <td>0.5</td>
-      </tr>
+          <tr>
+            <td>Kimi VL</td>
+            <td>16B</td>
+            <td>8.1</td>
+            <td>7.2</td>
+            <td>3.5</td>
+            <td>0.5</td>
+          </tr>
 
-      <tr>
-      <td>mPLUG-DocOwl2</td>
-      <td>9B</td>
-      <td>1.2</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      </tr>
+          <tr>
+            <td>mPLUG-DocOwl2</td>
+            <td>9B</td>
+            <td>1.2</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td>0.0</td>
+          </tr>
 
-      <tr>
-      <td>InternVL3.5</td>
-      <td>8B</td>
-      <td>41.5</td>
-      <td>12.5</td>
-      <td>15.5</td>
-      <td>7.6</td>
-      </tr>
+          <tr>
+            <td>InternVL3.5</td>
+            <td>8B</td>
+            <td>41.5</td>
+            <td>12.5</td>
+            <td>15.5</td>
+            <td>7.6</td>
+          </tr>
 
-      <tr>
-      <td>Qwen3-VL</td>
-      <td>8B</td>
-      <td>44.5</td>
-      <td>27.6</td>
-      <td>28.7</td>
-      <td>12.8</td>
-      </tr>
+          <tr>
+            <td>Qwen3-VL</td>
+            <td>8B</td>
+            <td>44.5</td>
+            <td>27.6</td>
+            <td>28.7</td>
+            <td>12.8</td>
+          </tr>
 
-      <tr>
-      <td>Kosmos 2.5 Chat</td>
-      <td>1.3B</td>
-      <td>0.7</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      </tr>
+          <tr>
+            <td>Kosmos 2.5 Chat</td>
+            <td>1.3B</td>
+            <td>0.7</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td>0.0</td>
+          </tr>
 
-      <tr>
-      <td>InternVL3.5 ft.</td>
-      <td>8B</td>
-      <td>58.7</td>
-      <td>27.6</td>
-      <td>37.6</td>
-      <td>52.7</td>
-      </tr>
+          <tr>
+            <td>InternVL3.5 ft.</td>
+            <td>8B</td>
+            <td>58.7</td>
+            <td>27.6</td>
+            <td>37.6</td>
+            <td>52.7</td>
+          </tr>
 
-      <tr>
-      <td>Qwen3-VL ft.</td>
-      <td>8B</td>
-      <td>62.3</td>
-      <td>35.8</td>
-      <td>43.4</td>
-      <td>60.6</td>
-      </tr>
+          <tr>
+            <td>Qwen3-VL ft.</td>
+            <td>8B</td>
+            <td>62.3</td>
+            <td>35.8</td>
+            <td>43.4</td>
+            <td>60.6</td>
+          </tr>
 
-      <tr class="ours">
-      <td><b>M3Grounder-I</b></td>
-      <td>8B</td>
-      <td>77.2</td>
-      <td>69.6</td>
-      <td>65.5</td>
-      <td>71.3</td>
-      </tr>
+          <tr class="ours">
+            <td><b>M3Grounder-I</b></td>
+            <td>8B</td>
+            <td>77.2</td>
+            <td>69.6</td>
+            <td>65.5</td>
+            <td>71.3</td>
+          </tr>
 
-      <tr class="ours">
-      <td><b>M3Grounder-Q</b></td>
-      <td>8B</td>
-      <td><b>81.4</b></td>
-      <td><b>73.3</b></td>
-      <td><b>68.2</b></td>
-      <td><b>79.0</b></td>
-      </tr>
+          <tr class="ours">
+            <td><b>M3Grounder-Q</b></td>
+            <td>8B</td>
+            <td><b>81.4</b></td>
+            <td><b>73.3</b></td>
+            <td><b>68.2</b></td>
+            <td><b>79.0</b></td>
+          </tr>
 
-      </tbody>
+        </tbody>
       </table>
 
     </div>
@@ -1296,8 +1344,8 @@
     <div class="container">
       <div class="content has-text-centered">
 
-        <!-- Institution / Conference Logos -->
-        <div class="institution-logos">
+        <!-- Institution / Conference Logos (footer, smaller) -->
+        <div class="footer-logos">
           <a href="https://cvpr.thecvf.com/" target="_blank" rel="noopener noreferrer" title="CVPR">
             <img src="static/images/logos/cvpr_logo.png" alt="CVPR logo" />
           </a>
@@ -1305,8 +1353,37 @@
             <img src="static/images/logos/iiiith_logo.jpg" alt="IIIT Hyderabad logo" />
           </a>
           <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen">
-            <img src="static/images//logos/logo_bharatgen.png" alt="BharatGen logo" />
+            <img src="static/images/logos/logo_bharatgen.png" alt="BharatGen logo" />
           </a>
+        </div>
+
+        <!-- ── Visitor counter + world map (ClustrMaps) ── -->
+        <div style="margin-bottom: 2rem;">
+          <p style="font-size:0.78rem; color:#aaa; margin-bottom:0.6rem; letter-spacing:0.04em; text-transform:uppercase; font-weight:600;">
+            Visitor Map
+          </p>
+          <div style="display:flex; justify-content:center;">
+            <!-- 
+              ClustrMaps widget: replace the src URL with your own after registering at
+              https://clustrmaps.com/add — paste the script snippet they give you here.
+              The URL below is a placeholder that renders a globe; once registered it will
+              show your actual visitor data.
+            -->
+            <script type="text/javascript" id="clustrmaps"
+              src="//clustrmaps.com/map_v2.js?d=YOUR_MAP_ID&cl=ffffff&w=400">
+            </script>
+            <noscript>
+              <a href="https://clustrmaps.com" title="Visitor Map">
+                <img src="//clustrmaps.com/map_v2.png?d=YOUR_MAP_ID&cl=ffffff&w=400"
+                     alt="Visitor Map" style="border-radius:8px;" />
+              </a>
+            </noscript>
+          </div>
+          <p style="font-size:0.72rem; color:#bbb; margin-top:0.5rem;">
+            <a href="https://clustrmaps.com" target="_blank" style="color:#bbb;">Powered by ClustrMaps</a>
+            &nbsp;·&nbsp;
+            <a href="https://clustrmaps.com/add" target="_blank" style="color:#3273dc;">Register your map ID →</a>
+          </p>
         </div>
 
         <p>
@@ -1314,6 +1391,9 @@
           <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project
             Page Template</a>
           which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+          <br>
+          You are free to borrow the source code of this website; we just ask that you link back to this page in the
+          footer.
           <br>
           This website is licensed under a
           <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons
