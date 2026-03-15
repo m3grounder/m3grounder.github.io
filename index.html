@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>M3Grounder: Mask-Based Multi-Span and Multi-Granular Grounding for Document QA</title>
+  <meta name="description"
+    content="M3Grounder: a hybrid VLM-segmentation model for fine-grained, hierarchical, mask-based Document QA grounding. CVPR 2026. By BharatGen and IIIT Hyderabad." />
+  <meta property="og:title" content="M3Grounder — CVPR 2026" />
+  <meta property="og:description"
+    content="Mask-Based Multi-Span and Multi-Granular Grounding for Document QA. BharatGen & IIIT Hyderabad." />
+  <meta property="og:type" content="website" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,700;1,400&family=Noto+Sans:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body);"></script>
+
+  <style>
+    /* ── Base ── */
+    body {
+      font-family: 'Noto Sans', sans-serif;
+    }
+
+    .title,
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: 'Google Sans', 'Noto Sans', sans-serif;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    /* ── Hero / Header ── */
+    .publication-header {
+      background: #fff;
+    }
+
+    .publication-title {
+      font-size: 2.1rem !important;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .publication-venue {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #3273dc;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.03em;
+    }
+
+    .author-block a {
+      color: #363636;
+      text-decoration: none;
+      border-bottom: 1px dotted #aaa;
+    }
+
+    .author-block a:hover {
+      color: #3273dc;
+      border-color: #3273dc;
+    }
+
+    .affil-logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+
+    .affil-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.88rem;
+      color: #555;
+      font-weight: 500;
+    }
+
+    .affil-tag i {
+      color: #888;
+    }
+
+    /* ── Sections ── */
+    .section-alt {
+      background: #fafafa;
+    }
+
+    /* ── Teaser ── */
+    .teaser {
+      padding: 1rem 1.5rem 2.5rem;
+    }
+
+    .teaser img {
+      border-radius: 8px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+    }
+
+    /* ── Figure placeholders ── */
+    .fig-placeholder {
+      background: #f5f5f5;
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      color: #bbb;
+      font-size: 0.9rem;
+      padding: 2rem;
+      gap: 0.5rem;
+    }
+
+    .fig-placeholder i {
+      font-size: 2.5rem;
+      color: #ddd;
+    }
+
+    .fig-placeholder code {
+      color: #999;
+      background: #eee;
+      border-radius: 3px;
+      padding: 0 4px;
+    }
+
+    /* ── Captions ── */
+    .fig-caption {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 0.75rem;
+      line-height: 1.65;
+    }
+
+    .fig-caption strong {
+      color: #333;
+    }
+
+    /* ── Abstract ── */
+    #abstract .content {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #363636;
+    }
+
+    /* ── Tagline / motivation box ── */
+    .motivation-box {
+      background: linear-gradient(135deg, #f0f5ff 0%, #fff8f0 100%);
+      border: 1px solid #dce8ff;
+      border-radius: 12px;
+      padding: 2rem 2.5rem;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+      line-height: 1.9;
+      color: #444;
+      position: relative;
+    }
+
+    .motivation-box .quote-mark {
+      font-size: 4rem;
+      color: #dce8ff;
+      font-family: Georgia, serif;
+      position: absolute;
+      top: 0.25rem;
+      left: 1rem;
+      line-height: 1;
+    }
+
+    .motivation-box p {
+      padding-left: 1rem;
+    }
+
+    .motivation-box strong {
+      color: #3273dc;
+    }
+
+    /* ── Stat boxes ── */
+    .stat-box {
+      text-align: center;
+      background: #fff;
+      border: 1px solid #e4e4e4;
+      border-radius: 10px;
+      padding: 1.5rem 1rem;
+      height: 100%;
+    }
+
+    .stat-box .stat-num {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #3273dc;
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .stat-box .stat-lbl {
+      font-size: 0.78rem;
+      color: #777;
+      margin-top: 0.2rem;
+      line-height: 1.4;
+    }
+
+    /* ── Results tables ── */
+    .result-table thead {
+      background: #363636;
+    }
+
+    .result-table thead th {
+      color: white;
+    }
+
+    .result-table tr.ours td {
+      font-weight: 700;
+      color: #3273dc;
+      background: #eef3ff;
+    }
+
+    .result-table {
+      font-size: 0.88rem;
+    }
+
+    .sota {
+      background: #3273dc;
+      color: white;
+      font-size: 0.58rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+
+    /* ── Method cards ── */
+    .method-card {
+      border: 1.5px solid #e8e8e8;
+      border-radius: 10px;
+      padding: 1.5rem;
+      background: #fff;
+      height: 100%;
+    }
+
+    .method-card h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+
+    /* ── Granularity ── */
+    .gran-card {
+      border: 1.5px solid #e4e4e4;
+      border-radius: 10px;
+      padding: 1.3rem;
+      text-align: center;
+      background: #fff;
+      height: 100%;
+    }
+
+    .gran-card .gran-emoji {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .gran-card h4 {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .gran-card p {
+      font-size: 0.82rem;
+      color: #666;
+    }
+
+    .enclosure-banner {
+      text-align: center;
+      background: #eef3ff;
+      border: 1px solid #bdd0ff;
+      border-radius: 8px;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      color: #3273dc;
+      font-weight: 600;
+      margin-top: 1.5rem;
+    }
+
+    /* ── Loss bars ── */
+    .loss-bar {
+      border-left: 4px solid;
+      padding: 0.75rem 1.1rem;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .loss-bar.blue {
+      border-color: #3273dc;
+      background: #f0f5ff;
+    }
+
+    .loss-bar.green {
+      border-color: #48c78e;
+      background: #f4fbf7;
+    }
+
+    .loss-bar.orange {
+      border-color: #ff6b35;
+      background: #fff8f5;
+    }
+
+    .loss-bar.gold {
+      border-color: #f5a623;
+      background: #fffbf0;
+    }
+
+    .loss-bar strong {
+      font-size: 0.92rem;
+    }
+
+    .loss-bar p {
+      font-size: 0.83rem;
+      color: #555;
+      margin-top: 0.2rem;
+    }
+
+    /* ── Dataset tags ── */
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.75rem;
+    }
+
+    .qual-box {
+      height: 280px;
+      background: #fafafa;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 12px;
+    }
+
+    .qual-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    /* ── Coming soon badge ── */
+    .coming-soon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      color: #856404;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+
+    /* ── BibTeX ── */
+    .bibtex-wrap {
+      background: #f8f8f8;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .bibtex-bar {
+      background: #363636;
+      color: #aaa;
+      font-size: 0.78rem;
+      font-family: monospace;
+      padding: 0.55rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .bibtex-bar button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ddd;
+      border-radius: 4px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-family: sans-serif;
+    }
+
+    .bibtex-bar button:hover {
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+    }
+
+    pre.bibtex-code {
+      padding: 1.25rem 1.5rem;
+      font-size: 0.83rem;
+      line-height: 1.75;
+      background: #f8f8f8;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* ── Footer ── */
+    footer.footer {
+      background: #fafafa;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    footer .content {
+      font-size: 0.87rem;
+      color: #777;
+    }
+
+    @media (max-width: 768px) {
+      .publication-title {
+        font-size: 1.5rem !important;
+      }
+    }
+
+    /* Orange circled labels (LaTeX style) */
+    .orange-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #ff6b35; /* Changed to Orange */
+      color: #ff6b35; /* Changed to Orange */
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.8rem;
+      width: 1.4em;
+      height: 1.4em;
+      margin: 0 2px;
+    }
+
+    .orange-circle-wide {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #ff6b35; /* Changed to Orange */
+      color: #ff6b35; /* Changed to Orange */
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 0 5px;
+      margin: 0 2px;
+    }
+
+    .metric-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.1;
+    }
+
+    .metric-header span {
+      font-size: 0.9em;
+    }
+
+    /* Table Center Alignment Constraints */
+    .results-table th,
+    .results-table td {
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
+
+    /* Keeps the Model names column left aligned */
+    .results-table th:first-child,
+    .results-table td:first-child {
+      text-align: left !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item has-text-weight-semibold" href="#">M3Grounder</a>
+        <a role="button" class="navbar-burger" data-target="navMenu" aria-label="menu">
+          <span></span><span></span><span></span>
+        </a>
+      </div>
+      <div id="navMenu" class="navbar-menu">
+        <div class="navbar-start" style="flex-grow:1;justify-content:center;">
+          <a class="navbar-item" href="#abstract">Abstract</a>
+          <a class="navbar-item" href="#method">Method</a>
+          <a class="navbar-item" href="#results">Results</a>
+          <a class="navbar-item" href="#dataset">Dataset</a>
+          <a class="navbar-item" href="#bibtex">BibTeX</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+
+  <section class="hero publication-header">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+
+            <p class="publication-venue">CVPR 2026</p>
+
+            <h1 class="title is-2 publication-title">
+              M3Grounder: Mask-Based Multi-Span and Multi-Granular Grounding for Document QA
+            </h1>
+
+            <div class="is-size-5 publication-authors" style="margin-top:1.25rem; line-height:2;">
+              <span class="author-block">
+                <a href="https://www.linkedin.com/in/venkata-kesav-venna-8a489b20b/" target="_blank">Venkat Kesav
+                  Venna</a><sup>1,†</sup>,&ensp;
+              </span>
+              <span class="author-block">
+                <a href="https://www.linkedin.com/in/sai-madhusudan-gunda-45bab4223/" target="_blank">Sai Madhusudan
+                  Gunda</a><sup>2,†</sup>,&ensp;
+              </span>
+              <span class="author-block">
+                <a href="https://www.linkedin.com/in/jyothi-swaroopa-jinka-339320200/" target="_blank">Jyothi Swaroopa
+                  Jinka</a><sup>2,‡</sup>,&ensp;
+              </span>
+              <span class="author-block">
+                <a href="https://www.linkedin.com/in/hrithiksagar/" target="_blank">Hrithik Sagar
+                  Rachakonda</a><sup>2,‡</sup>,&ensp;
+              </span>
+              <span class="author-block">
+                <a href="https://www.linkedin.com/in/anirudh-srini/" target="_blank">Anirudh
+                  Srinivasan</a><sup>1</sup>,&ensp;
+              </span>
+              <span class="author-block">
+                <a href="https://www.linkedin.com/in/ravi-kiran-s/" target="_blank"> Ravi Kiran Sarvadevabhatla
+                </a><sup>1,2</sup>
+              </span>
+            </div>
+
+            <div style="margin-top:0.75rem; font-size:1rem; line-height:1.6;">
+
+              <div style="font-weight:600;">
+                <sup>1</sup> BharatGen &nbsp;&nbsp;&nbsp;
+                <sup>2</sup> IIIT Hyderabad
+              </div>
+
+              <div style="font-size:0.9rem; color:#666;">
+                <sup>†</sup> Equal contribution &nbsp;&nbsp;&nbsp;
+                <sup>‡</sup> Equal contribution
+              </div>
+
+            </div>
+
+            <div style="margin-top:1.75rem;">
+              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
+                <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                <span>Paper <span class="coming-soon">Soon</span></span>
+              </span>
+
+              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
+                <span class="icon"><i class="fas fa-file-lines"></i></span>
+                <span>Supplementary <span class="coming-soon">Soon</span></span>
+              </span>
+
+              <a href="https://github.com/kesav-tih/M3Grounder" target="_blank" class="button is-dark is-rounded" style="margin:0.2rem;">
+                <span class="icon"><i class="fab fa-github"></i></span><span>Code</span>
+              </a>
+
+              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
+                <span class="icon"><i class="fas fa-database"></i></span>
+                <span>Dataset <span class="coming-soon">Soon</span></span>
+              </span>
+
+              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
+                <span class="icon">🤗</span><span>Models <span class="coming-soon">Soon</span></span>
+              </span>
+
+              <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
+                <span class="icon"><i class="fas fa-newspaper"></i></span>
+                <span>arXiv <span class="coming-soon">Soon</span></span>
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <div class="teaser">
+    <div class="container is-max-desktop">
+      <img src="static/images/teaser.png" alt="M3Grounder teaser figure">
+      <p class="fig-caption">
+      <strong>M3Grounder in action:</strong>
+      Each example shows a QA pair. The predicted answer text contains interleaved
+      <code>[GROUND]</code> tokens which map answer spans to corresponding grounding regions.
+
+      <span class="orange-circle">A</span>,
+      <span class="orange-circle">B</span>
+      demonstrate precise segmentation without spillover into irrelevant regions.
+
+      <span class="orange-circle">B</span>
+      shows effective grounding for dense, multi-span evidence in complex document layouts.
+
+      <span class="orange-circle-wide">C1</span>,
+      <span class="orange-circle-wide">C2</span>,
+      <span class="orange-circle-wide">C3</span>
+      illustrate multi-granular grounding, where the grounding scope expands hierarchically
+      (phrase \( \subset \) line \( \subset \) block).
+      </p>
+    </div>
+  </div>
+
+
+  <section class="section" id="abstract">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+
+          <div class="motivation-box has-text-left" style="margin-bottom:2rem;">
+            <span class="quote-mark">"</span>
+            <p>
+              Most document AI systems can answer questions. But they rarely show <strong>where</strong> the answer came
+              from.
+              Documents are messy — text can be curved, scattered across regions, or embedded in charts and forms.
+              Sometimes the answer comes from multiple places on a page.
+              <br><br>
+              <strong>M3Grounder</strong> behaves like a smart highlighter ✨ — generating answers
+              while simultaneously highlighting the precise evidence in the document. Not rough boxes. Not vague
+              regions.
+              Exact pixel-level masks of the words supporting the answer.
+              <br><br>
+              In real-world domains — finance, healthcare, legal, enterprise — <strong>answers alone aren't enough.
+                Trust comes from verifiable evidence.</strong>
+            </p>
+          </div>
+
+          <div class="content has-text-justified">
+            <p>
+              Document QA requires not only accurate answers but also identifying where each answer is grounded
+              on the page. Most approaches treat the task as text-only generation, while existing answer grounding
+              methods generate coarse bounding boxes that fail to capture curved text. We introduce
+              <strong>M3Grounder</strong>, a hybrid vision-language and segmentation architecture that formulates
+              document grounding as pixel-level segmentation.
+            </p>
+            <p>
+              M3Grounder produces fine-grained evidence masks refined by a <em>bleed-suppression loss</em> to
+              prevent spillover. It autoregressively generates answer text interleaved with <code>[GROUND]</code>
+              tokens that link individual answer spans to their corresponding evidence regions. M3Grounder also grounds
+              evidence hierarchically across phrase, line, and block levels using an <em>enclosure loss</em> that
+              enforces spatial containment (phrase&thinsp;⊂&thinsp;line&thinsp;⊂&thinsp;block).
+            </p>
+            <p>
+              We release <strong>GroundingDocQA</strong>, a large-scale dataset of 200K documents and 2M
+              multi-span and multi-granular QA pairs with pixel-level grounding masks, built through a data engine
+              handling complex layouts, curved-text, and graphic-rich documents. We also release
+              <strong>GroundingDocQA-Bench</strong>, a diverse human-verified benchmark. M3Grounder sets a new
+              state-of-the-art in grounded DocVQA, advancing from coarse boxes to hierarchical, fine-grained and
+              contextually grounded mask evidence.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="section section-alt" id="method">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Method</h2>
+
+      <img src="static/images/model_overview.png" alt="M3Grounder architecture overview"> 
+      <p class="fig-caption">
+        <strong>Overview of M3Grounder.</strong>
+        Given a document image and question, a VLM <strong>(1)</strong> encodes visual features and
+        autoregressively generates an answer sequence <strong>(2)</strong> interleaved with <code>[GROUND]</code>
+        tokens.
+        The hidden states of <code>[GROUND]</code> tokens <strong>(3)</strong> are projected by three
+        granularity-specific
+        MLP heads into phrase-, line-, and block-level prompt embeddings <strong>(4)</strong>. A promptable
+        segmentation module <strong>(5)</strong> extracts dense image embeddings reused across all spans and
+        granularities.
+        The prompt embeddings are decoded by a mask decoder to produce hierarchical grounding masks
+        <strong>(6)</strong>,
+        mapping each answer span to its evidence at all granularities.
+      </p>
+
+      <div class="columns" style="margin-top:2.5rem;">
+        <div class="column">
+          <div class="method-card">
+            <h4>🔗 Decoupled Language &amp; Spatial Grounding</h4>
+            <p style="font-size:0.9rem; color:#555; line-height:1.7;">
+              Unlike prior methods that interleave bounding-box coordinates inside generated text,
+              M3Grounder <em>decouples</em> language modeling from spatial prediction. The VLM focuses on
+              semantically accurate answers and span boundaries, while a dedicated segmentation head handles
+              fine-grained, geometry-aware localization — yielding cleaner text outputs and more precise masks.
+            </p>
+          </div>
+        </div>
+        <div class="column">
+          <div class="method-card">
+            <h4>🔢 Autoregressive Multi-Span Grounding</h4>
+            <p style="font-size:0.9rem; color:#555; line-height:1.7;">
+              M3Grounder autoregressively generates answer text with special <code>[GROUND]</code> tokens
+              emitted immediately after each answer span, maintaining a one-to-one span-to-region link.
+              This naturally handles multi-span answers drawing evidence from multiple, spatially distinct
+              document regions in a single forward pass.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="title is-4 has-text-centered" style="margin-top:3rem;">Multi-Granular Hierarchical Grounding</h3>
+      <p class="has-text-centered" style="color:#666; margin-bottom:1.5rem; font-size:0.95rem;">
+        Documents follow a natural spatial hierarchy. M3Grounder jointly predicts evidence at three levels,
+        enforced by a hierarchical enclosure loss.
+      </p>
+      <div class="columns is-centered">
+        <div class="column is-one-third">
+          <div class="gran-card">
+            <div class="gran-emoji">🔤</div>
+            <h4>Phrase Level</h4>
+            <p>Fine-grained spans for extractive answers — names, dates, numeric values</p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="gran-card">
+            <div class="gran-emoji">📏</div>
+            <h4>Line Level</h4>
+            <p>Full text lines capturing neighboring context and reading-order cues</p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="gran-card">
+            <div class="gran-emoji">🔲</div>
+            <h4>Block Level</h4>
+            <p>Broader regions for abstractive or summary questions requiring wide context</p>
+          </div>
+        </div>
+      </div>
+      <div class="enclosure-banner">
+        Hierarchical Enclosure Loss enforces strict nesting:&ensp;<strong>phrase ⊂ line ⊂ block</strong>
+      </div>
+
+      <h3 class="title is-4 has-text-centered" style="margin-top:3rem;">Training Objectives</h3>
+      <p class="has-text-centered" style="color:#666; margin-bottom:0.5rem; font-size:0.95rem;">
+        M3Grounder is trained end-to-end with four complementary loss terms:
+      </p>
+      <p class="has-text-centered" style="font-size:0.98rem; font-family:monospace; color:#333; margin-bottom:1.5rem;">
+        𝓛<sub>total</sub> = λ<sub>lm</sub>𝓛<sub>lm</sub> + λ<sub>seg</sub>𝓛<sub>seg</sub>
+        + λ<sub>bleed</sub>𝓛<sub>bleed</sub> + λ<sub>hier</sub>𝓛<sub>hier</sub>
+      </p>
+      <div class="columns is-multiline">
+        <div class="column is-half">
+          <div class="loss-bar blue">
+            <strong>𝓛<sub>lm</sub> — Language Modeling</strong>
+            <p>Cross-entropy over all output tokens for accurate QA generation and span boundary prediction.</p>
+          </div>
+        </div>
+        <div class="column is-half">
+          <div class="loss-bar green">
+            <strong>𝓛<sub>seg</sub> — Segmentation (Dice + BCE)</strong>
+            <p>Supervises mask predictions at each granularity level against pixel-level ground truth.</p>
+          </div>
+        </div>
+        <div class="column is-half">
+          <div class="loss-bar orange">
+            <strong>𝓛<sub>bleed</sub> — Bleed Suppression</strong>
+            <p>Penalizes mask overlap beyond text pixels, preventing spillover into irrelevant background regions.</p>
+          </div>
+        </div>
+        <div class="column is-half">
+          <div class="loss-bar gold">
+            <strong>𝓛<sub>hier</sub> — Hierarchical Enclosure</strong>
+            <p>Enforces phrase ⊂ line ⊂ block nesting, stabilizing multi-granular grounding spatially.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <section class="section" id="qualitative">
+    <div class="container is-max-desktop">
+
+      <h2 class="title is-3 has-text-centered">Qualitative Results</h2>
+
+      <p class="has-text-centered" style="color:#666; margin-bottom:2rem;">
+        M3Grounder produces precise, hierarchical segmentation masks across diverse document types —
+        scanned documents, forms, charts, and curved-text banners.
+      </p>
+
+      <div class="columns is-multiline">
+
+        <div class="column is-half">
+          <div class="qual-box">
+            <img src="static/images/qual/Examples-Finance.png" loading="lazy">
+          </div>
+          <p class="fig-caption">Precise multi-span grounding in financial reports, linking narrative claims to both textual evidence and tabular values.</p>
+        </div>
+
+        <div class="column is-half">
+          <div class="qual-box">
+            <img src="static/images/qual/Examples-Healthcare.png" loading="lazy">
+          </div>
+          <p class="fig-caption">Medical report reasoning with grounded evidence, connecting abnormal lab measurements to diagnostic interpretation.</p>
+        </div>
+
+      </div>
+
+
+      <div class="columns is-multiline">
+
+        <div class="column is-half">
+          <div class="qual-box">
+            <img src="static/images/qual/Examples-Legal.png" loading="lazy">
+          </div>
+          <p class="fig-caption">Dense multi-span grounding in legal documents, retrieving multiple clauses that jointly satisfy a query.</p>
+        </div>
+
+        <div class="column is-half">
+          <div class="qual-box">
+            <img src="static/images/qual/Examples-Transcript.png" loading="lazy">
+          </div>
+          <p class="fig-caption">Structured evidence grounding in academic records, extracting identifiers and performance indicators across table rows.</p>
+        </div>
+
+      </div>
+
+
+    </div>
+  </section>
+
+    <section class="section" id="dataset">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">GroundingDocQA Dataset &amp; Benchmark</h2>
+
+      <div class="notification is-warning is-light has-text-centered" style="margin-top:1rem; margin-bottom:2rem;">
+        <i class="fas fa-clock"></i>&ensp;
+        <strong>Dataset page coming soon.</strong>
+        We are preparing the GroundingDocQA dataset and benchmark for public release.
+        Check back here or watch the <a href="https://github.com/hrithiksagar-tih/M3Grounder" target="_blank">GitHub
+          repo</a> for updates.
+      </div>
+
+      <div class="columns" style="margin-top:0.5rem;">
+
+        <div class="column">
+          <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:2rem; background:#fff; height:100%;">
+            <h3 class="title is-4" style="color:#3273dc; margin-bottom:0.5rem;">
+              📦 GroundingDocQA
+            </h3>
+            <p style="font-size:0.9rem; color:#555; margin-bottom:1.5rem;">
+              Large-scale training dataset built with a novel data engine that handles complex layouts,
+              curved-text, and graphic-rich documents — annotated with pixel-level masks at three granularities.
+            </p>
+            <div class="columns is-multiline">
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num">200K</div>
+                  <div class="stat-lbl">Documents</div>
+                </div>
+              </div>
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num">2M</div>
+                  <div class="stat-lbl">QA Pairs</div>
+                </div>
+              </div>
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num" style="font-size:1.3rem;">Multi-<br>Span</div>
+                  <div class="stat-lbl">Annotation</div>
+                </div>
+              </div>
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num">3</div>
+                  <div class="stat-lbl">Mask Levels<br>(phrase, line, block)</div>
+                </div>
+              </div>
+            </div>
+            <div class="tag-row">
+              <span class="tag is-light">Text-rich docs</span>
+              <span class="tag is-light">Charts</span>
+              <span class="tag is-light">Forms &amp; tables</span>
+              <span class="tag is-light">Curved text</span>
+              <span class="tag is-light">Webpages</span>
+              <span class="tag is-light">Reports</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:2rem; background:#fff; height:100%;">
+            <h3 class="title is-4" style="color:#3273dc; margin-bottom:0.5rem;">
+              📊 GroundingDocQA-Bench
+            </h3>
+            <p style="font-size:0.9rem; color:#555; margin-bottom:1.5rem;">
+              Human-verified benchmark for systematic evaluation of grounding fidelity under
+              multi-span, multi-granular, and curved-text conditions with mask-level annotations.
+            </p>
+            <div class="columns is-multiline">
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num">2.5K</div>
+                  <div class="stat-lbl">Documents</div>
+                </div>
+              </div>
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num">5K</div>
+                  <div class="stat-lbl">QA Pairs</div>
+                </div>
+              </div>
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num" style="font-size:1.3rem;">Human</div>
+                  <div class="stat-lbl">Verified</div>
+                </div>
+              </div>
+              <div class="column is-half" style="padding:0.3rem;">
+                <div class="stat-box">
+                  <div class="stat-num" style="font-size:1.3rem;">Curved</div>
+                  <div class="stat-lbl">Text Split (CS)</div>
+                </div>
+              </div>
+            </div>
+            <div class="tag-row">
+              <span class="tag is-link is-light">Single-span F₁</span>
+              <span class="tag is-link is-light">Multi-span F₁</span>
+              <span class="tag is-link is-light">Curved F₁ (CS)</span>
+              <span class="tag is-link is-light">G-Eval (AQ)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:2.5rem; text-align:center;">
+
+        <img src="static/images/figs/dataengine_final.png"
+            alt="GroundingDocQA data engine pipeline"
+            style="width:100%; max-width:900px; display:block; margin:auto;
+                    border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,0.08);">
+
+        <p class="fig-caption">
+          <strong>GroundingDocQA data engine.</strong>
+          The pipeline processes layout-aware, curved-text, and chart documents,
+          generating multi-span and multi-granular QA pairs with pixel-level mask
+          annotations at three levels (phrase, line, block). A human-in-the-loop
+          verification stage ensures annotation quality across all document types.
+        </p>
+
+      </div>
+    </div>
+  </section>
+
+
+  <section class="section section-alt" id="results">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Results</h2>
+      <p class="has-text-centered" style="color:#666; margin-bottom:2rem;">
+        M3Grounder achieves state-of-the-art grounding performance across all evaluated benchmarks.
+        Gains are most pronounced on curved and skewed text, where segmentation-based localization
+        substantially outperforms bounding-box approaches.
+      </p>
+
+      <div class="columns" style="margin-bottom:2.5rem;">
+        <div class="column">
+          <div class="stat-box">
+            <div class="stat-num">79.0</div>
+            <div class="stat-lbl">GDQA-Bench F₁<br><em style="color:#bbb;">(ours)</em></div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="stat-box">
+            <div class="stat-num">73.3</div>
+            <div class="stat-lbl">DOGR-Bench F₁<br><em style="color:#bbb;">M3Grounder-Q</em></div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="stat-box">
+            <div class="stat-num">87.5</div>
+            <div class="stat-lbl">Block-level F₁<br><em style="color:#bbb;">M3Grounder-Q</em></div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="stat-box">
+            <div class="stat-num">+6.9</div>
+            <div class="stat-lbl">Over DOGR @ 8B<br><em style="color:#bbb;">same backbone scale</em></div>
+          </div>
+        </div>
+      </div>
+
+      <section class="section" id="quantitative">
+      <div class="container is-max-desktop">
+
+      <h2 class="title is-3 has-text-centered">Benchmark Results</h2>
+
+      <table class="table is-striped is-hoverable is-fullwidth results-table">
+      <thead>
+      <tr>
+      <th>Model</th>
+      <th>Params</th>
+      <th>
+        <div class="metric-header">
+          BD-Test
+          <span>F1<sub>g</sub></span>
+        </div>
+      </th>
+
+      <th>
+        <div class="metric-header">
+          DOGR-Bench
+          <span>F1<sub>g</sub></span>
+        </div>
+      </th>
+
+      <th>
+        <div class="metric-header">
+          MMDocBench
+          <span>IoU</span>
+        </div>
+      </th>
+
+      <th>
+        <div class="metric-header">
+          GDQA-Bench
+          <span>F1<sub>g</sub></span>
+        </div>
+      </th>
+      </tr>
+      </thead>
+
+      <tbody>
+
+      <tr>
+      <td>GPT-4o</td>
+      <td>-</td>
+      <td>2.3</td>
+      <td>2.9</td>
+      <td>2.5</td>
+      <td>3.4</td>
+      </tr>
+
+      <tr>
+      <td>GPT-5</td>
+      <td>-</td>
+      <td>5.4</td>
+      <td>3.6</td>
+      <td>9.3</td>
+      <td>4.5</td>
+      </tr>
+
+      <tr>
+      <td>Gemini-2.5-Pro</td>
+      <td>-</td>
+      <td>70.0</td>
+      <td>59.3</td>
+      <td>49.4</td>
+      <td>43.4</td>
+      </tr>
+
+      <tr>
+      <td>Gemma-3</td>
+      <td>12B</td>
+      <td>0.5</td>
+      <td>1.77</td>
+      <td>1.6</td>
+      <td>1.5</td>
+      </tr>
+
+      <tr>
+      <td>Kimi VL</td>
+      <td>16B</td>
+      <td>8.1</td>
+      <td>7.2</td>
+      <td>3.5</td>
+      <td>0.5</td>
+      </tr>
+
+      <tr>
+      <td>mPLUG-DocOwl2</td>
+      <td>9B</td>
+      <td>1.2</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      </tr>
+
+      <tr>
+      <td>InternVL3.5</td>
+      <td>8B</td>
+      <td>41.5</td>
+      <td>12.5</td>
+      <td>15.5</td>
+      <td>7.6</td>
+      </tr>
+
+      <tr>
+      <td>Qwen3-VL</td>
+      <td>8B</td>
+      <td>44.5</td>
+      <td>27.6</td>
+      <td>28.7</td>
+      <td>12.8</td>
+      </tr>
+
+      <tr>
+      <td>Kosmos 2.5 Chat</td>
+      <td>1.3B</td>
+      <td>0.7</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      </tr>
+
+      <tr>
+      <td>InternVL3.5 ft.</td>
+      <td>8B</td>
+      <td>58.7</td>
+      <td>27.6</td>
+      <td>37.6</td>
+      <td>52.7</td>
+      </tr>
+
+      <tr>
+      <td>Qwen3-VL ft.</td>
+      <td>8B</td>
+      <td>62.3</td>
+      <td>35.8</td>
+      <td>43.4</td>
+      <td>60.6</td>
+      </tr>
+
+      <tr class="ours">
+      <td><b>M3Grounder-I</b></td>
+      <td>8B</td>
+      <td>77.2</td>
+      <td>69.6</td>
+      <td>65.5</td>
+      <td>71.3</td>
+      </tr>
+
+      <tr class="ours">
+      <td><b>M3Grounder-Q</b></td>
+      <td>8B</td>
+      <td><b>81.4</b></td>
+      <td><b>73.3</b></td>
+      <td><b>68.2</b></td>
+      <td><b>79.0</b></td>
+      </tr>
+
+      </tbody>
+      </table>
+
+      </div>
+      </section>
+
+      <h3 class="title is-4">Multi-Granularity Results on GDQA-Bench</h3>
+      <p style="color:#666; font-size:0.9rem; margin-bottom:0.75rem;">
+        Block-level grounding achieves the highest F₁, confirming that wider spatial context is effectively leveraged.
+      </p>
+      <div class="table-container" style="margin-bottom:2rem;">
+        <table class="table is-bordered is-hoverable is-fullwidth result-table results-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Phrase F₁</th>
+              <th>Line F₁</th>
+              <th>Block F₁</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="ours">
+              <td><strong>M3Grounder-I</strong></td>
+              <td>75.2</td>
+              <td>79.8</td>
+              <td>82.5</td>
+            </tr>
+            <tr class="ours">
+              <td><strong>M3Grounder-Q</strong> <span class="sota">Best</span></td>
+              <td>80.1</td>
+              <td>84.3</td>
+              <td>87.5</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+
+  <section class="section section-alt" id="bibtex">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">BibTeX</h2>
+          <p class="has-text-centered" style="color:#666; margin-bottom:1.25rem;">
+            If you find our work useful in your research, please consider citing:
+          </p>
+          <div class="bibtex-wrap">
+            <div class="bibtex-bar">
+              <span>m3grounder_cvpr2026.bib</span>
+              <button onclick="copyBibtex(this)">
+                <i class="far fa-copy"></i>&ensp;Copy
+              </button>
+            </div>
+            <pre class="bibtex-code" id="bibtex-text">@inproceedings{m3grounder2026,
+  title     = {M3Grounder: Mask-Based Multi-Span and
+               Multi-Granular Grounding for Document QA},
+  author    = {Venna, Venkat Kesav and Gunda, Sai Madhusudan and
+               Jinka, Jyothi Swaroopa and Rachakonda, Hrithik Sagar and
+               Srinivasan, Anirudh},
+  booktitle = {Proceedings of the IEEE/CVF Conference on
+               Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2026},
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <footer class="footer">
+    <div class="container">
+      <div class="content has-text-centered">
+        <p>
+          This page was built using the
+          <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project
+            Page Template</a>
+          which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+          <br>
+          You are free to borrow the source code of this website; we just ask that you link back to this page in the
+          footer.
+          <br>
+          This website is licensed under a
+          <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons
+            Attribution-ShareAlike 4.0 International License</a>.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+
+  <script>
+    // Navbar burger
+    document.querySelectorAll('.navbar-burger').forEach(el => {
+      el.addEventListener('click', () => {
+        document.getElementById(el.dataset.target).classList.toggle('is-active');
+        el.classList.toggle('is-active');
+      });
+    });
+
+    // Copy BibTeX
+    function copyBibtex(btn) {
+      const text = document.getElementById('bibtex-text').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.innerHTML = '<i class="fas fa-check"></i>&ensp;Copied!';
+        setTimeout(() => btn.innerHTML = '<i class="far fa-copy"></i>&ensp;Copy', 2000);
+      });
+    }
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      });
+    });
+  </script>
+
+</body>
+
+</html>
