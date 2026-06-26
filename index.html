@@ -1,780 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" sizes="32x32" href="static/images/logos/logo_bharatgen.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="static/images/logos/logo_bharatgen.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="static/images/logos/logo_bharatgen.png">
-  <link rel="shortcut icon" href="static/images/logos/logo_bharatgen.png">
-  <!-- Apple touch icon -->
-  <link rel="apple-touch-icon" sizes="180x180" href="static/images/logos/logo_bharatgen.png">
-
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>M3Grounder: Mask-Based Multi-Span and Multi-Granular Grounding for Document QA</title>
-  <meta name="description"
-    content="M3Grounder: a hybrid VLM-segmentation model for fine-grained, hierarchical, mask-based Document QA grounding. CVPR 2026. By BharatGen and IIIT Hyderabad." />
+  <meta name="description" content="M3Grounder: a hybrid VLM-segmentation model for fine-grained, hierarchical, mask-based Document QA grounding. CVPR 2026. By BharatGen and IIIT Hyderabad." />
   <meta property="og:title" content="M3Grounder — CVPR 2026" />
-  <meta property="og:description"
-    content="Mask-Based Multi-Span and Multi-Granular Grounding for Document QA. BharatGen & IIIT Hyderabad." />
+  <meta property="og:description" content="Mask-Based Multi-Span and Multi-Granular Grounding for Document QA. BharatGen &amp; IIIT Hyderabad." />
   <meta property="og:type" content="website" />
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="static/images/logos/logo_bharatgen.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="static/images/logos/logo_bharatgen.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,700;1,400&family=Noto+Sans:ital,wght@0,400;0,700;1,400&display=swap"
-    rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
-    onload="renderMathInElement(document.body);"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
   <style>
-    /* ── Base ── */
-    body {
-      font-family: 'Noto Sans', sans-serif;
+    :root {
+      --bg-0:#080808; --bg-1:#0f0f0f; --bg-2:#161616; --bg-3:#1f1f1f;
+      --surface-light:#ffffff; --surface-off:#f7f7f8;
+      --text-primary:#f0f0f0; --text-secondary:#a0a0a8; --text-muted:#606068;
+      --text-dark:#0f0f0f; --text-dark-sec:#4a4a52;
+      --accent:#4f7ef8; --accent-dim:rgba(79,126,248,0.12);
+      --border:rgba(255,255,255,0.07); --border-lit:rgba(0,0,0,0.08);
+      --radius-sm:8px; --radius-md:14px; --radius-lg:22px; --radius-pill:999px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:17px;font-weight:400;line-height:1.75;background:var(--bg-0);color:var(--text-primary);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+    a{color:inherit;text-decoration:none;}
+    img,video{max-width:100%;height:auto;display:block;}
+
+    /* Layout */
+    .container{max-width:1080px;margin:0 auto;padding:0 24px;}
+    .container-narrow{max-width:720px;margin:0 auto;padding:0 24px;}
+    section{padding:120px 0;}
+
+    /* Scroll reveal */
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity .5s ease,transform .5s ease;}
+    .reveal.visible{opacity:1;transform:translateY(0);}
+    @media(prefers-reduced-motion:reduce){
+      .reveal{opacity:1;transform:none;transition:none;}
+      .hero-content{animation:none!important;opacity:1!important;}
     }
 
-    .title,
-    h1,
-    h2,
-    h3,
-    h4 {
-      font-family: 'Google Sans', 'Noto Sans', sans-serif;
-    }
+    /* ── Nav ── */
+    nav.site-nav{position:fixed;top:0;left:0;right:0;z-index:1000;transition:background .3s,border-color .3s;border-bottom:1px solid transparent;}
+    nav.site-nav.scrolled{background:rgba(8,8,8,.85);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border-bottom-color:var(--border);}
+    .nav-inner{max-width:1080px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+    .nav-logo{font-size:15px;font-weight:500;color:var(--text-primary);letter-spacing:-.01em;flex-shrink:0;}
+    .nav-links{display:flex;align-items:center;gap:2px;}
+    .nav-links a{font-size:13px;font-weight:500;color:var(--text-secondary);padding:6px 11px;border-radius:var(--radius-sm);transition:color .15s,background .15s;}
+    .nav-links a:hover{color:var(--text-primary);background:var(--bg-3);}
+    .nav-right{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+    .nav-badge{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);background:var(--accent-dim);border-radius:var(--radius-pill);padding:4px 12px;}
+    .nav-hamburger{display:none;align-items:center;justify-content:center;cursor:pointer;background:none;border:none;color:var(--text-primary);font-size:22px;padding:4px;}
+    .mobile-menu{display:none;background:rgba(8,8,8,.97);border-bottom:1px solid var(--border);padding:12px 24px 20px;flex-direction:column;gap:2px;}
+    .mobile-menu.open{display:flex;}
+    .mobile-menu a{font-size:15px;font-weight:500;color:var(--text-secondary);padding:10px 12px;border-radius:var(--radius-sm);transition:color .15s,background .15s;}
+    .mobile-menu a:hover{color:var(--text-primary);background:var(--bg-3);}
+    @media(max-width:768px){.nav-links{display:none;}.nav-badge{display:none;}.nav-hamburger{display:flex;}}
 
-    /* ── Navbar ── */
-    .navbar {
-      border-bottom: 1px solid #f0f0f0;
-    }
+    /* ── Hero ── */
+    section#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 0 80px;background:var(--bg-0);}
+    .hero-content{width:100%;max-width:1080px;padding:0 24px;text-align:center;animation:heroFadeUp .65s ease forwards;}
+    @keyframes heroFadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+    .hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim);color:var(--accent);border-radius:var(--radius-pill);padding:6px 16px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:36px;}
+    .hero-title-main{font-size:clamp(36px,5.5vw,68px);font-weight:700;letter-spacing:-.03em;line-height:1.05;color:var(--text-primary);margin-bottom:28px;}
+    .hero-title-sub{font-weight:300;color:var(--text-secondary);}
+    .hero-authors{font-size:15px;color:var(--text-secondary);line-height:2.2;margin-bottom:6px;}
+    .hero-authors a{color:var(--text-primary);border-bottom:1px solid transparent;transition:border-color .2s,color .2s;padding-bottom:1px;}
+    .hero-authors a:hover{border-bottom-color:var(--accent);color:var(--accent);}
+    .hero-affiliations{font-size:14px;font-weight:600;color:var(--text-secondary);margin-top:6px;}
+    .hero-equal-contrib{font-size:13px;color:var(--text-muted);margin-top:4px;margin-bottom:28px;}
+    .hero-logos{display:flex;align-items:center;justify-content:center;gap:36px;flex-wrap:wrap;margin-bottom:36px;}
+    .hero-logos a{opacity:.55;transition:opacity .2s;}
+    .hero-logos a:hover{opacity:.88;}
+    .hero-logos img{height:46px;width:auto;object-fit:contain;filter:brightness(0) invert(1);}
+    .hero-buttons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:64px;}
+    .hero-teaser{width:100%;max-width:960px;margin:0 auto;}
+    .hero-teaser img{width:100%;border-radius:var(--radius-md);border:1px solid var(--border);}
+    .teaser-caption{font-size:14px;color:var(--text-secondary);line-height:1.75;margin-top:18px;font-style:italic;text-align:center;}
+    .teaser-caption strong{color:var(--text-primary);font-style:normal;}
+    .teaser-caption code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary);background:rgba(255,255,255,.07);padding:1px 5px;border-radius:4px;font-style:normal;}
 
-    /* ── Hero / Header ── */
-    .publication-header {
-      background: #fff;
-    }
+    /* ── Buttons ── */
+    .btn{display:inline-flex;align-items:center;gap:7px;border-radius:var(--radius-pill);padding:10px 20px;font-size:13.5px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;transition:opacity .2s,transform .15s,background .15s,border-color .15s,color .15s;text-decoration:none;line-height:1;border:1px solid transparent;}
+    .btn i{font-size:16px;line-height:1;}
+    .btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px);}
+    .btn-ghost{background:transparent;color:var(--text-primary);border-color:var(--border);}
+    .btn-ghost:hover{background:var(--bg-3);border-color:rgba(255,255,255,.18);}
+    .btn-disabled{background:transparent;color:var(--text-muted);border-color:rgba(255,255,255,.08);opacity:.38;cursor:default;pointer-events:none;}
+    .btn-soon{font-size:9px;letter-spacing:.05em;text-transform:uppercase;background:rgba(255,255,255,.1);padding:2px 6px;border-radius:3px;margin-left:2px;}
 
-    .publication-title {
-      font-size: 2.1rem !important;
-      font-weight: 700;
-      line-height: 1.25;
-    }
+    /* ── Section heads ── */
+    .sec-head{text-align:center;margin-bottom:52px;}
+    .sec-head h2{font-size:clamp(26px,3.5vw,32px);font-weight:600;letter-spacing:-.02em;line-height:1.2;}
+    .sec-head.dark h2{color:var(--text-primary);}
+    .sec-head.light h2{color:var(--text-dark);}
+    .sec-head p{font-size:15px;line-height:1.7;margin-top:14px;max-width:640px;margin-left:auto;margin-right:auto;}
+    .sec-head.dark p{color:var(--text-secondary);}
+    .sec-head.light p{color:var(--text-dark-sec);}
+    .eyebrow{display:block;font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;}
 
-    .publication-venue {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #3273dc;
-      margin-bottom: 0.5rem;
-      letter-spacing: 0.03em;
-    }
+    /* ── Captions + inline labels ── */
+    .fig-cap{font-size:14px;line-height:1.7;margin-top:14px;text-align:center;}
+    .fig-cap.dark{color:var(--text-secondary);}
+    .fig-cap.dark strong{color:var(--text-primary);}
+    .fig-cap.light{color:var(--text-dark-sec);}
+    .fig-cap.light strong{color:var(--text-dark);}
+    .orange-circle{display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #ff6b35;color:#ff6b35;border-radius:50%;font-weight:700;font-size:10px;width:19px;height:19px;margin:0 1px;line-height:1;}
+    .orange-circle-wide{display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #ff6b35;color:#ff6b35;border-radius:10px;font-weight:700;font-size:10px;padding:1px 5px;margin:0 1px;}
 
-    .author-block a {
-      color: #363636;
-      text-decoration: none;
-      border-bottom: 1px dotted #aaa;
-    }
+    /* ── Abstract (light) ── */
+    section#abstract{background:var(--surface-light);}
+    section#abstract p{font-size:18px;line-height:1.8;color:var(--text-dark);}
+    section#abstract p+p{margin-top:22px;}
+    section#abstract strong{font-weight:600;}
+    section#abstract code{font-family:'JetBrains Mono',monospace;font-size:14px;background:#f3f4f6;color:#374151;padding:2px 6px;border-radius:4px;}
 
-    .author-block a:hover {
-      color: #3273dc;
-      border-color: #3273dc;
-    }
+    /* ── Video (dark) ── */
+    section#video{background:var(--bg-1);}
+    .yt-wrap{position:relative;width:100%;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:var(--radius-md);border:1px solid var(--border);}
+    .yt-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
 
-    .affil-logos {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      margin-top: 0.75rem;
-    }
+    /* ── Method (dark) ── */
+    section#method{background:var(--bg-1);}
+    section#method video{width:100%;border-radius:var(--radius-md);border:1px solid var(--border);}
+    .method-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:44px;}
+    .method-card{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:28px;}
+    .method-card h4{font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:10px;line-height:1.4;}
+    .method-card p{font-size:14px;color:var(--text-secondary);line-height:1.75;}
+    .method-card code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary);background:rgba(255,255,255,.07);padding:1px 4px;border-radius:3px;}
+    .gran-section{margin-top:60px;}
+    .gran-head{text-align:center;margin-bottom:24px;}
+    .gran-head h3{font-size:22px;font-weight:600;color:var(--text-primary);letter-spacing:-.01em;}
+    .gran-head p{font-size:14px;color:var(--text-secondary);margin-top:8px;}
+    .gran-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+    .gran-card{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:28px 20px;text-align:center;}
+    .gran-emoji{font-size:28px;margin-bottom:12px;}
+    .gran-card h4{font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:8px;}
+    .gran-card p{font-size:13.5px;color:var(--text-secondary);line-height:1.6;}
+    .enclosure-banner{text-align:center;background:var(--accent-dim);border:1px solid rgba(79,126,248,.22);border-radius:var(--radius-md);padding:14px 24px;font-size:14px;font-weight:600;color:var(--accent);margin-top:20px;}
+    .obj-section{margin-top:60px;}
+    .obj-head{text-align:center;margin-bottom:20px;}
+    .obj-head h3{font-size:22px;font-weight:600;color:var(--text-primary);letter-spacing:-.01em;}
+    .obj-head p{font-size:14px;color:var(--text-secondary);margin-top:8px;}
+    .formula-box{text-align:center;font-size:16px;color:var(--text-primary);background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 28px;margin-bottom:24px;}
+    .loss-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .loss-bar{border-radius:var(--radius-sm);padding:16px 20px;border-left:3px solid;}
+    .loss-bar.blue{border-color:var(--accent);background:rgba(79,126,248,.08);}
+    .loss-bar.green{border-color:#48c78e;background:rgba(72,199,142,.08);}
+    .loss-bar.orange{border-color:#ff6b35;background:rgba(255,107,53,.08);}
+    .loss-bar.gold{border-color:#f5a623;background:rgba(245,166,35,.08);}
+    .loss-bar strong{font-size:13.5px;font-weight:600;color:var(--text-primary);display:block;margin-bottom:6px;}
+    .loss-bar p{font-size:13px;color:var(--text-secondary);line-height:1.6;}
 
-    .affil-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.88rem;
-      color: #555;
-      font-weight: 500;
-    }
+    /* ── Qualitative (dark) ── */
+    section#qualitative{background:var(--bg-0);}
+    .qual-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+    .qual-item img{width:100%;border-radius:var(--radius-md);border:1px solid var(--border);}
 
-    .affil-tag i {
-      color: #888;
-    }
+    /* ── Dataset (light) ── */
+    section#dataset{background:var(--surface-light);}
+    .soon-banner{display:flex;align-items:flex-start;gap:14px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius-md);padding:16px 24px;font-size:15px;color:#92400e;margin-bottom:44px;}
+    .soon-banner i{font-size:20px;color:#d97706;flex-shrink:0;margin-top:1px;}
+    .soon-banner a{color:var(--accent);font-weight:500;}
+    .ds-cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+    .ds-card{border:1px solid var(--border-lit);border-radius:var(--radius-lg);padding:32px;}
+    .ds-card h3{font-size:18px;font-weight:700;color:var(--text-dark);margin-bottom:10px;}
+    .ds-card>p{font-size:14px;color:var(--text-dark-sec);line-height:1.65;margin-bottom:22px;}
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+    .stat-box{text-align:center;background:var(--surface-off);border:1px solid var(--border-lit);border-radius:var(--radius-md);padding:20px 12px;}
+    .stat-num{font-size:26px;font-weight:700;color:var(--accent);line-height:1.15;font-variant-numeric:tabular-nums;}
+    .stat-lbl{font-size:12px;color:var(--text-dark-sec);margin-top:4px;line-height:1.4;}
+    .tag-row{display:flex;flex-wrap:wrap;gap:7px;}
+    .tag{display:inline-flex;align-items:center;background:var(--surface-off);border:1px solid var(--border-lit);border-radius:var(--radius-pill);padding:4px 12px;font-size:12px;font-weight:500;color:var(--text-dark-sec);}
+    .tag.accent{background:var(--accent-dim);border-color:rgba(79,126,248,.2);color:var(--accent);}
 
-    /* ── Sections ── */
-    .section-alt {
-      background: #fafafa;
-    }
+    /* ── Benchmarks / Results / DocVQA (light) ── */
+    section#quantitative{background:var(--surface-off);}
+    section#results{background:var(--surface-light);}
+    section#docvqa{background:var(--surface-off);}
+    .bench-tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;}
+    .bench-tab{background:var(--surface-light);border:1px solid var(--border-lit);border-radius:var(--radius-pill);padding:7px 18px;font-size:13px;font-weight:600;color:var(--text-dark-sec);cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif;}
+    section#docvqa .bench-tab{background:var(--surface-off);}
+    .bench-tab:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+    .bench-tab.is-active{background:var(--accent);border-color:var(--accent);color:#fff;}
+    .chart-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius-md);border:1px solid var(--border-lit);background:var(--surface-light);padding:16px 16px 8px;}
+    section#docvqa .chart-scroll{background:var(--surface-off);}
+    .chart-inner{position:relative;min-width:580px;height:370px;}
+    .chart-hint{text-align:center;font-size:12px;color:#b0b0b8;margin-top:8px;}
+    .table-wrap{width:100%;overflow-x:auto;border-radius:var(--radius-md);border:1px solid var(--border-lit);margin-top:40px;}
+    table.rt{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px;}
+    table.rt thead th{background:var(--surface-off);color:var(--text-dark-sec);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:12px 16px;text-align:center;border-bottom:1px solid var(--border-lit);white-space:nowrap;}
+    section#results table.rt thead th,
+    section#quantitative table.rt thead th{background:var(--surface-off);}
+    section#docvqa table.rt thead th{background:#eeeef0;}
+    table.rt thead th:first-child{text-align:left;}
+    table.rt tbody td{padding:11px 16px;text-align:center;color:var(--text-dark);border-bottom:1px solid var(--border-lit);}
+    table.rt tbody td:first-child{text-align:left;font-weight:500;}
+    table.rt tbody tr:last-child td{border-bottom:none;}
+    table.rt tbody tr:hover td{background:rgba(0,0,0,.02);}
+    table.rt tbody tr.ours td{background:rgba(79,126,248,.05);}
+    table.rt tbody tr.ours td:first-child{border-left:3px solid var(--accent);padding-left:13px;}
+    table.rt tbody tr.ours:hover td{background:rgba(79,126,248,.09);}
+    table.rt td b,table.rt td strong{font-weight:700;}
+    table.rt tbody tr.ours b,table.rt tbody tr.ours strong{color:var(--accent);}
+    .metric-hd{display:flex;flex-direction:column;align-items:center;line-height:1.25;gap:2px;}
+    .metric-hd span{font-size:10px;}
+    .sota-badge{display:inline-block;background:var(--accent);color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;letter-spacing:.06em;text-transform:uppercase;vertical-align:middle;margin-left:4px;}
+    .table-note{font-size:13px;color:var(--text-dark-sec);line-height:1.6;margin-top:16px;}
+    .hero-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:52px;}
+    .hero-stat{text-align:center;padding:32px 16px;background:var(--surface-light);border:1px solid var(--border-lit);border-radius:var(--radius-lg);}
+    .hero-stat-num{font-size:clamp(38px,4.5vw,54px);font-weight:700;color:var(--accent);letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;}
+    .hero-stat-lbl{font-size:13px;color:var(--text-dark-sec);margin-top:8px;line-height:1.55;}
 
-    /* ── Teaser ── */
-    .teaser {
-      padding: 1rem 1.5rem 2.5rem;
-    }
+    /* ── Workshops (dark) ── */
+    section#workshops{background:var(--bg-1);}
+    .ws-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
+    .ws-card{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:32px 28px;display:flex;flex-direction:column;}
+    .ws-icon{font-size:28px;color:var(--accent);margin-bottom:16px;}
+    .ws-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+    .ws-acronym{display:inline-block;background:var(--accent-dim);color:var(--accent);border-radius:var(--radius-pill);padding:3px 10px;font-size:11px;font-weight:700;letter-spacing:.04em;}
+    .ws-highlight{display:inline-block;background:rgba(245,166,35,.15);color:#f5a623;border-radius:var(--radius-pill);padding:3px 10px;font-size:11px;font-weight:700;letter-spacing:.04em;}
+    .ws-name{font-size:14px;font-weight:600;color:var(--text-primary);line-height:1.55;flex-grow:1;}
+    .ws-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;}
+    .ws-link{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:500;color:var(--text-secondary);border:1px solid var(--border);border-radius:var(--radius-pill);padding:6px 14px;transition:color .15s,border-color .15s,background .15s;}
+    .ws-link:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-dim);}
+    .ws-link i{font-size:12px;}
 
-    .teaser img {
-      border-radius: 8px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
-    }
-
-    /* ── Figure placeholders ── */
-    .fig-placeholder {
-      background: #f5f5f5;
-      border: 2px dashed #ddd;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 280px;
-      color: #bbb;
-      font-size: 0.9rem;
-      padding: 2rem;
-      gap: 0.5rem;
-    }
-
-    .fig-placeholder i {
-      font-size: 2.5rem;
-      color: #ddd;
-    }
-
-    .fig-placeholder code {
-      color: #999;
-      background: #eee;
-      border-radius: 3px;
-      padding: 0 4px;
-    }
-
-    /* ── Captions ── */
-    .fig-caption {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #555;
-      margin-top: 0.75rem;
-      line-height: 1.65;
-    }
-
-    .fig-caption strong {
-      color: #333;
-    }
-
-    /* ── Abstract ── */
-    #abstract .content {
-      font-size: 1rem;
-      line-height: 1.8;
-      color: #363636;
-    }
-
-    /* ── Tagline / motivation box ── */
-    .motivation-box {
-      background: linear-gradient(135deg, #f0f5ff 0%, #fff8f0 100%);
-      border: 1px solid #dce8ff;
-      border-radius: 12px;
-      padding: 2rem 2.5rem;
-      margin-bottom: 2rem;
-      font-size: 1rem;
-      line-height: 1.9;
-      color: #444;
-      position: relative;
-    }
-
-    .motivation-box .quote-mark {
-      font-size: 4rem;
-      color: #dce8ff;
-      font-family: Georgia, serif;
-      position: absolute;
-      top: 0.25rem;
-      left: 1rem;
-      line-height: 1;
-    }
-
-    .motivation-box p {
-      padding-left: 1rem;
-    }
-
-    .motivation-box strong {
-      color: #3273dc;
-    }
-
-    /* ── Stat boxes ── */
-    .stat-box {
-      text-align: center;
-      background: #fff;
-      border: 1px solid #e4e4e4;
-      border-radius: 10px;
-      padding: 1.5rem 1rem;
-      height: 100%;
-    }
-
-    .stat-box .stat-num {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #3273dc;
-      font-family: 'Google Sans', sans-serif;
-    }
-
-    .stat-box .stat-lbl {
-      font-size: 0.78rem;
-      color: #777;
-      margin-top: 0.2rem;
-      line-height: 1.4;
-    }
-
-    /* ── Results tables ── */
-    .result-table thead {
-      background: #363636;
-    }
-
-    .result-table thead th {
-      color: white;
-    }
-
-    .result-table tr.ours td {
-      font-weight: 700;
-      color: #3273dc;
-      background: #eef3ff;
-    }
-
-    .result-table {
-      font-size: 0.88rem;
-    }
-
-    .sota {
-      background: #3273dc;
-      color: white;
-      font-size: 0.58rem;
-      font-weight: 700;
-      padding: 1px 5px;
-      border-radius: 3px;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-      vertical-align: middle;
-      margin-left: 4px;
-    }
-
-    /* ── Method cards ── */
-    .method-card {
-      border: 1.5px solid #e8e8e8;
-      border-radius: 10px;
-      padding: 1.5rem;
-      background: #fff;
-      height: 100%;
-    }
-
-    .method-card h4 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 0.6rem;
-    }
-
-    /* ── Granularity ── */
-    .gran-card {
-      border: 1.5px solid #e4e4e4;
-      border-radius: 10px;
-      padding: 1.3rem;
-      text-align: center;
-      background: #fff;
-      height: 100%;
-    }
-
-    .gran-card .gran-emoji {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .gran-card h4 {
-      font-weight: 700;
-      font-size: 0.95rem;
-      margin-bottom: 0.35rem;
-    }
-
-    .gran-card p {
-      font-size: 0.82rem;
-      color: #666;
-    }
-
-    .enclosure-banner {
-      text-align: center;
-      background: #eef3ff;
-      border: 1px solid #bdd0ff;
-      border-radius: 8px;
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      color: #3273dc;
-      font-weight: 600;
-      margin-top: 1.5rem;
-    }
-
-    /* ── Loss bars ── */
-    .loss-bar {
-      border-left: 4px solid;
-      padding: 0.75rem 1.1rem;
-      border-radius: 0 8px 8px 0;
-    }
-
-    .loss-bar.blue {
-      border-color: #3273dc;
-      background: #f0f5ff;
-    }
-
-    .loss-bar.green {
-      border-color: #48c78e;
-      background: #f4fbf7;
-    }
-
-    .loss-bar.orange {
-      border-color: #ff6b35;
-      background: #fff8f5;
-    }
-
-    .loss-bar.gold {
-      border-color: #f5a623;
-      background: #fffbf0;
-    }
-
-    .loss-bar strong {
-      font-size: 0.92rem;
-    }
-
-    .loss-bar p {
-      font-size: 0.83rem;
-      color: #555;
-      margin-top: 0.2rem;
-    }
-
-    /* ── Dataset tags ── */
-    .tag-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: 0.75rem;
-    }
-
-    .qual-box {
-      background: #fafafa;
-      border: 1px solid #e6e6e6;
-      border-radius: 8px;
-      padding: 12px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .qual-box img {
-      max-width: 100%;
-      height: auto;
-      object-fit: contain;
-    }
-
-    /* ── Coming soon badge ── */
-    .coming-soon {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      background: #fff3cd;
-      border: 1px solid #ffc107;
-      color: #856404;
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      vertical-align: middle;
-      margin-left: 4px;
-    }
-
-    /* ── BibTeX ── */
-    .bibtex-wrap {
-      background: #f8f8f8;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .bibtex-bar {
-      background: #363636;
-      color: #aaa;
-      font-size: 0.78rem;
-      font-family: monospace;
-      padding: 0.55rem 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .bibtex-bar button {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #ddd;
-      border-radius: 4px;
-      padding: 0.2rem 0.6rem;
-      font-size: 0.75rem;
-      cursor: pointer;
-      font-family: sans-serif;
-    }
-
-    .bibtex-bar button:hover {
-      background: rgba(255, 255, 255, 0.22);
-      color: #fff;
-    }
-
-    pre.bibtex-code {
-      padding: 1.25rem 1.5rem;
-      font-size: 0.83rem;
-      line-height: 1.75;
-      background: #f8f8f8;
-      margin: 0;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
+    /* ── BibTeX (dark) ── */
+    section#bibtex{background:var(--bg-0);}
+    .bib-hint{font-size:15px;color:var(--text-secondary);text-align:center;margin-bottom:28px;}
+    .bib-fname{font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;}
+    .bib-wrap{position:relative;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .bib-copy{position:absolute;top:14px;right:16px;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text-secondary);background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-pill);padding:5px 14px;cursor:pointer;transition:color .15s,border-color .15s;font-family:'Inter',sans-serif;}
+    .bib-copy:hover{color:var(--accent);border-color:var(--accent);}
+    .bib-copy i{font-size:14px;}
+    pre.bib-code{padding:24px 28px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.9;background:transparent;margin:0;white-space:pre-wrap;word-break:break-all;color:var(--text-secondary);}
+    .bt{color:var(--accent);} .bk{color:#a78bfa;} .bb{color:var(--text-muted);}
 
     /* ── Footer ── */
-    footer.footer {
-      background: #fafafa;
-      border-top: 1px solid #f0f0f0;
-    }
+    footer{background:var(--bg-0);border-top:1px solid var(--border);padding:56px 0 40px;}
+    .footer-grid{max-width:1080px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr auto 1fr;gap:32px;align-items:center;margin-bottom:36px;}
+    .footer-logotype{font-size:15px;font-weight:600;color:var(--text-primary);}
+    .footer-venue{font-size:12px;color:var(--text-muted);margin-top:4px;}
+    .footer-logos{display:flex;align-items:center;gap:20px;justify-content:center;}
+    .footer-logos a{opacity:.45;transition:opacity .2s;}
+    .footer-logos a:hover{opacity:.8;}
+    .footer-logos img{height:30px;width:auto;object-fit:contain;filter:brightness(0) invert(1);}
+    .footer-links{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
+    .footer-link{font-size:13px;color:var(--text-muted);padding:5px 9px;border-radius:var(--radius-sm);transition:color .15s;}
+    .footer-link:hover{color:var(--text-secondary);}
+    .footer-attr{max-width:1080px;margin:0 auto;padding:24px 24px 0;border-top:1px solid var(--border);text-align:center;font-size:12px;color:var(--text-muted);line-height:1.9;}
+    .footer-attr a{color:var(--text-secondary);border-bottom:1px solid var(--border);transition:color .15s;}
+    .footer-attr a:hover{color:var(--text-primary);}
 
-    footer .content {
-      font-size: 0.87rem;
-      color: #777;
-    }
+    /* ── Utilities ── */
+    .mt16{margin-top:16px;} .mt24{margin-top:24px;} .mt32{margin-top:32px;}
+    .mt40{margin-top:40px;} .mt48{margin-top:48px;} .mt56{margin-top:56px;}
+    .tc{text-align:center;}
 
-    /* ── Institution logos ── */
-    .institution-logos {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 3rem;
-      flex-wrap: wrap;
-      margin-top: 2rem;
-      padding: 1.25rem 1.5rem;
-      background: #f7f9ff;
-      border: 1px solid #e4ecff;
-      border-radius: 12px;
+    /* ── Responsive ── */
+    @media(max-width:800px){
+      .ws-grid{grid-template-columns:1fr;}
+      .footer-grid{grid-template-columns:1fr;text-align:center;}
+      .footer-links{justify-content:center;}
     }
-
-    .institution-logos a {
-      display: inline-flex;
-      align-items: center;
-      opacity: 0.9;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    .institution-logos a:hover {
-      opacity: 1;
-      transform: scale(1.05);
-    }
-
-    .institution-logos img {
-      height: 72px;
-      width: auto;
-      object-fit: contain;
-    }
-
-    /* footer logos (smaller, kept for structure) */
-    .footer-logos {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 2rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.25rem;
-    }
-
-    .footer-logos a {
-      display: inline-flex;
-      align-items: center;
-      opacity: 0.7;
-      transition: opacity 0.2s ease;
-    }
-
-    .footer-logos a:hover { opacity: 1; }
-
-    .footer-logos img {
-      height: 36px;
-      width: auto;
-      object-fit: contain;
-    }
-
-    @media (max-width: 768px) {
-      .publication-title {
-        font-size: 1.5rem !important;
-      }
-
-      .institution-logos {
-        gap: 1.75rem;
-        padding: 1rem;
-      }
-
-      .institution-logos img {
-        height: 52px;
-      }
-    }
-
-    /* Orange circled labels (LaTeX style) */
-    .orange-circle {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid #ff6b35;
-      /* Changed to Orange */
-      color: #ff6b35;
-      /* Changed to Orange */
-      border-radius: 50%;
-      font-weight: 700;
-      font-size: 0.8rem;
-      width: 1.4em;
-      height: 1.4em;
-      margin: 0 2px;
-    }
-
-    .orange-circle-wide {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid #ff6b35;
-      /* Changed to Orange */
-      color: #ff6b35;
-      /* Changed to Orange */
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 0 5px;
-      margin: 0 2px;
-    }
-
-    .metric-header {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      line-height: 1.1;
-    }
-
-    .metric-header span {
-      font-size: 0.9em;
-    }
-
-    /* Table Center Alignment Constraints */
-    .results-table th,
-    .results-table td {
-      text-align: center !important;
-      vertical-align: middle !important;
-    }
-
-    /* Keeps the Model names column left aligned */
-    .results-table th:first-child,
-    .results-table td:first-child {
-      text-align: left !important;
-    }
-
-    /* ── Benchmark chart tabs ── */
-    .bench-tab {
-      background: #f0f0f0;
-      border: 1.5px solid #e0e0e0;
-      border-radius: 20px;
-      padding: 0.35rem 1.1rem;
-      font-size: 0.84rem;
-      font-family: 'Google Sans', sans-serif;
-      font-weight: 600;
-      color: #555;
-      cursor: pointer;
-      transition: all 0.18s ease;
-    }
-    .bench-tab:hover {
-      background: #e8eeff;
-      border-color: #3273dc;
-      color: #3273dc;
-    }
-    .bench-tab.is-active {
-      background: #3273dc;
-      border-color: #3273dc;
-      color: #fff;
-    }
-    .chart-scroll-wrap {
-      width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    .chart-inner {
-      position: relative;
-      min-width: 640px;
-      height: 400px;
+    @media(max-width:640px){
+      section{padding:80px 0;}
+      .method-cards,.gran-grid,.loss-grid,.qual-grid,.ds-cols,.hero-stats{grid-template-columns:1fr;}
+      .hero-logos{gap:20px;}
+      .hero-logos img{height:36px;}
     }
   </style>
 </head>
-
 <body>
 
-  <nav class="navbar is-light" role="navigation" aria-label="main navigation">
-    <div class="container">
-      <div class="navbar-brand">
-        <a class="navbar-item has-text-weight-semibold" href="#">M3Grounder</a>
-        <a role="button" class="navbar-burger" data-target="navMenu" aria-label="menu">
-          <span></span><span></span><span></span>
-        </a>
-      </div>
-      <div id="navMenu" class="navbar-menu">
-        <div class="navbar-start" style="flex-grow:1;justify-content:center;">
-          <a class="navbar-item" href="#abstract">Abstract</a>
-          <a class="navbar-item" href="#video">Video</a>
-          <a class="navbar-item" href="#method">Method</a>
-          <a class="navbar-item" href="#results">Results</a>
-          <a class="navbar-item" href="#docvqa">DocVQA</a>
-          <a class="navbar-item" href="#dataset">Dataset</a>
-          <a class="navbar-item" href="#workshops">Workshops</a>
-          <a class="navbar-item" href="#bibtex">BibTeX</a>
-        </div>
-      </div>
+<!-- ═══════════ NAV ═══════════ -->
+<nav class="site-nav" role="navigation" aria-label="main navigation">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">M3Grounder</a>
+    <div class="nav-links">
+      <a href="#abstract">Abstract</a>
+      <a href="#video">Video</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#docvqa">DocVQA</a>
+      <a href="#dataset">Dataset</a>
+      <a href="#workshops">Workshops</a>
+      <a href="#bibtex">BibTeX</a>
     </div>
-  </nav>
-
-
-<section class="hero publication-header">
-  <div class="hero-body">
-    <div class="container is-max-widescreen">
-      <div class="columns is-centered">
-        <div class="column has-text-centered">
-
-          <p class="publication-venue">CVPR 2026</p>
-
-          <h1 class="title is-2 publication-title">
-            M3Grounder: Mask-Based Multi-Span and Multi-Granular Grounding for Document QA
-          </h1>
-
-          <div class="is-size-5 publication-authors" style="margin-top:1.25rem; line-height:2;">
-
-            <span class="author-block">
-              <a href="https://www.linkedin.com/in/venkata-kesav-venna-8a489b20b/" target="_blank">
-                Venkat Kesav Venna
-              </a><sup>1,*</sup>,&ensp;
-            </span>
-
-            <span class="author-block">
-              <a href="https://www.linkedin.com/in/sai-madhusudan-gunda-45bab4223/" target="_blank">
-                Sai Madhusudan Gunda
-              </a><sup>2,*</sup>,&ensp;
-            </span>
-
-            <span class="author-block">
-              <a href="https://www.linkedin.com/in/jyothi-swaroopa-jinka-339320200/" target="_blank">
-                Jyothi Swaroopa Jinka
-              </a><sup>2,†</sup>,&ensp;
-            </span>
-
-            <span class="author-block">
-              <a href="https://www.linkedin.com/in/hrithiksagar/" target="_blank">
-                Hrithik&nbsp;Sagar&nbsp;Rachakonda
-              </a><sup>2,†</sup>,&ensp;
-            </span>
-
-            <span class="author-block">
-              <a href="https://www.linkedin.com/in/anirudh-srini/" target="_blank">
-                Anirudh Srinivasan
-              </a><sup>1</sup>,&ensp;
-            </span>
-
-            <span class="author-block">
-              <a href="https://www.linkedin.com/in/ravi-kiran-s/" target="_blank">
-                Ravi Kiran Sarvadevabhatla
-              </a><sup>1,2</sup>
-            </span>
-
-          </div>
-
-          <div style="margin-top:0.75rem; font-size:1rem; line-height:1.6;">
-
-            <div style="font-weight:600;">
-              <sup>1</sup> BharatGen &nbsp;&nbsp;&nbsp;
-              <sup>2</sup> IIIT Hyderabad
-            </div>
-
-            <div style="font-size:0.9rem; color:#666;">
-              <sup>*</sup> Equal contribution &nbsp;&nbsp;&nbsp;
-              <sup>†</sup> Equal contribution
-            </div>
-
-          </div>
-
-          <div style="margin-top:1.75rem;">
-
-            <a href="https://github.com/m3grounder/m3grounder" target="_blank" class="button is-dark is-rounded"
-              style="margin:0.2rem;">
-              <span class="icon"><i class="fab fa-github"></i></span><span>Code</span>
-            </a>
-
-            <a href="https://huggingface.co/spaces/m3grounder/m3grounder" target="_blank" class="button is-dark is-rounded"
-              style="margin:0.2rem;">
-              <span class="icon">🤗</span><span>HF Space</span>
-            </a>
-            <a href="https://openaccess.thecvf.com/content/CVPR2026/papers/Venna_M3Grounder_Mask-Based_Multi-Span_and_Multi-Granular_Grounding_for_Document_QA_CVPR_2026_paper.pdf" target="_blank" class="button is-dark is-rounded" style="margin:0.2rem;">
-              <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper</span>
-            </a>
-
-            <a href="https://cvpr.thecvf.com/media/PosterPDFs/CVPR%202026/38567.png?t=1779277504.852796" target="_blank" class="button is-dark is-rounded" style="margin:0.2rem;">
-              <span class="icon"><i class="fas fa-image"></i></span><span>Poster</span>
-            </a>
-
-            <a href="https://youtu.be/V9GlzdwNi3k?si=7mPamvzeuULW7MRd" target="_blank" class="button is-dark is-rounded" style="margin:0.2rem;">
-              <span class="icon"><i class="fab fa-youtube" style="color:#ff3333;"></i></span><span>Video</span>
-            </a>
-
-            <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;"
-              title="Coming soon">
-              <span class="icon"><i class="fas fa-database"></i></span>
-              <span>Dataset <span class="coming-soon">Soon</span></span>
-            </span>
-
-            <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;"
-              title="Coming soon">
-              <span class="icon">🤗</span><span>Models <span class="coming-soon">Soon</span></span>
-            </span>
-
-            <!-- <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;"
-              title="Coming soon">
-              <span class="icon"><i class="fas fa-newspaper"></i></span>
-              <span>arXiv <span class="coming-soon">Soon</span></span>
-            </span> -->
-
-          </div>
-
-          <!-- ── Institution / Conference Logos ── -->
-          <div class="institution-logos">
-            <a href="https://cvpr.thecvf.com/" target="_blank" rel="noopener noreferrer" title="CVPR">
-              <img src="static/images/logos/cvpr_logo.png" alt="CVPR logo" />
-            </a>
-            <a href="https://www.iiit.ac.in/" target="_blank" rel="noopener noreferrer" title="IIIT Hyderabad">
-              <img src="static/images/logos/iiiith_logo.jpg" alt="IIIT Hyderabad logo" />
-            </a>
-            <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen">
-              <img src="static/images/logos/logo_bharatgen.png" alt="BharatGen logo" />
-            </a>
-          </div>
-
-        </div>
-      </div>
+    <div class="nav-right">
+      <span class="nav-badge">CVPR 2026</span>
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
+        <i class="ti ti-menu-2"></i>
+      </button>
     </div>
   </div>
-</section>
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="#abstract">Abstract</a>
+    <a href="#video">Video</a>
+    <a href="#method">Method</a>
+    <a href="#results">Results</a>
+    <a href="#docvqa">DocVQA</a>
+    <a href="#dataset">Dataset</a>
+    <a href="#workshops">Workshops</a>
+    <a href="#bibtex">BibTeX</a>
+  </div>
+</nav>
 
+<!-- ═══════════ HERO ═══════════ -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <i class="ti ti-star-filled" style="font-size:11px;"></i>
+      CVPR 2026
+    </div>
 
-  <div class="teaser">
-    <div class="container is-max-desktop">
+    <div class="hero-title-main">
+      <span style="font-weight:700;">M3Grounder:</span>
+      <br>
+      <span class="hero-title-sub">Mask-Based Multi-Span and Multi-Granular<br>Grounding for Document QA</span>
+    </div>
+
+    <div class="hero-authors">
+      <a href="https://www.linkedin.com/in/venkata-kesav-venna-8a489b20b/" target="_blank">Venkat Kesav Venna</a><sup>1,*</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/sai-madhusudan-gunda-45bab4223/" target="_blank">Sai Madhusudan Gunda</a><sup>2,*</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/jyothi-swaroopa-jinka-339320200/" target="_blank">Jyothi Swaroopa Jinka</a><sup>2,†</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/hrithiksagar/" target="_blank">Hrithik&nbsp;Sagar&nbsp;Rachakonda</a><sup>2,†</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/anirudh-srini/" target="_blank">Anirudh Srinivasan</a><sup>1</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/ravi-kiran-s/" target="_blank">Ravi Kiran Sarvadevabhatla</a><sup>1,2</sup>
+    </div>
+    <div class="hero-affiliations"><sup>1</sup> BharatGen &nbsp;&nbsp;&nbsp; <sup>2</sup> IIIT Hyderabad</div>
+    <div class="hero-equal-contrib"><sup>*</sup> Equal contribution &nbsp;&nbsp;&nbsp; <sup>†</sup> Equal contribution</div>
+
+    <div class="hero-logos">
+      <a href="https://cvpr.thecvf.com/" target="_blank" rel="noopener noreferrer" title="CVPR">
+        <img src="static/images/logos/cvpr_logo.png" alt="CVPR logo">
+      </a>
+      <a href="https://www.iiit.ac.in/" target="_blank" rel="noopener noreferrer" title="IIIT Hyderabad">
+        <img src="static/images/logos/iiiith_logo.jpg" alt="IIIT Hyderabad logo">
+      </a>
+      <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen">
+        <img src="static/images/logos/logo_bharatgen.png" alt="BharatGen logo">
+      </a>
+    </div>
+
+    <div class="hero-buttons">
+      <a href="https://github.com/m3grounder/m3grounder" target="_blank" class="btn btn-ghost">
+        <i class="ti ti-brand-github"></i>Code
+      </a>
+      <a href="https://huggingface.co/spaces/m3grounder/m3grounder" target="_blank" class="btn btn-ghost">
+        <i class="ti ti-robot"></i>HF Space
+      </a>
+      <a href="https://openaccess.thecvf.com/content/CVPR2026/papers/Venna_M3Grounder_Mask-Based_Multi-Span_and_Multi-Granular_Grounding_for_Document_QA_CVPR_2026_paper.pdf" target="_blank" class="btn btn-primary">
+        <i class="ti ti-file-text"></i>Paper
+      </a>
+      <a href="https://cvpr.thecvf.com/media/PosterPDFs/CVPR%202026/38567.png?t=1779277504.852796" target="_blank" class="btn btn-ghost">
+        <i class="ti ti-photo"></i>Poster
+      </a>
+      <a href="https://youtu.be/V9GlzdwNi3k?si=7mPamvzeuULW7MRd" target="_blank" class="btn btn-ghost">
+        <i class="ti ti-brand-youtube"></i>Video
+      </a>
+      <span class="btn btn-disabled"><i class="ti ti-database"></i>Dataset<span class="btn-soon">Soon</span></span>
+      <span class="btn btn-disabled"><i class="ti ti-cpu"></i>Models<span class="btn-soon">Soon</span></span>
+    </div>
+
+    <div class="hero-teaser">
       <img src="static/images/teaser.png" alt="M3Grounder teaser figure">
-      <p class="fig-caption">
+      <p class="teaser-caption">
         <strong>M3Grounder in action:</strong>
         Each example shows a QA pair. The predicted answer text contains interleaved
-        <code>[GROUND]</code> tokens which map answer spans to corresponding grounding regions.
-
+        <code>[GROUND]</code>
+        tokens which map answer spans to corresponding grounding regions.
         <span class="orange-circle">A</span>,
         <span class="orange-circle">B</span>
         demonstrate precise segmentation without spillover into irrelevant regions.
-
         <span class="orange-circle">B</span>
         shows effective grounding for dense, multi-span evidence in complex document layouts.
-
         <span class="orange-circle-wide">C1</span>,
         <span class="orange-circle-wide">C2</span>,
         <span class="orange-circle-wide">C3</span>
@@ -783,625 +392,367 @@
       </p>
     </div>
   </div>
+</section>
 
+<!-- ═══════════ ABSTRACT (light) ═══════════ -->
+<section id="abstract">
+  <div class="container-narrow">
+    <div class="reveal">
+      <span class="eyebrow">Abstract</span>
+      <p>
+        Document QA requires not only accurate answers but also identifying where each answer is grounded
+        on the page. Most approaches treat the task as text-only generation, while existing answer grounding
+        methods generate coarse bounding boxes that fail to capture curved text. We introduce
+        <strong>M3Grounder</strong>, a hybrid vision-language and segmentation architecture that formulates
+        document grounding as pixel-level segmentation.
+      </p>
+      <p>
+        M3Grounder produces fine-grained evidence masks refined by a <em>bleed-suppression loss</em> to
+        prevent spillover. It autoregressively generates answer text interleaved with <code>[GROUND]</code>
+        tokens that link individual answer spans to their corresponding evidence regions. M3Grounder also grounds
+        evidence hierarchically across phrase, line, and block levels using an <em>enclosure loss</em> that
+        enforces spatial containment (phrase&thinsp;⊂&thinsp;line&thinsp;⊂&thinsp;block).
+      </p>
+      <p>
+        We release <strong>GroundingDocQA</strong>, a large-scale dataset of 200K documents and 2M
+        multi-span and multi-granular QA pairs with pixel-level grounding masks, built through a data engine
+        handling complex layouts, curved-text, and graphic-rich documents. We also release
+        <strong>GroundingDocQA-Bench</strong>, a diverse human-verified benchmark. M3Grounder sets a new
+        state-of-the-art in grounded DocVQA, advancing from coarse boxes to hierarchical, fine-grained and
+        contextually grounded mask evidence.
+      </p>
+    </div>
+  </div>
+</section>
 
-  <section class="section" id="abstract">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered has-text-centered">
-        <div class="column is-four-fifths">
-          <h2 class="title is-3">Abstract</h2>
-
-          <!-- <div class="motivation-box has-text-left" style="margin-bottom:2rem;">
-            <span class="quote-mark">"</span>
-            <p>
-              Most document AI systems can answer questions. But they rarely show <strong>where</strong> the answer came
-              from.
-              Documents are messy — text can be curved, scattered across regions, or embedded in charts and forms.
-              Sometimes the answer comes from multiple places on a page.
-              <br><br>
-              <strong>M3Grounder</strong> behaves like a smart highlighter ✨ — generating answers
-              while simultaneously highlighting the precise evidence in the document. Not rough boxes. Not vague
-              regions.
-              Exact pixel-level masks of the words supporting the answer.
-              <br><br>
-              In real-world domains — finance, healthcare, legal, enterprise — <strong>answers alone aren't enough.
-                Trust comes from verifiable evidence.</strong>
-            </p>
-          </div> -->
-
-          <div class="content has-text-justified">
-            <p>
-              Document QA requires not only accurate answers but also identifying where each answer is grounded
-              on the page. Most approaches treat the task as text-only generation, while existing answer grounding
-              methods generate coarse bounding boxes that fail to capture curved text. We introduce
-              <strong>M3Grounder</strong>, a hybrid vision-language and segmentation architecture that formulates
-              document grounding as pixel-level segmentation.
-            </p>
-            <p>
-              M3Grounder produces fine-grained evidence masks refined by a <em>bleed-suppression loss</em> to
-              prevent spillover. It autoregressively generates answer text interleaved with <code>[GROUND]</code>
-              tokens that link individual answer spans to their corresponding evidence regions. M3Grounder also grounds
-              evidence hierarchically across phrase, line, and block levels using an <em>enclosure loss</em> that
-              enforces spatial containment (phrase&thinsp;⊂&thinsp;line&thinsp;⊂&thinsp;block).
-            </p>
-            <p>
-              We release <strong>GroundingDocQA</strong>, a large-scale dataset of 200K documents and 2M
-              multi-span and multi-granular QA pairs with pixel-level grounding masks, built through a data engine
-              handling complex layouts, curved-text, and graphic-rich documents. We also release
-              <strong>GroundingDocQA-Bench</strong>, a diverse human-verified benchmark. M3Grounder sets a new
-              state-of-the-art in grounded DocVQA, advancing from coarse boxes to hierarchical, fine-grained and
-              contextually grounded mask evidence.
-            </p>
-          </div>
-        </div>
+<!-- ═══════════ VIDEO (dark) ═══════════ -->
+<section id="video">
+  <div class="container">
+    <div class="reveal sec-head dark"><h2>Video</h2></div>
+    <div class="reveal">
+      <div class="yt-wrap">
+        <iframe
+          src="https://www.youtube.com/embed/V9GlzdwNi3k?si=7mPamvzeuULW7MRd&rel=0&modestbranding=1"
+          title="M3Grounder — CVPR 2026"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="section" id="video">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3 has-text-centered">Video</h2>
-      <div style="display:flex; justify-content:center; margin-top:1rem;">
-        <div style="position:relative; width:100%; max-width:800px; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:10px; box-shadow:0 4px 24px rgba(0,0,0,0.12);">
-          <iframe
-            style="position:absolute; top:0; left:0; width:100%; height:100%;"
-            src="https://www.youtube.com/embed/V9GlzdwNi3k?si=7mPamvzeuULW7MRd"
-            title="M3Grounder — CVPR 2026"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen>
-          </iframe>
-        </div>
-      </div>
-    </div>
-  </section>
+<!-- ═══════════ METHOD (dark) ═══════════ -->
+<section id="method">
+  <div class="container">
+    <div class="reveal sec-head dark"><h2>Method</h2></div>
 
-
-  <section class="section section-alt" id="method">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3 has-text-centered">Method</h2>
-
-      <!-- <img src="static/images/model_overview.png" alt="M3Grounder architecture overview"> -->
-      <!-- <img src="static/images/model_overview.gif" alt="M3Grounder architecture overview"> -->
-      <video autoplay loop muted playsinline style="width:100%; border-radius:8px; box-shadow:0 4px 24px rgba(0,0,0,0.10);">
+    <div class="reveal">
+      <video autoplay loop muted playsinline>
         <source src="static/images/model_overview.mp4" type="video/mp4">
       </video>
-      <p class="fig-caption">
+      <p class="fig-cap dark mt16">
         <strong>Overview of M3Grounder.</strong>
         Given a document image and question, a VLM <strong>(1)</strong> encodes visual features and
-        autoregressively generates an answer sequence <strong>(2)</strong> interleaved with <code>[GROUND]</code>
-        tokens.
-        The hidden states of <code>[GROUND]</code> tokens <strong>(3)</strong> are projected by three
-        granularity-specific
-        MLP heads into phrase-, line-, and block-level prompt embeddings <strong>(4)</strong>. A promptable
-        segmentation module <strong>(5)</strong> extracts dense image embeddings reused across all spans and
-        granularities.
-        The prompt embeddings are decoded by a mask decoder to produce hierarchical grounding masks
-        <strong>(6)</strong>,
-        mapping each answer span to its evidence at all granularities.
+        autoregressively generates an answer sequence <strong>(2)</strong> interleaved with <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary);background:rgba(255,255,255,.07);padding:1px 4px;border-radius:3px;">[GROUND]</code>
+        tokens. The hidden states of <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary);background:rgba(255,255,255,.07);padding:1px 4px;border-radius:3px;">[GROUND]</code> tokens <strong>(3)</strong> are projected by three
+        granularity-specific MLP heads into phrase-, line-, and block-level prompt embeddings <strong>(4)</strong>.
+        A promptable segmentation module <strong>(5)</strong> extracts dense image embeddings reused across all spans and
+        granularities. The prompt embeddings are decoded by a mask decoder to produce hierarchical grounding masks
+        <strong>(6)</strong>, mapping each answer span to its evidence at all granularities.
       </p>
+    </div>
 
-      <div class="columns" style="margin-top:2.5rem;">
-        <div class="column">
-          <div class="method-card">
-            <h4>🔗 Decoupled Language &amp; Spatial Grounding</h4>
-            <p style="font-size:0.9rem; color:#555; line-height:1.7;">
-              Unlike prior methods that interleave bounding-box coordinates inside generated text,
-              M3Grounder <em>decouples</em> language modeling from spatial prediction. The VLM focuses on
-              semantically accurate answers and span boundaries, while a dedicated segmentation head handles
-              fine-grained, geometry-aware localization — yielding cleaner text outputs and more precise masks.
-            </p>
-          </div>
-        </div>
-        <div class="column">
-          <div class="method-card">
-            <h4>🔢 Autoregressive Multi-Span Grounding</h4>
-            <p style="font-size:0.9rem; color:#555; line-height:1.7;">
-              M3Grounder autoregressively generates answer text with special <code>[GROUND]</code> tokens
-              emitted immediately after each answer span, maintaining a one-to-one span-to-region link.
-              This naturally handles multi-span answers drawing evidence from multiple, spatially distinct
-              document regions in a single forward pass.
-            </p>
-          </div>
-        </div>
+    <div class="method-cards reveal">
+      <div class="method-card">
+        <h4>🔗 Decoupled Language &amp; Spatial Grounding</h4>
+        <p>
+          Unlike prior methods that interleave bounding-box coordinates inside generated text,
+          M3Grounder <em>decouples</em> language modeling from spatial prediction. The VLM focuses on
+          semantically accurate answers and span boundaries, while a dedicated segmentation head handles
+          fine-grained, geometry-aware localization — yielding cleaner text outputs and more precise masks.
+        </p>
       </div>
+      <div class="method-card">
+        <h4>🔢 Autoregressive Multi-Span Grounding</h4>
+        <p>
+          M3Grounder autoregressively generates answer text with special <code>[GROUND]</code> tokens
+          emitted immediately after each answer span, maintaining a one-to-one span-to-region link.
+          This naturally handles multi-span answers drawing evidence from multiple, spatially distinct
+          document regions in a single forward pass.
+        </p>
+      </div>
+    </div>
 
-      <h3 class="title is-4 has-text-centered" style="margin-top:3rem;">Multi-Granular Hierarchical Grounding</h3>
-      <p class="has-text-centered" style="color:#666; margin-bottom:1.5rem; font-size:0.95rem;">
-        Documents follow a natural spatial hierarchy. M3Grounder jointly predicts evidence at three levels,
-        enforced by a hierarchical enclosure loss.
-      </p>
-      <div class="columns is-centered">
-        <div class="column is-one-third">
-          <div class="gran-card">
-            <div class="gran-emoji">🔤</div>
-            <h4>Phrase Level</h4>
-            <p>Fine-grained spans for extractive answers — names, dates, numeric values</p>
-          </div>
+    <div class="gran-section reveal">
+      <div class="gran-head">
+        <h3>Multi-Granular Hierarchical Grounding</h3>
+        <p>Documents follow a natural spatial hierarchy. M3Grounder jointly predicts evidence at three levels,
+        enforced by a hierarchical enclosure loss.</p>
+      </div>
+      <div class="gran-grid">
+        <div class="gran-card">
+          <div class="gran-emoji">🔤</div>
+          <h4>Phrase Level</h4>
+          <p>Fine-grained spans for extractive answers — names, dates, numeric values</p>
         </div>
-        <div class="column is-one-third">
-          <div class="gran-card">
-            <div class="gran-emoji">📏</div>
-            <h4>Line Level</h4>
-            <p>Full text lines capturing neighboring context and reading-order cues</p>
-          </div>
+        <div class="gran-card">
+          <div class="gran-emoji">📏</div>
+          <h4>Line Level</h4>
+          <p>Full text lines capturing neighboring context and reading-order cues</p>
         </div>
-        <div class="column is-one-third">
-          <div class="gran-card">
-            <div class="gran-emoji">🔲</div>
-            <h4>Block Level</h4>
-            <p>Broader regions for abstractive or summary questions requiring wide context</p>
-          </div>
+        <div class="gran-card">
+          <div class="gran-emoji">🔲</div>
+          <h4>Block Level</h4>
+          <p>Broader regions for abstractive or summary questions requiring wide context</p>
         </div>
       </div>
       <div class="enclosure-banner">
         Hierarchical Enclosure Loss enforces strict nesting:&ensp;<strong>phrase ⊂ line ⊂ block</strong>
       </div>
+    </div>
 
-      <!-- Bank statement example figure -->
-      <div style="margin-top:2rem; text-align:center;">
-
-        <img src="static/images/bank_example.png"
-            alt="Multi-granular grounding example on a bank statement"
-            style="width:100%; max-width:950px; display:block; margin:auto;
-                    border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,0.08);">
-
-        <p class="fig-caption">
-          <strong>Multi-granular grounding on financial documents.</strong>
-          M3Grounder grounds answer evidence at three hierarchical levels.
-          <span class="orange-circle-wide">C1</span> Phrase-level masks highlight
-          the precise token spans corresponding to extracted values.
-          <span class="orange-circle-wide">C2</span> Line-level masks capture the
-          surrounding transaction context, while
-          <span class="orange-circle-wide">C3</span> Block-level grounding retrieves
-          the broader statement region containing the relevant entries.
-        </p>
-
-      </div>
-
-      <h3 class="title is-4 has-text-centered" style="margin-top:3rem;">Training Objectives</h3>
-      <p class="has-text-centered" style="color:#666; margin-bottom:0.5rem; font-size:0.95rem;">
-        M3Grounder is trained end-to-end with four complementary loss terms:
+    <div class="reveal mt40 tc">
+      <img src="static/images/bank_example.png"
+        alt="Multi-granular grounding example on a bank statement"
+        style="width:100%;border-radius:var(--radius-md);border:1px solid var(--border);">
+      <p class="fig-cap dark mt16">
+        <strong>Multi-granular grounding on financial documents.</strong>
+        M3Grounder grounds answer evidence at three hierarchical levels.
+        <span class="orange-circle-wide">C1</span> Phrase-level masks highlight
+        the precise token spans corresponding to extracted values.
+        <span class="orange-circle-wide">C2</span> Line-level masks capture the
+        surrounding transaction context, while
+        <span class="orange-circle-wide">C3</span> Block-level grounding retrieves
+        the broader statement region containing the relevant entries.
       </p>
-      <p class="has-text-centered" style="font-size:0.98rem; font-family:monospace; color:#333; margin-bottom:1.5rem;">
+    </div>
+
+    <div class="obj-section reveal">
+      <div class="obj-head">
+        <h3>Training Objectives</h3>
+        <p>M3Grounder is trained end-to-end with four complementary loss terms:</p>
+      </div>
+      <div class="formula-box">
         𝓛<sub>total</sub> = λ<sub>lm</sub>𝓛<sub>lm</sub> + λ<sub>seg</sub>𝓛<sub>seg</sub>
         + λ<sub>bleed</sub>𝓛<sub>bleed</sub> + λ<sub>hier</sub>𝓛<sub>hier</sub>
-      </p>
-      <div class="columns is-multiline">
-        <div class="column is-half">
-          <div class="loss-bar blue">
-            <strong>𝓛<sub>lm</sub> — Language Modeling</strong>
-            <p>Cross-entropy over all output tokens for accurate QA generation and span boundary prediction.</p>
-          </div>
-        </div>
-        <div class="column is-half">
-          <div class="loss-bar green">
-            <strong>𝓛<sub>seg</sub> — Segmentation (Dice + BCE)</strong>
-            <p>Supervises mask predictions at each granularity level against pixel-level ground truth.</p>
-          </div>
-        </div>
-        <div class="column is-half">
-          <div class="loss-bar orange">
-            <strong>𝓛<sub>bleed</sub> — Bleed Suppression</strong>
-            <p>Penalizes mask overlap beyond text pixels, preventing spillover into irrelevant background regions.</p>
-          </div>
-        </div>
-        <div class="column is-half">
-          <div class="loss-bar gold">
-            <strong>𝓛<sub>hier</sub> — Hierarchical Enclosure</strong>
-            <p>Enforces phrase ⊂ line ⊂ block nesting, stabilizing multi-granular grounding spatially.</p>
-          </div>
-        </div>
       </div>
-
-    </div>
-  </section>
-
-
-  <section class="section" id="qualitative">
-    <div class="container is-max-widescreen">
-
-      <h2 class="title is-3 has-text-centered">Qualitative Results</h2>
-
-      <p class="has-text-centered" style="color:#666; margin-bottom:2rem;">
-        M3Grounder produces precise, hierarchical segmentation masks across diverse document types —
-        scanned documents, forms, charts, and curved-text banners.
-      </p>
-
-      <div class="columns is-multiline">
-
-        <div class="column is-full">
-          <div class="qual-box">
-            <img src="static/images/qual/Examples-Finance.png" loading="lazy">
-          </div>
-          <p class="fig-caption">Precise multi-span grounding in financial reports, linking narrative claims to both
-            textual evidence and tabular values.</p>
+      <div class="loss-grid">
+        <div class="loss-bar blue">
+          <strong>𝓛<sub>lm</sub> — Language Modeling</strong>
+          <p>Cross-entropy over all output tokens for accurate QA generation and span boundary prediction.</p>
         </div>
-
-        <div class="column is-full">
-          <div class="qual-box">
-            <img src="static/images/qual/Examples-Healthcare.png" loading="lazy">
-          </div>
-          <p class="fig-caption">Medical report reasoning with grounded evidence, connecting abnormal lab measurements
-            to diagnostic interpretation.</p>
+        <div class="loss-bar green">
+          <strong>𝓛<sub>seg</sub> — Segmentation (Dice + BCE)</strong>
+          <p>Supervises mask predictions at each granularity level against pixel-level ground truth.</p>
         </div>
-
-        <div class="column is-full">
-          <div class="qual-box">
-            <img src="static/images/qual/Examples-Legal.png" loading="lazy">
-          </div>
-          <p class="fig-caption">Dense multi-span grounding in legal documents, retrieving multiple clauses that jointly
-            satisfy a query.</p>
+        <div class="loss-bar orange">
+          <strong>𝓛<sub>bleed</sub> — Bleed Suppression</strong>
+          <p>Penalizes mask overlap beyond text pixels, preventing spillover into irrelevant background regions.</p>
         </div>
-
-        <div class="column is-full">
-          <div class="qual-box">
-            <img src="static/images/qual/Examples-Transcript.png" loading="lazy">
-          </div>
-          <p class="fig-caption">Structured evidence grounding in academic records, extracting identifiers and
-            performance indicators across table rows.</p>
+        <div class="loss-bar gold">
+          <strong>𝓛<sub>hier</sub> — Hierarchical Enclosure</strong>
+          <p>Enforces phrase ⊂ line ⊂ block nesting, stabilizing multi-granular grounding spatially.</p>
         </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <section class="section section-alt" id="dataset">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3 has-text-centered">GroundingDocQA Dataset &amp; Benchmark</h2>
-
-      <div class="notification is-warning is-light has-text-centered" style="margin-top:1rem; margin-bottom:2rem;">
-        <i class="fas fa-clock"></i>&ensp;
-        <strong>Dataset page coming soon.</strong>
-        We are preparing the GroundingDocQA dataset and benchmark for public release.
-        Check back here or watch the <a href="https://github.com/hrithiksagar-tih/M3Grounder" target="_blank">GitHub
-          repo</a> for updates.
-      </div>
-
-      <div class="columns" style="margin-top:0.5rem;">
-
-        <div class="column">
-          <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:2rem; background:#fff; height:100%;">
-            <h3 class="title is-4" style="color:#3273dc; margin-bottom:0.5rem;">
-              📦 GroundingDocQA
-            </h3>
-            <p style="font-size:0.9rem; color:#555; margin-bottom:1.5rem;">
-              Large-scale training dataset built with a novel data engine that handles complex layouts,
-              curved-text, and graphic-rich documents — annotated with pixel-level masks at three granularities.
-            </p>
-            <div class="columns is-multiline">
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num">200K</div>
-                  <div class="stat-lbl">Documents</div>
-                </div>
-              </div>
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num">2M</div>
-                  <div class="stat-lbl">QA Pairs</div>
-                </div>
-              </div>
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num" style="font-size:1.3rem;">Multi-<br>Span</div>
-                  <div class="stat-lbl">Annotation</div>
-                </div>
-              </div>
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num">3</div>
-                  <div class="stat-lbl">Mask Levels<br>(phrase, line, block)</div>
-                </div>
-              </div>
-            </div>
-            <div class="tag-row">
-              <span class="tag is-light">Text-rich docs</span>
-              <span class="tag is-light">Charts</span>
-              <span class="tag is-light">Forms &amp; tables</span>
-              <span class="tag is-light">Curved text</span>
-              <span class="tag is-light">Webpages</span>
-              <span class="tag is-light">Reports</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="column">
-          <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:2rem; background:#fff; height:100%;">
-            <h3 class="title is-4" style="color:#3273dc; margin-bottom:0.5rem;">
-              📊 GroundingDocQA-Bench
-            </h3>
-            <p style="font-size:0.9rem; color:#555; margin-bottom:1.5rem;">
-              Human-verified benchmark for systematic evaluation of grounding fidelity under
-              multi-span, multi-granular, and curved-text conditions with mask-level annotations.
-            </p>
-            <div class="columns is-multiline">
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num">2.5K</div>
-                  <div class="stat-lbl">Documents</div>
-                </div>
-              </div>
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num">5K</div>
-                  <div class="stat-lbl">QA Pairs</div>
-                </div>
-              </div>
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num" style="font-size:1.3rem;">Human</div>
-                  <div class="stat-lbl">Verified</div>
-                </div>
-              </div>
-              <div class="column is-half" style="padding:0.3rem;">
-                <div class="stat-box">
-                  <div class="stat-num" style="font-size:1.3rem;">Curved</div>
-                  <div class="stat-lbl">Text Split (CS)</div>
-                </div>
-              </div>
-            </div>
-            <div class="tag-row">
-              <span class="tag is-link is-light">Single-span F₁</span>
-              <span class="tag is-link is-light">Multi-span F₁</span>
-              <span class="tag is-link is-light">Curved F₁ (CS)</span>
-              <span class="tag is-link is-light">G-Eval (AQ)</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div style="margin-top:2.5rem; text-align:center;">
-
-        <img src="static/images/figs/dataengine_final.png" alt="GroundingDocQA data engine pipeline" style="width:100%; max-width:900px; display:block; margin:auto;
-                    border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,0.08);">
-
-        <p class="fig-caption">
-          <strong>GroundingDocQA data engine.</strong>
-          The pipeline processes layout-aware, curved-text, and chart documents,
-          generating multi-span and multi-granular QA pairs with pixel-level mask
-          annotations at three levels (phrase, line, block). A human-in-the-loop
-          verification stage ensures annotation quality across all document types.
-        </p>
-
       </div>
     </div>
-  </section>
-  <!-- ═══════════════════════════════════════════════════════
-       SECTION ORDER: Benchmark Results first, then Results
-       ═══════════════════════════════════════════════════════ -->
+  </div>
+</section>
 
-  <!-- Benchmark Results (moved before Results) -->
-  <section class="section section-alt" id="quantitative">
-    <div class="container is-max-desktop">
-
-      <h2 class="title is-3 has-text-centered">Benchmark Results</h2>
-
-      <p class="has-text-centered" style="color:#666; margin-bottom:2rem;">
-        M3Grounder achieves state-of-the-art grounding performance across all evaluated benchmarks.
-        Gains are most pronounced on curved and skewed text, where segmentation-based localization
-        substantially outperforms bounding-box approaches.
-      </p>
-
-      <!-- ── Interactive Benchmark Chart ── -->
-      <div style="margin-bottom:3rem;">
-        <div id="bench-tabs" style="display:flex; gap:0.5rem; justify-content:center; margin-bottom:1.5rem; flex-wrap:wrap;">
-          <button class="bench-tab is-active" data-bench="GDQA-Bench">GDQA-Bench</button>
-          <button class="bench-tab" data-bench="BD-Test">BD-Test</button>
-          <button class="bench-tab" data-bench="DOGR-Bench">DOGR-Bench</button>
-          <button class="bench-tab" data-bench="MMDocBench">MMDocBench</button>
-        </div>
-        <div class="chart-scroll-wrap">
-          <div class="chart-inner">
-            <canvas id="benchChart"></canvas>
-          </div>
-        </div>
-        <p style="text-align:center; font-size:0.78rem; color:#aaa; margin-top:0.6rem;">
-          <i class="fas fa-hand-pointer" style="margin-right:4px;"></i>Hover bars for score · Sorted by performance (high → low)
-        </p>
-      </div>
-      <!-- ── End Chart ── -->
-
-      <table class="table is-striped is-hoverable is-fullwidth results-table">
-        <thead>
-          <tr>
-            <th>Model</th>
-            <th>Params</th>
-            <th>
-              <div class="metric-header">
-                BD-Test
-                <span>F1<sub>g</sub></span>
-              </div>
-            </th>
-
-            <th>
-              <div class="metric-header">
-                DOGR-Bench
-                <span>F1<sub>g</sub></span>
-              </div>
-            </th>
-
-            <th>
-              <div class="metric-header">
-                MMDocBench
-                <span>IoU</span>
-              </div>
-            </th>
-
-            <th>
-              <div class="metric-header">
-                GDQA-Bench
-                <span>F1<sub>g</sub></span>
-              </div>
-            </th>
-          </tr>
-        </thead>
-
-        <tbody>
-
-          <tr>
-            <td>GPT-4o</td>
-            <td>-</td>
-            <td>2.3</td>
-            <td>2.9</td>
-            <td>2.5</td>
-            <td>3.4</td>
-          </tr>
-
-          <tr>
-            <td>GPT-5</td>
-            <td>-</td>
-            <td>5.4</td>
-            <td>3.6</td>
-            <td>9.3</td>
-            <td>4.5</td>
-          </tr>
-
-          <tr>
-            <td>Gemini-2.5-Pro</td>
-            <td>-</td>
-            <td>70.0</td>
-            <td>59.3</td>
-            <td>49.4</td>
-            <td>43.4</td>
-          </tr>
-
-          <tr>
-            <td>Gemma-3</td>
-            <td>12B</td>
-            <td>0.5</td>
-            <td>1.77</td>
-            <td>1.6</td>
-            <td>1.5</td>
-          </tr>
-
-          <tr>
-            <td>Kimi VL</td>
-            <td>16B</td>
-            <td>8.1</td>
-            <td>7.2</td>
-            <td>3.5</td>
-            <td>0.5</td>
-          </tr>
-
-          <tr>
-            <td>mPLUG-DocOwl2</td>
-            <td>9B</td>
-            <td>1.2</td>
-            <td>0.0</td>
-            <td>0.0</td>
-            <td>0.0</td>
-          </tr>
-
-          <tr>
-            <td>InternVL3.5</td>
-            <td>8B</td>
-            <td>41.5</td>
-            <td>12.5</td>
-            <td>15.5</td>
-            <td>7.6</td>
-          </tr>
-
-          <tr>
-            <td>Qwen3-VL</td>
-            <td>8B</td>
-            <td>44.5</td>
-            <td>27.6</td>
-            <td>28.7</td>
-            <td>12.8</td>
-          </tr>
-
-          <tr>
-            <td>Kosmos 2.5 Chat</td>
-            <td>1.3B</td>
-            <td>0.7</td>
-            <td>0.0</td>
-            <td>0.0</td>
-            <td>0.0</td>
-          </tr>
-
-          <tr>
-            <td>InternVL3.5 ft.</td>
-            <td>8B</td>
-            <td>58.7</td>
-            <td>27.6</td>
-            <td>37.6</td>
-            <td>52.7</td>
-          </tr>
-
-          <tr>
-            <td>Qwen3-VL ft.</td>
-            <td>8B</td>
-            <td>62.3</td>
-            <td>35.8</td>
-            <td>43.4</td>
-            <td>60.6</td>
-          </tr>
-
-          <tr class="ours">
-            <td><b>M3Grounder-I</b></td>
-            <td>8B</td>
-            <td>77.2</td>
-            <td>69.6</td>
-            <td>65.5</td>
-            <td>71.3</td>
-          </tr>
-
-          <tr class="ours">
-            <td><b>M3Grounder-Q</b></td>
-            <td>8B</td>
-            <td><b>81.4</b></td>
-            <td><b>73.3</b></td>
-            <td><b>68.2</b></td>
-            <td><b>79.0</b></td>
-          </tr>
-
-        </tbody>
-      </table>
-
+<!-- ═══════════ QUALITATIVE (dark) ═══════════ -->
+<section id="qualitative">
+  <div class="container">
+    <div class="reveal sec-head dark">
+      <h2>Qualitative Results</h2>
+      <p>M3Grounder produces precise, hierarchical segmentation masks across diverse document types —
+      scanned documents, forms, charts, and curved-text banners.</p>
     </div>
-  </section>
+    <div class="qual-grid">
+      <div class="reveal">
+        <img src="static/images/qual/Examples-Finance.png" loading="lazy" alt="Finance qualitative example">
+        <p class="fig-cap dark mt16">Precise multi-span grounding in financial reports, linking narrative claims to both
+          textual evidence and tabular values.</p>
+      </div>
+      <div class="reveal">
+        <img src="static/images/qual/Examples-Healthcare.png" loading="lazy" alt="Healthcare qualitative example">
+        <p class="fig-cap dark mt16">Medical report reasoning with grounded evidence, connecting abnormal lab measurements
+          to diagnostic interpretation.</p>
+      </div>
+      <div class="reveal">
+        <img src="static/images/qual/Examples-Legal.png" loading="lazy" alt="Legal qualitative example">
+        <p class="fig-cap dark mt16">Dense multi-span grounding in legal documents, retrieving multiple clauses that jointly
+          satisfy a query.</p>
+      </div>
+      <div class="reveal">
+        <img src="static/images/qual/Examples-Transcript.png" loading="lazy" alt="Transcript qualitative example">
+        <p class="fig-cap dark mt16">Structured evidence grounding in academic records, extracting identifiers and
+          performance indicators across table rows.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <!-- Results (now after Benchmark Results) -->
-  <section class="section" id="results">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3 has-text-centered">Results</h2>
-      <p class="has-text-centered" style="color:#666; margin-bottom:2rem;">
-        M3Grounder achieves state-of-the-art grounding performance across all evaluated benchmarks.
-        Gains are most pronounced on curved and skewed text, where segmentation-based localization
-        substantially outperforms bounding-box approaches.
-      </p>
+<!-- ═══════════ DATASET (light) ═══════════ -->
+<section id="dataset">
+  <div class="container">
+    <div class="reveal sec-head light">
+      <h2>GroundingDocQA Dataset &amp; Benchmark</h2>
+    </div>
 
-      <div class="columns" style="margin-bottom:2.5rem;">
-        <div class="column">
-          <div class="stat-box">
-            <div class="stat-num">79.0</div>
-            <div class="stat-lbl">GDQA-Bench F₁<br><em style="color:#bbb;">(ours)</em></div>
-          </div>
-        </div>
-        <div class="column">
-          <div class="stat-box">
-            <div class="stat-num">73.3</div>
-            <div class="stat-lbl">DOGR-Bench F₁<br><em style="color:#bbb;">M3Grounder-Q</em></div>
-          </div>
-        </div>
-        <div class="column">
-          <div class="stat-box">
-            <div class="stat-num">87.5</div>
-            <div class="stat-lbl">Block-level F₁<br><em style="color:#bbb;">M3Grounder-Q</em></div>
-          </div>
+    <div class="reveal">
+      <div class="soon-banner">
+        <i class="ti ti-clock"></i>
+        <div>
+          <strong>Dataset page coming soon.</strong>
+          We are preparing the GroundingDocQA dataset and benchmark for public release.
+          Check back here or watch the <a href="https://github.com/hrithiksagar-tih/M3Grounder" target="_blank">GitHub repo</a> for updates.
         </div>
       </div>
+    </div>
 
-      <h3 class="title is-4">Multi-Granularity Results on GroundingDocQA-Bench</h3>
-      <p style="color:#666; font-size:0.9rem; margin-bottom:0.75rem;">
-        Block-level grounding achieves the highest F₁, confirming that wider spatial context is effectively leveraged.
+    <div class="ds-cols reveal">
+      <div class="ds-card">
+        <h3>📦 GroundingDocQA</h3>
+        <p>Large-scale training dataset built with a novel data engine that handles complex layouts,
+          curved-text, and graphic-rich documents — annotated with pixel-level masks at three granularities.</p>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="stat-num">200K</div><div class="stat-lbl">Documents</div></div>
+          <div class="stat-box"><div class="stat-num">2M</div><div class="stat-lbl">QA Pairs</div></div>
+          <div class="stat-box"><div class="stat-num" style="font-size:18px;line-height:1.3;">Multi-Span</div><div class="stat-lbl">Annotation</div></div>
+          <div class="stat-box"><div class="stat-num">3</div><div class="stat-lbl">Mask Levels<br>(phrase, line, block)</div></div>
+        </div>
+        <div class="tag-row">
+          <span class="tag">Text-rich docs</span>
+          <span class="tag">Charts</span>
+          <span class="tag">Forms &amp; tables</span>
+          <span class="tag">Curved text</span>
+          <span class="tag">Webpages</span>
+          <span class="tag">Reports</span>
+        </div>
+      </div>
+      <div class="ds-card">
+        <h3>📊 GroundingDocQA-Bench</h3>
+        <p>Human-verified benchmark for systematic evaluation of grounding fidelity under
+          multi-span, multi-granular, and curved-text conditions with mask-level annotations.</p>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="stat-num">2.5K</div><div class="stat-lbl">Documents</div></div>
+          <div class="stat-box"><div class="stat-num">5K</div><div class="stat-lbl">QA Pairs</div></div>
+          <div class="stat-box"><div class="stat-num" style="font-size:18px;line-height:1.3;">Human</div><div class="stat-lbl">Verified</div></div>
+          <div class="stat-box"><div class="stat-num" style="font-size:18px;line-height:1.3;">Curved</div><div class="stat-lbl">Text Split (CS)</div></div>
+        </div>
+        <div class="tag-row">
+          <span class="tag accent">Single-span F₁</span>
+          <span class="tag accent">Multi-span F₁</span>
+          <span class="tag accent">Curved F₁ (CS)</span>
+          <span class="tag accent">G-Eval (AQ)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal mt40 tc">
+      <img src="static/images/figs/dataengine_final.png"
+        alt="GroundingDocQA data engine pipeline"
+        style="width:100%;border-radius:var(--radius-md);border:1px solid var(--border-lit);">
+      <p class="fig-cap light mt16">
+        <strong>GroundingDocQA data engine.</strong>
+        The pipeline processes layout-aware, curved-text, and chart documents,
+        generating multi-span and multi-granular QA pairs with pixel-level mask
+        annotations at three levels (phrase, line, block). A human-in-the-loop
+        verification stage ensures annotation quality across all document types.
       </p>
-      <div class="table-container" style="margin-bottom:2rem;">
-        <table class="table is-bordered is-hoverable is-fullwidth result-table results-table">
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BENCHMARK RESULTS (light-off) ═══════════ -->
+<section id="quantitative">
+  <div class="container">
+    <div class="reveal sec-head light">
+      <h2>Benchmark Results</h2>
+      <p>M3Grounder achieves state-of-the-art grounding performance across all evaluated benchmarks.
+      Gains are most pronounced on curved and skewed text, where segmentation-based localization
+      substantially outperforms bounding-box approaches.</p>
+    </div>
+
+    <div class="reveal">
+      <div class="bench-tabs" id="bench-tabs">
+        <button class="bench-tab is-active" data-bench="GDQA-Bench">GDQA-Bench</button>
+        <button class="bench-tab" data-bench="BD-Test">BD-Test</button>
+        <button class="bench-tab" data-bench="DOGR-Bench">DOGR-Bench</button>
+        <button class="bench-tab" data-bench="MMDocBench">MMDocBench</button>
+      </div>
+      <div class="chart-scroll">
+        <div class="chart-inner"><canvas id="benchChart"></canvas></div>
+      </div>
+      <p class="chart-hint"><i class="ti ti-hand-click" style="font-size:13px;"></i> Hover bars for score · Sorted by performance (high → low)</p>
+    </div>
+
+    <div class="reveal">
+      <div class="table-wrap">
+        <table class="rt">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Params</th>
+              <th><div class="metric-hd">BD-Test<span>F1<sub>g</sub></span></div></th>
+              <th><div class="metric-hd">DOGR-Bench<span>F1<sub>g</sub></span></div></th>
+              <th><div class="metric-hd">MMDocBench<span>IoU</span></div></th>
+              <th><div class="metric-hd">GDQA-Bench<span>F1<sub>g</sub></span></div></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>GPT-4o</td><td>-</td><td>2.3</td><td>2.9</td><td>2.5</td><td>3.4</td></tr>
+            <tr><td>GPT-5</td><td>-</td><td>5.4</td><td>3.6</td><td>9.3</td><td>4.5</td></tr>
+            <tr><td>Gemini-2.5-Pro</td><td>-</td><td>70.0</td><td>59.3</td><td>49.4</td><td>43.4</td></tr>
+            <tr><td>Gemma-3</td><td>12B</td><td>0.5</td><td>1.77</td><td>1.6</td><td>1.5</td></tr>
+            <tr><td>Kimi VL</td><td>16B</td><td>8.1</td><td>7.2</td><td>3.5</td><td>0.5</td></tr>
+            <tr><td>mPLUG-DocOwl2</td><td>9B</td><td>1.2</td><td>0.0</td><td>0.0</td><td>0.0</td></tr>
+            <tr><td>InternVL3.5</td><td>8B</td><td>41.5</td><td>12.5</td><td>15.5</td><td>7.6</td></tr>
+            <tr><td>Qwen3-VL</td><td>8B</td><td>44.5</td><td>27.6</td><td>28.7</td><td>12.8</td></tr>
+            <tr><td>Kosmos 2.5 Chat</td><td>1.3B</td><td>0.7</td><td>0.0</td><td>0.0</td><td>0.0</td></tr>
+            <tr><td>InternVL3.5 ft.</td><td>8B</td><td>58.7</td><td>27.6</td><td>37.6</td><td>52.7</td></tr>
+            <tr><td>Qwen3-VL ft.</td><td>8B</td><td>62.3</td><td>35.8</td><td>43.4</td><td>60.6</td></tr>
+            <tr class="ours"><td><b>M3Grounder-I</b></td><td>8B</td><td>77.2</td><td>69.6</td><td>65.5</td><td>71.3</td></tr>
+            <tr class="ours"><td><b>M3Grounder-Q</b></td><td>8B</td><td><b>81.4</b></td><td><b>73.3</b></td><td><b>68.2</b></td><td><b>79.0</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ RESULTS — hero stats + granularity table (light) ═══════════ -->
+<section id="results">
+  <div class="container">
+    <div class="reveal sec-head light">
+      <h2>Results</h2>
+      <p>M3Grounder achieves state-of-the-art grounding performance across all evaluated benchmarks.
+      Gains are most pronounced on curved and skewed text, where segmentation-based localization
+      substantially outperforms bounding-box approaches.</p>
+    </div>
+
+    <div class="hero-stats reveal">
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="79.0" data-dec="1">79.0</div>
+        <div class="hero-stat-lbl">GDQA-Bench F₁<br><em style="color:#aaa;">(ours)</em></div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="73.3" data-dec="1">73.3</div>
+        <div class="hero-stat-lbl">DOGR-Bench F₁<br><em style="color:#aaa;">M3Grounder-Q</em></div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="87.5" data-dec="1">87.5</div>
+        <div class="hero-stat-lbl">Block-level F₁<br><em style="color:#aaa;">M3Grounder-Q</em></div>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <h3 style="font-size:20px;font-weight:600;color:var(--text-dark);letter-spacing:-.01em;margin-bottom:8px;">Multi-Granularity Results on GroundingDocQA-Bench</h3>
+      <p style="font-size:14px;color:var(--text-dark-sec);margin-bottom:16px;">Block-level grounding achieves the highest F₁, confirming that wider spatial context is effectively leveraged.</p>
+      <div class="table-wrap">
+        <table class="rt">
           <thead>
             <tr>
               <th>Model</th>
@@ -1413,59 +764,51 @@
           <tbody>
             <tr class="ours">
               <td><strong>M3Grounder-I</strong></td>
-              <td>75.2</td>
-              <td>79.8</td>
-              <td>82.5</td>
+              <td>75.2</td><td>79.8</td><td>82.5</td>
             </tr>
             <tr class="ours">
-              <td><strong>M3Grounder-Q</strong> <span class="sota">Best</span></td>
-              <td>80.1</td>
-              <td>84.3</td>
-              <td>87.5</td>
+              <td><strong>M3Grounder-Q</strong> <span class="sota-badge">Best</span></td>
+              <td>80.1</td><td>84.3</td><td>87.5</td>
             </tr>
           </tbody>
         </table>
       </div>
-
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="section section-alt" id="docvqa">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3 has-text-centered">General Document VQA</h2>
-      <p class="has-text-centered" style="color:#666; margin-bottom:2rem;">
-        M3Grounder retains strong performance across 10 general document understanding benchmarks,
-        showing no trade-off between grounding capability and VQA accuracy.
-        <strong>Bold</strong> = highest score, <u>underline</u> = second-highest. — = not reported.
-      </p>
+<!-- ═══════════ DOCVQA (light-off) ═══════════ -->
+<section id="docvqa">
+  <div class="container">
+    <div class="reveal sec-head light">
+      <h2>General Document VQA</h2>
+      <p>M3Grounder retains strong performance across 10 general document understanding benchmarks,
+      showing no trade-off between grounding capability and VQA accuracy.
+      <strong style="color:var(--text-dark);">Bold</strong> = highest score, <u>underline</u> = second-highest. — = not reported.</p>
+    </div>
 
-      <!-- ── Interactive Chart ── -->
-      <div style="margin-bottom:3rem;">
-        <div id="gen-doc-tabs" style="display:flex; gap:0.4rem; justify-content:center; margin-bottom:1.5rem; flex-wrap:wrap;">
-          <button class="bench-tab gen-doc-tab is-active" data-bench="Doc VQA">Doc VQA</button>
-          <button class="bench-tab gen-doc-tab" data-bench="Info VQA">Info VQA</button>
-          <button class="bench-tab gen-doc-tab" data-bench="Deep Form">Deep Form</button>
-          <button class="bench-tab gen-doc-tab" data-bench="KLC">KLC</button>
-          <button class="bench-tab gen-doc-tab" data-bench="WTQ">WTQ</button>
-          <button class="bench-tab gen-doc-tab" data-bench="Tab Fact">Tab Fact</button>
-          <button class="bench-tab gen-doc-tab" data-bench="Chart QA">Chart QA</button>
-          <button class="bench-tab gen-doc-tab" data-bench="Text VQA">Text VQA</button>
-          <button class="bench-tab gen-doc-tab" data-bench="Text Caps">Text Caps</button>
-          <button class="bench-tab gen-doc-tab" data-bench="Visual MRC">Visual MRC</button>
-        </div>
-        <div class="chart-scroll-wrap">
-          <div class="chart-inner">
-            <canvas id="genDocChart"></canvas>
-          </div>
-        </div>
-        <p style="text-align:center; font-size:0.78rem; color:#aaa; margin-top:0.6rem;">
-          <i class="fas fa-hand-pointer" style="margin-right:4px;"></i>Hover bars for score &middot; Sorted high → low &middot; Models with — excluded per benchmark
-        </p>
+    <div class="reveal">
+      <div class="bench-tabs" id="gen-doc-tabs">
+        <button class="bench-tab gen-doc-tab is-active" data-bench="Doc VQA">Doc VQA</button>
+        <button class="bench-tab gen-doc-tab" data-bench="Info VQA">Info VQA</button>
+        <button class="bench-tab gen-doc-tab" data-bench="Deep Form">Deep Form</button>
+        <button class="bench-tab gen-doc-tab" data-bench="KLC">KLC</button>
+        <button class="bench-tab gen-doc-tab" data-bench="WTQ">WTQ</button>
+        <button class="bench-tab gen-doc-tab" data-bench="Tab Fact">Tab Fact</button>
+        <button class="bench-tab gen-doc-tab" data-bench="Chart QA">Chart QA</button>
+        <button class="bench-tab gen-doc-tab" data-bench="Text VQA">Text VQA</button>
+        <button class="bench-tab gen-doc-tab" data-bench="Text Caps">Text Caps</button>
+        <button class="bench-tab gen-doc-tab" data-bench="Visual MRC">Visual MRC</button>
       </div>
+      <div class="chart-scroll">
+        <div class="chart-inner"><canvas id="genDocChart"></canvas></div>
+      </div>
+      <p class="chart-hint"><i class="ti ti-hand-click" style="font-size:13px;"></i> Hover bars for score · Sorted high → low · Models with — excluded per benchmark</p>
+    </div>
 
-      <!-- ── Table ── -->
-      <div class="table-container">
-        <table class="table is-bordered is-hoverable is-fullwidth results-table" style="font-size:0.84rem;">
+    <div class="reveal">
+      <div class="table-wrap">
+        <table class="rt" style="font-size:12.5px;">
           <thead>
             <tr>
               <th>Model</th><th>Size</th>
@@ -1508,539 +851,400 @@
           </tbody>
         </table>
       </div>
-      <p class="fig-caption" style="margin-top:1rem; text-align:left;">
+      <p class="table-note">
         <strong>Table 3. Performance comparison of M3Grounder across 10 general document QA benchmarks.</strong>
         We compare against other models of similar size (8B). <strong>Bold</strong> = highest, <u>underline</u> = second-highest. — = not reported by the original work.
       </p>
-
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="section" id="workshops">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3 has-text-centered">Workshop Acceptances</h2>
-      <p class="has-text-centered" style="color:#666; margin-bottom:2rem;">
-        M3Grounder was accepted at three CVPR 2026 workshops.
-      </p>
-      <div class="columns is-multiline">
-
-        <div class="column is-full">
-          <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:1.5rem 2rem; background:#fff; display:flex; align-items:flex-start; gap:1rem;">
-            <div style="font-size:1.6rem; line-height:1;">📄</div>
-            <div>
-              <p style="font-weight:700; font-size:0.97rem; margin-bottom:0.3rem;">
-                CVPR 2026 Workshop on Emerging Directions in Data for Multimodal Foundation Models
-              </p>
-              <a href="https://datamfm.github.io/#papers:~:text=DataMFM%2D4%20%C2%A0%20M3Grounder%3A%20Mask%2DBased%20Multi%2DSpan%20and%20Multi%2DGranular%20Grounding%20for%20Document%20QA"
-                target="_blank" style="font-size:0.88rem; color:#3273dc;">
-                View paper listing →
-              </a>
-            </div>
-          </div>
+<!-- ═══════════ WORKSHOPS (dark) ═══════════ -->
+<section id="workshops">
+  <div class="container">
+    <div class="reveal sec-head dark">
+      <h2>Workshop Acceptances</h2>
+      <p>M3Grounder was accepted at three CVPR 2026 workshops.</p>
+    </div>
+    <div class="ws-grid">
+      <div class="ws-card reveal">
+        <div class="ws-icon"><i class="ti ti-file-description"></i></div>
+        <div class="ws-badges"><span class="ws-acronym">DataMFM</span></div>
+        <div class="ws-name">CVPR 2026 Workshop on Emerging Directions in Data for Multimodal Foundation Models</div>
+        <div class="ws-links">
+          <a href="https://datamfm.github.io/#papers:~:text=DataMFM%2D4%20%C2%A0%20M3Grounder%3A%20Mask%2DBased%20Multi%2DSpan%20and%20Multi%2DGranular%20Grounding%20for%20Document%20QA"
+            target="_blank" class="ws-link">
+            <i class="ti ti-external-link"></i>View paper listing
+          </a>
         </div>
-
-        <div class="column is-full">
-          <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:1.5rem 2rem; background:#fff; display:flex; align-items:flex-start; gap:1rem;">
-            <div style="font-size:1.6rem; line-height:1;">🏆</div>
-            <div>
-              <p style="font-weight:700; font-size:0.97rem; margin-bottom:0.3rem;">
-                CVPR 2026 Workshop on Grounding and Reasoning in AI with Language and Visuals (GRAIL-V)
-              </p>
-              <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:0.3rem;">
-                <a href="https://grailworkshops.github.io/papers/" target="_blank"
-                  style="font-size:0.88rem; color:#3273dc;">Workshop papers →</a>
-                <a href="https://grailworkshops.github.io/papers/#:~:text=M3Grounder%3A%20Mask%2DBased%20Multi%2DSpan%20and%20Multi%2DGranular%20Grounding%20for%20Document%20QA"
-                  target="_blank" style="font-size:0.88rem; color:#3273dc;">Highlight →</a>
-              </div>
-            </div>
-          </div>
+      </div>
+      <div class="ws-card reveal">
+        <div class="ws-icon"><i class="ti ti-trophy"></i></div>
+        <div class="ws-badges">
+          <span class="ws-acronym">GRAIL-V</span>
+          <span class="ws-highlight">Highlight</span>
         </div>
-
-        <div class="column is-full">
-          <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:1.5rem 2rem; background:#fff; display:flex; align-items:flex-start; gap:1rem;">
-            <div style="font-size:1.6rem; line-height:1;">🌐</div>
-            <div>
-              <p style="font-weight:700; font-size:0.97rem; margin-bottom:0.3rem;">
-                MMFM5: The 5th Workshop on What is Next in Multimodal Foundation Models?
-              </p>
-              <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:0.3rem;">
-                <a href="https://mmfm-workshop.github.io/" target="_blank"
-                  style="font-size:0.88rem; color:#3273dc;">Workshop website →</a>
-                <a href="https://openreview.net/group?id=thecvf.com/CVPR/2026/Workshop/MMFM5#tab-your-consoles"
-                  target="_blank" style="font-size:0.88rem; color:#3273dc;">OpenReview →</a>
-              </div>
-            </div>
-          </div>
+        <div class="ws-name">CVPR 2026 Workshop on Grounding and Reasoning in AI with Language and Visuals (GRAIL-V)</div>
+        <div class="ws-links">
+          <a href="https://grailworkshops.github.io/papers/" target="_blank" class="ws-link">
+            <i class="ti ti-external-link"></i>Workshop papers
+          </a>
+          <a href="https://grailworkshops.github.io/papers/#:~:text=M3Grounder%3A%20Mask%2DBased%20Multi%2DSpan%20and%20Multi%2DGranular%20Grounding%20for%20Document%20QA"
+            target="_blank" class="ws-link">
+            <i class="ti ti-star"></i>Highlight
+          </a>
         </div>
-
+      </div>
+      <div class="ws-card reveal">
+        <div class="ws-icon"><i class="ti ti-world"></i></div>
+        <div class="ws-badges"><span class="ws-acronym">MMFM5</span></div>
+        <div class="ws-name">MMFM5: The 5th Workshop on What is Next in Multimodal Foundation Models?</div>
+        <div class="ws-links">
+          <a href="https://mmfm-workshop.github.io/" target="_blank" class="ws-link">
+            <i class="ti ti-external-link"></i>Workshop website
+          </a>
+          <a href="https://openreview.net/group?id=thecvf.com/CVPR/2026/Workshop/MMFM5#tab-your-consoles"
+            target="_blank" class="ws-link">
+            <i class="ti ti-external-link"></i>OpenReview
+          </a>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="section section-alt" id="bibtex">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered">
-        <div class="column is-four-fifths">
-          <h2 class="title is-3 has-text-centered">BibTeX</h2>
-          <p class="has-text-centered" style="color:#666; margin-bottom:1.25rem;">
-            If you find our work useful in your research, please consider citing:
-          </p>
-          <div class="bibtex-wrap">
-            <div class="bibtex-bar">
-              <span>m3grounder_cvpr2026.bib</span>
-              <button onclick="copyBibtex(this)">
-                <i class="far fa-copy"></i>&ensp;Copy
-              </button>
-            </div>
-            <pre class="bibtex-code" id="bibtex-text">@inproceedings{venna2026m3grounder,
+<!-- ═══════════ BIBTEX (dark) ═══════════ -->
+<section id="bibtex">
+  <div class="container-narrow">
+    <div class="reveal sec-head dark"><h2>BibTeX</h2></div>
+    <div class="reveal">
+      <p class="bib-hint">If you find our work useful in your research, please consider citing:</p>
+      <p class="bib-fname">m3grounder_cvpr2026.bib</p>
+      <div class="bib-wrap">
+        <button class="bib-copy" onclick="copyBibtex(this)" aria-label="Copy BibTeX">
+          <i class="ti ti-copy"></i>Copy
+        </button>
+        <pre class="bib-code" id="bibtex-display"><span class="bt">@inproceedings</span><span class="bb">{</span>venna2026m3grounder,
+  <span class="bk">title</span>     = <span class="bb">{</span>M3Grounder: Mask-Based Multi-Span and Multi-Granular Grounding for Document QA<span class="bb">},</span>
+  <span class="bk">author</span>    = <span class="bb">{</span>Venna, Venkata Kesav and Gunda, Sai Madhusudan and Jinka, Jyothi Swaroopa and Rachakonda, Hrithik Sagar and Srinivasan, Anirudh and Sarvadevabhatla, Ravi Kiran<span class="bb">},</span>
+  <span class="bk">booktitle</span> = <span class="bb">{</span>Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition<span class="bb">},</span>
+  <span class="bk">pages</span>     = <span class="bb">{</span>23685--23695<span class="bb">},</span>
+  <span class="bk">year</span>      = <span class="bb">{</span>2026<span class="bb">}</span>
+<span class="bb">}</span></pre>
+      </div>
+    </div>
+    <!-- raw text for clipboard copy -->
+    <textarea id="bibtex-raw" style="display:none;">@inproceedings{venna2026m3grounder,
   title={M3Grounder: Mask-Based Multi-Span and Multi-Granular Grounding for Document QA},
   author={Venna, Venkata Kesav and Gunda, Sai Madhusudan and Jinka, Jyothi Swaroopa and Rachakonda, Hrithik Sagar and Srinivasan, Anirudh and Sarvadevabhatla, Ravi Kiran},
   booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
   pages={23685--23695},
   year={2026}
-}
-</pre>
-          </div>
-        </div>
-      </div>
+}</textarea>
+  </div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logotype">M3Grounder</div>
+      <div class="footer-venue">CVPR 2026</div>
     </div>
-  </section>
- 
-
-
-  <footer class="footer">
-    <div class="container">
-      <div class="content has-text-centered">
-
-        <!-- Institution / Conference Logos (footer, smaller) -->
-        <div class="footer-logos">
-          <a href="https://cvpr.thecvf.com/" target="_blank" rel="noopener noreferrer" title="CVPR">
-            <img src="static/images/logos/cvpr_logo.png" alt="CVPR logo" />
-          </a>
-          <a href="https://www.iiit.ac.in/" target="_blank" rel="noopener noreferrer" title="IIIT Hyderabad">
-            <img src="static/images/logos/iiiith_logo.jpg" alt="IIIT Hyderabad logo" />
-          </a>
-          <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen">
-            <img src="static/images/logos/logo_bharatgen.png" alt="BharatGen logo" />
-          </a>
-        </div>
-
-        <!-- Flag Counter -->
-        <div style="margin-bottom: 2rem;">
-          <p style="font-size:0.78rem; color:#aaa; margin-bottom:0.6rem; 
-                    letter-spacing:0.04em; text-transform:uppercase; font-weight:600;">
-            Visitor Map
-          </p>
-          <div style="display:flex; justify-content:center;">
-            <a href="https://info.flagcounter.com/p3zJ"><img src="https://s01.flagcounter.com/map/p3zJ/size_s/txt_000000/border_CCCCCC/pageviews_1/viewers_0/flags_0/" alt="Flag Counter" border="0"></a>
-          </div>
-        </div>
-
-        <p>
-          This page was built using the
-          <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project
-            Page Template</a>
-          which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
-          <br>
-          You are free to borrow the source code of this website; we just ask that you link back to this page in the
-          footer.
-          <br>
-          This website is licensed under a
-          <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons
-            Attribution-ShareAlike 4.0 International License</a>.
-        </p>
-      </div>
+    <div class="footer-logos">
+      <a href="https://cvpr.thecvf.com/" target="_blank" rel="noopener noreferrer" title="CVPR">
+        <img src="static/images/logos/cvpr_logo.png" alt="CVPR logo">
+      </a>
+      <a href="https://www.iiit.ac.in/" target="_blank" rel="noopener noreferrer" title="IIIT Hyderabad">
+        <img src="static/images/logos/iiiith_logo.jpg" alt="IIIT Hyderabad logo">
+      </a>
+      <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen">
+        <img src="static/images/logos/logo_bharatgen.png" alt="BharatGen logo">
+      </a>
     </div>
-  </footer>
+    <div class="footer-links">
+      <a href="https://openaccess.thecvf.com/content/CVPR2026/papers/Venna_M3Grounder_Mask-Based_Multi-Span_and_Multi-Granular_Grounding_for_Document_QA_CVPR_2026_paper.pdf" target="_blank" class="footer-link">Paper</a>
+      <a href="https://github.com/m3grounder/m3grounder" target="_blank" class="footer-link">Code</a>
+      <a href="https://huggingface.co/spaces/m3grounder/m3grounder" target="_blank" class="footer-link">HF Space</a>
+      <a href="https://cvpr.thecvf.com/media/PosterPDFs/CVPR%202026/38567.png?t=1779277504.852796" target="_blank" class="footer-link">Poster</a>
+    </div>
+  </div>
+  <div class="footer-attr">
+    This page was built using the
+    <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a>
+    which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+    You are free to borrow the source code of this website; we just ask that you link back to this page in the footer.
+    This website is licensed under a
+    <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+  </div>
+</footer>
 
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<script>
+  /* ── Nav scroll ── */
+  const nav = document.querySelector('.site-nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60), {passive:true});
 
-  <script>
-    // Navbar burger
-    document.querySelectorAll('.navbar-burger').forEach(el => {
-      el.addEventListener('click', () => {
-        document.getElementById(el.dataset.target).classList.toggle('is-active');
-        el.classList.toggle('is-active');
-      });
+  /* ── Hamburger ── */
+  const ham = document.getElementById('nav-hamburger');
+  const mob = document.getElementById('mobile-menu');
+  ham.addEventListener('click', () => {
+    mob.classList.toggle('open');
+    ham.querySelector('i').className = mob.classList.contains('open') ? 'ti ti-x' : 'ti ti-menu-2';
+  });
+  mob.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    mob.classList.remove('open');
+    ham.querySelector('i').className = 'ti ti-menu-2';
+  }));
+
+  /* ── Smooth scroll (offset for fixed nav) ── */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) { e.preventDefault(); window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 72, behavior:'smooth' }); }
     });
+  });
 
-    // Copy BibTeX (kept in JS in case section is re-enabled)
-    function copyBibtex(btn) {
-      const text = document.getElementById('bibtex-text').innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        btn.innerHTML = '<i class="fas fa-check"></i>&ensp;Copied!';
-        setTimeout(() => btn.innerHTML = '<i class="far fa-copy"></i>&ensp;Copy', 2000);
+  /* ── Reveal observer ── */
+  const revObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const delay = parseInt(entry.target.dataset.delay || 0);
+        setTimeout(() => entry.target.classList.add('visible'), delay);
+        revObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.07 });
+  document.querySelectorAll('.reveal').forEach(el => revObs.observe(el));
+
+  /* stagger workshop + qual cards */
+  document.querySelectorAll('.ws-card, .qual-grid > div').forEach((el, i) => {
+    el.dataset.delay = i * 80;
+  });
+
+  /* ── Count-up for hero stats ── */
+  function countUp(el, target, dec, dur = 1200) {
+    const t0 = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - t0) / dur, 1);
+      const v = target * (1 - Math.pow(1 - p, 3));
+      el.textContent = v.toFixed(dec);
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  }
+  const cntObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        countUp(e.target, parseFloat(e.target.dataset.count), parseInt(e.target.dataset.dec || 0));
+        cntObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-count]').forEach(el => cntObs.observe(el));
+
+  /* ── Copy BibTeX ── */
+  function copyBibtex(btn) {
+    const text = document.getElementById('bibtex-raw').value;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.innerHTML = '<i class="ti ti-check"></i>Copied!';
+      btn.style.color = '#4ade80';
+      setTimeout(() => { btn.innerHTML = '<i class="ti ti-copy"></i>Copy'; btn.style.color = ''; }, 2000);
+    });
+  }
+
+  /* ══════════════════════════════════
+     BENCHMARK CHART
+  ══════════════════════════════════ */
+  const benchData = {
+    'GDQA-Bench': { metric:'F₁ᵍ', models:{ 'GPT-4o':3.4,'GPT-5':4.5,'Gemini 2.5 Pro':43.4,'Gemma-3':1.5,'Kimi VL':0.5,'mPLUG-DocOwl2':0.0,'InternVL3.5':7.6,'Qwen3-VL':12.8,'Kosmos 2.5':0.0,'InternVL3.5 ft.':52.7,'Qwen3-VL ft.':60.6,'M3Grounder-I':71.3,'M3Grounder-Q':79.0 }},
+    'BD-Test':    { metric:'F₁ᵍ', models:{ 'GPT-4o':2.3,'GPT-5':5.4,'Gemini 2.5 Pro':70.0,'Gemma-3':0.5,'Kimi VL':8.1,'mPLUG-DocOwl2':1.2,'InternVL3.5':41.5,'Qwen3-VL':44.5,'Kosmos 2.5':0.7,'InternVL3.5 ft.':58.7,'Qwen3-VL ft.':62.3,'M3Grounder-I':77.2,'M3Grounder-Q':81.4 }},
+    'DOGR-Bench': { metric:'F₁ᵍ', models:{ 'GPT-4o':2.9,'GPT-5':3.6,'Gemini 2.5 Pro':59.3,'Gemma-3':1.77,'Kimi VL':7.2,'mPLUG-DocOwl2':0.0,'InternVL3.5':12.5,'Qwen3-VL':27.6,'Kosmos 2.5':0.0,'InternVL3.5 ft.':27.6,'Qwen3-VL ft.':35.8,'M3Grounder-I':69.6,'M3Grounder-Q':73.3 }},
+    'MMDocBench': { metric:'IoU',  models:{ 'GPT-4o':2.5,'GPT-5':9.3,'Gemini 2.5 Pro':49.4,'Gemma-3':1.6,'Kimi VL':3.5,'mPLUG-DocOwl2':0.0,'InternVL3.5':15.5,'Qwen3-VL':28.7,'Kosmos 2.5':0.0,'InternVL3.5 ft.':37.6,'Qwen3-VL ft.':43.4,'M3Grounder-I':65.5,'M3Grounder-Q':68.2 }}
+  };
+  const modelLogoUrls = {
+    'M3Grounder-Q':'static/images/logos/logo_bharatgen.png','M3Grounder-I':'static/images/logos/logo_bharatgen.png',
+    'GPT-4o':'https://avatars.githubusercontent.com/u/14957082?v=4','GPT-5':'https://avatars.githubusercontent.com/u/14957082?v=4',
+    'Gemini 2.5 Pro':'https://avatars.githubusercontent.com/u/1342004?v=4','Gemma-3':'https://avatars.githubusercontent.com/u/1342004?v=4',
+    'Kimi VL':'https://avatars.githubusercontent.com/u/126619596?v=4','mPLUG-DocOwl2':'https://avatars.githubusercontent.com/u/1961952?v=4',
+    'InternVL3.5':'https://avatars.githubusercontent.com/u/77686817?v=4','InternVL3.5 ft.':'https://avatars.githubusercontent.com/u/77686817?v=4',
+    'Qwen3-VL':'https://avatars.githubusercontent.com/u/113365823?v=4','Qwen3-VL ft.':'https://avatars.githubusercontent.com/u/113365823?v=4',
+    'Kosmos 2.5':'https://avatars.githubusercontent.com/u/6154722?v=4'
+  };
+  const modelColors = {
+    'M3Grounder-Q':'rgba(79,126,248,.95)','M3Grounder-I':'rgba(79,126,248,.62)',
+    'Gemini 2.5 Pro':'rgba(251,191,36,.72)','Qwen3-VL ft.':'rgba(255,138,76,.78)',
+    'InternVL3.5 ft.':'rgba(255,160,100,.72)','Qwen3-VL':'rgba(147,213,162,.78)',
+    'InternVL3.5':'rgba(120,195,145,.72)','GPT-5':'rgba(180,180,205,.78)',
+    'GPT-4o':'rgba(195,195,215,.72)','Kimi VL':'rgba(170,210,240,.72)',
+    'Gemma-3':'rgba(215,190,240,.72)','mPLUG-DocOwl2':'rgba(210,205,195,.72)',
+    'Kosmos 2.5':'rgba(205,205,215,.72)'
+  };
+  const logoImgs = {};
+  Object.entries(modelLogoUrls).forEach(([m, url]) => {
+    const img = new Image(); img.crossOrigin='anonymous';
+    img.onload = () => { logoImgs[m]=img; window._bc && window._bc.draw(); };
+    img.src = url;
+  });
+  const logoPlugin = {
+    id:'logoAboveBars',
+    afterDatasetsDraw(chart) {
+      const {ctx} = chart, meta = chart.getDatasetMeta(0);
+      chart.data.labels.forEach((model,i) => {
+        const img = logoImgs[model]; if(!img) return;
+        const bar = meta.data[i], size=24;
+        const x=Math.round(bar.x-size/2), y=Math.round(bar.y-size-6);
+        if(y < chart.chartArea.top-4) return;
+        ctx.save(); ctx.beginPath(); ctx.arc(x+size/2,y+size/2,size/2,0,Math.PI*2); ctx.clip();
+        ctx.drawImage(img,x,y,size,size); ctx.restore();
+        ctx.save(); ctx.beginPath(); ctx.arc(x+size/2,y+size/2,size/2,0,Math.PI*2);
+        ctx.strokeStyle='rgba(0,0,0,.1)'; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
       });
     }
-
-    // Smooth scroll
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => {
-        const target = document.querySelector(a.getAttribute('href'));
-        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-      });
-    });
-
-    // ── Benchmark Charts ──────────────────────────────────────────────
-    const benchData = {
-      'GDQA-Bench': {
-        metric: 'F₁ᵍ',
-        models: {
-          'GPT-4o': 3.4, 'GPT-5': 4.5, 'Gemini 2.5 Pro': 43.4, 'Gemma-3': 1.5,
-          'Kimi VL': 0.5, 'mPLUG-DocOwl2': 0.0, 'InternVL3.5': 7.6, 'Qwen3-VL': 12.8,
-          'Kosmos 2.5': 0.0, 'InternVL3.5 ft.': 52.7, 'Qwen3-VL ft.': 60.6,
-          'M3Grounder-I': 71.3, 'M3Grounder-Q': 79.0
-        }
-      },
-      'BD-Test': {
-        metric: 'F₁ᵍ',
-        models: {
-          'GPT-4o': 2.3, 'GPT-5': 5.4, 'Gemini 2.5 Pro': 70.0, 'Gemma-3': 0.5,
-          'Kimi VL': 8.1, 'mPLUG-DocOwl2': 1.2, 'InternVL3.5': 41.5, 'Qwen3-VL': 44.5,
-          'Kosmos 2.5': 0.7, 'InternVL3.5 ft.': 58.7, 'Qwen3-VL ft.': 62.3,
-          'M3Grounder-I': 77.2, 'M3Grounder-Q': 81.4
-        }
-      },
-      'DOGR-Bench': {
-        metric: 'F₁ᵍ',
-        models: {
-          'GPT-4o': 2.9, 'GPT-5': 3.6, 'Gemini 2.5 Pro': 59.3, 'Gemma-3': 1.77,
-          'Kimi VL': 7.2, 'mPLUG-DocOwl2': 0.0, 'InternVL3.5': 12.5, 'Qwen3-VL': 27.6,
-          'Kosmos 2.5': 0.0, 'InternVL3.5 ft.': 27.6, 'Qwen3-VL ft.': 35.8,
-          'M3Grounder-I': 69.6, 'M3Grounder-Q': 73.3
-        }
-      },
-      'MMDocBench': {
-        metric: 'IoU',
-        models: {
-          'GPT-4o': 2.5, 'GPT-5': 9.3, 'Gemini 2.5 Pro': 49.4, 'Gemma-3': 1.6,
-          'Kimi VL': 3.5, 'mPLUG-DocOwl2': 0.0, 'InternVL3.5': 15.5, 'Qwen3-VL': 28.7,
-          'Kosmos 2.5': 0.0, 'InternVL3.5 ft.': 37.6, 'Qwen3-VL ft.': 43.4,
-          'M3Grounder-I': 65.5, 'M3Grounder-Q': 68.2
-        }
-      }
-    };
-
-    // GitHub org avatar URLs — very reliable, no CORS issues
-    const modelLogoUrls = {
-      'M3Grounder-Q':    'static/images/logos/logo_bharatgen.png',
-      'M3Grounder-I':    'static/images/logos/logo_bharatgen.png',
-      'GPT-4o':          'https://avatars.githubusercontent.com/u/14957082?v=4',
-      'GPT-5':           'https://avatars.githubusercontent.com/u/14957082?v=4',
-      'Gemini 2.5 Pro':  'https://avatars.githubusercontent.com/u/1342004?v=4',
-      'Gemma-3':         'https://avatars.githubusercontent.com/u/1342004?v=4',
-      'Kimi VL':         'https://avatars.githubusercontent.com/u/126619596?v=4',
-      'mPLUG-DocOwl2':   'https://avatars.githubusercontent.com/u/1961952?v=4',
-      'InternVL3.5':     'https://avatars.githubusercontent.com/u/77686817?v=4',
-      'InternVL3.5 ft.': 'https://avatars.githubusercontent.com/u/77686817?v=4',
-      'Qwen3-VL':        'https://avatars.githubusercontent.com/u/113365823?v=4',
-      'Qwen3-VL ft.':    'https://avatars.githubusercontent.com/u/113365823?v=4',
-      'Kosmos 2.5':      'https://avatars.githubusercontent.com/u/6154722?v=4',
-    };
-
-    const modelColors = {
-      'M3Grounder-Q':    'rgba(50,  115, 220, 0.95)',
-      'M3Grounder-I':    'rgba(100, 155, 235, 0.80)',
-      'Gemini 2.5 Pro':  'rgba(251, 191,  36, 0.72)',
-      'Qwen3-VL ft.':    'rgba(255, 138,  76, 0.78)',
-      'InternVL3.5 ft.': 'rgba(255, 160, 100, 0.72)',
-      'Qwen3-VL':        'rgba(147, 213, 162, 0.78)',
-      'InternVL3.5':     'rgba(120, 195, 145, 0.72)',
-      'GPT-5':           'rgba(180, 180, 205, 0.78)',
-      'GPT-4o':          'rgba(195, 195, 215, 0.72)',
-      'Kimi VL':         'rgba(170, 210, 240, 0.72)',
-      'Gemma-3':         'rgba(215, 190, 240, 0.72)',
-      'mPLUG-DocOwl2':   'rgba(210, 205, 195, 0.72)',
-      'Kosmos 2.5':      'rgba(205, 205, 215, 0.72)',
-    };
-
-    // Pre-load all logos
-    const logoImgs = {};
-    let loadedCount = 0;
-    const totalLogos = Object.keys(modelLogoUrls).length;
-    Object.entries(modelLogoUrls).forEach(([model, url]) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => { logoImgs[model] = img; loadedCount++; if (window._benchChart) window._benchChart.draw(); };
-      img.onerror = () => { loadedCount++; };
-      img.src = url;
-    });
-
-    // Plugin: draw circular logos above bars
-    const logoPlugin = {
-      id: 'logoAboveBars',
-      afterDatasetsDraw(chart) {
-        const { ctx } = chart;
-        const meta = chart.getDatasetMeta(0);
-        const labels = chart.data.labels;
-        meta.data.forEach((bar, i) => {
-          const model = labels[i];
-          const img = logoImgs[model];
-          if (!img) return;
-          const size = 26;
-          const x = Math.round(bar.x - size / 2);
-          const y = Math.round(bar.y - size - 7);
-          if (y < chart.chartArea.top - 4) return;
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-          ctx.closePath();
-          ctx.clip();
-          ctx.drawImage(img, x, y, size, size);
-          ctx.restore();
-          // thin circle border
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(0,0,0,0.12)';
-          ctx.lineWidth = 1;
-          ctx.stroke();
-          ctx.restore();
-        });
-      }
-    };
-
-    function buildChartData(benchKey) {
-      const { metric, models } = benchData[benchKey];
-      const sorted = Object.entries(models).sort((a, b) => b[1] - a[1]);
-      return {
-        labels:  sorted.map(e => e[0]),
-        values:  sorted.map(e => e[1]),
-        colors:  sorted.map(e => modelColors[e[0]] || 'rgba(200,200,200,0.65)'),
-        borders: sorted.map(e => (modelColors[e[0]] || 'rgba(200,200,200,0.65)').replace(/[\d.]+\)$/, '1)')),
-        metric
-      };
-    }
-
-    function initBenchChart(benchKey) {
-      const { labels, values, colors, borders, metric } = buildChartData(benchKey);
-      const ctx = document.getElementById('benchChart').getContext('2d');
-      if (window._benchChart) window._benchChart.destroy();
-
-      window._benchChart = new Chart(ctx, {
-        type: 'bar',
-        plugins: [logoPlugin],
-        data: {
-          labels,
-          datasets: [{
-            data: values,
-            backgroundColor: colors,
-            borderColor: borders,
-            borderWidth: 1.5,
-            borderRadius: 6,
-            borderSkipped: false
-          }]
+  };
+  function buildBench(key) {
+    const {metric,models} = benchData[key];
+    const s = Object.entries(models).sort((a,b)=>b[1]-a[1]);
+    return { labels:s.map(e=>e[0]), values:s.map(e=>e[1]),
+      colors:s.map(e=>modelColors[e[0]]||'rgba(200,200,200,.65)'),
+      borders:s.map(e=>(modelColors[e[0]]||'rgba(200,200,200,.65)').replace(/[\d.]+\)$/,'1)')), metric };
+  }
+  function initBenchChart(key) {
+    const {labels,values,colors,borders,metric} = buildBench(key);
+    const ctx = document.getElementById('benchChart').getContext('2d');
+    if(window._bc) window._bc.destroy();
+    window._bc = new Chart(ctx, {
+      type:'bar', plugins:[logoPlugin],
+      data:{ labels, datasets:[{ data:values, backgroundColor:colors, borderColor:borders, borderWidth:1, borderRadius:6, borderSkipped:false }] },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        animation:{duration:480, easing:'easeInOutQuart'},
+        layout:{padding:{top:42,right:10,left:10,bottom:4}},
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{title:c=>c[0].label, label:c=>` ${key}  ${metric}: ${c.raw}`},
+            displayColors:true, backgroundColor:'rgba(12,12,12,.96)',
+            titleFont:{family:"'Inter',sans-serif",size:13,weight:'600'},
+            bodyFont:{family:"'Inter',sans-serif",size:12},
+            padding:12, cornerRadius:8, borderColor:'rgba(255,255,255,.1)', borderWidth:1}
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: { duration: 350, easing: 'easeInOutQuart' },
-          layout: { padding: { top: 46, right: 10, left: 10, bottom: 4 } },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                title: ctx => ctx[0].label,
-                label: ctx => ` ${benchKey}  ${metric}: ${ctx.raw}`
-              },
-              displayColors: true,
-              backgroundColor: 'rgba(25,25,25,0.92)',
-              titleFont: { family: "'Google Sans', sans-serif", size: 13, weight: '700' },
-              bodyFont:  { family: "'Noto Sans', sans-serif",  size: 12 },
-              padding: 12,
-              cornerRadius: 8,
-              borderColor: 'rgba(255,255,255,0.08)',
-              borderWidth: 1
-            }
-          },
-          scales: {
-            x: {
-              grid: { display: false },
-              border: { display: false },
-              ticks: {
-                font: { family: "'Noto Sans', sans-serif", size: 10.5 },
-                maxRotation: 30,
-                minRotation: 15,
-                color: '#555'
-              }
-            },
-            y: {
-              min: 0,
-              max: 100,
-              grid: { color: 'rgba(0,0,0,0.055)', drawTicks: false },
-              border: { dash: [4, 4], display: false },
-              ticks: {
-                font: { family: "'Noto Sans', sans-serif", size: 11 },
-                color: '#999',
-                padding: 6,
-                callback: v => v + '%'
-              },
-              title: {
-                display: true,
-                text: metric === 'IoU' ? 'IoU (%)' : 'F₁ Score (%)',
-                font: { family: "'Google Sans', sans-serif", size: 11.5 },
-                color: '#888',
-                padding: { bottom: 6 }
-              }
-            }
-          }
+        scales:{
+          x:{grid:{display:false}, border:{display:false}, ticks:{font:{family:"'Inter',sans-serif",size:11},maxRotation:30,minRotation:15,color:'#666'}},
+          y:{min:0,max:100,
+            grid:{color:'rgba(0,0,0,.055)',drawTicks:false}, border:{dash:[4,4],display:false},
+            ticks:{font:{family:"'Inter',sans-serif",size:11},color:'#999',padding:6,callback:v=>v+'%'},
+            title:{display:true,text:metric==='IoU'?'IoU (%)':'F₁ Score (%)',font:{family:"'Inter',sans-serif",size:11.5},color:'#888',padding:{bottom:6}}}
         }
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      if (document.getElementById('benchChart')) {
-        initBenchChart('GDQA-Bench');
-        document.querySelectorAll('.bench-tab:not(.gen-doc-tab)').forEach(btn => {
-          btn.addEventListener('click', () => {
-            document.querySelectorAll('.bench-tab:not(.gen-doc-tab)').forEach(b => b.classList.remove('is-active'));
-            btn.classList.add('is-active');
-            initBenchChart(btn.dataset.bench);
-          });
-        });
-      }
-      if (document.getElementById('genDocChart')) {
-        initGenDocChart('Doc VQA');
-        document.querySelectorAll('.gen-doc-tab').forEach(btn => {
-          btn.addEventListener('click', () => {
-            document.querySelectorAll('.gen-doc-tab').forEach(b => b.classList.remove('is-active'));
-            btn.classList.add('is-active');
-            initGenDocChart(btn.dataset.bench);
-          });
-        });
       }
     });
+  }
+  let bcInit=false;
+  new IntersectionObserver(entries => {
+    if(entries[0].isIntersecting && !bcInit){ bcInit=true; initBenchChart('GDQA-Bench'); }
+  },{threshold:.15}).observe(document.getElementById('benchChart').closest('.chart-scroll'));
+  document.querySelectorAll('.bench-tab:not(.gen-doc-tab)').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.bench-tab:not(.gen-doc-tab)').forEach(b=>b.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    initBenchChart(btn.dataset.bench);
+  }));
 
-    // ── General DocVQA Chart Data ─────────────────────────────────────
-    const generalDocData = {
-      'Doc VQA':   { models: { 'DocOwl-2': 80.7, 'InternVL3.5': 92.3, 'Qwen3-VL': 96.1, 'DOGR': 91.7, 'M3Grounder-I': 90.3, 'M3Grounder-Q': 92.1 } },
-      'Info VQA':  { models: { 'DocOwl-2': 46.4, 'InternVL3.5': 79.1, 'Qwen3-VL': 83.1, 'DOGR': 70.7, 'M3Grounder-I': 76.2, 'M3Grounder-Q': 79.6 } },
-      'Deep Form': { models: { 'DocOwl-2': 66.8, 'DOGR': 70.8, 'M3Grounder-I': 71.9, 'M3Grounder-Q': 72.8 } },
-      'KLC':       { models: { 'DocOwl-2': 37.5, 'DOGR': 40.4, 'M3Grounder-I': 41.6, 'M3Grounder-Q': 42.8 } },
-      'WTQ':       { models: { 'DocOwl-2': 36.5, 'DOGR': 58.8, 'M3Grounder-I': 59.7, 'M3Grounder-Q': 60.4 } },
-      'Tab Fact':  { models: { 'DocOwl-2': 78.2, 'DOGR': 84.5, 'M3Grounder-I': 81.9, 'M3Grounder-Q': 85.3 } },
-      'Chart QA':  { models: { 'DocOwl-2': 70.0, 'InternVL3.5': 86.7, 'DOGR': 83.6, 'M3Grounder-I': 82.2, 'M3Grounder-Q': 83.9 } },
-      'Text VQA':  { models: { 'DocOwl-2': 66.7, 'InternVL3.5': 78.2, 'DOGR': 76.6, 'M3Grounder-I': 78.6, 'M3Grounder-Q': 78.1 } },
-      'Text Caps': { models: { 'DocOwl-2': 131.8, 'DOGR': 145.9, 'M3Grounder-I': 147.2, 'M3Grounder-Q': 148.1 } },
-      'Visual MRC':{ models: { 'DocOwl-2': 217.4, 'DOGR': 332.5, 'M3Grounder-I': 291.8, 'M3Grounder-Q': 334.2 } },
-    };
-
-    // Local logo paths — upload these files to static/images/logos/ (see instructions below)
-    // Fallback to GitHub org avatars if local files not yet present
-    const genDocLogoLocal = {
-      'M3Grounder-Q': 'static/images/logos/logo_bharatgen.png',
-      'M3Grounder-I': 'static/images/logos/logo_bharatgen.png',
-      'DocOwl-2':     'static/images/logos/logo_docowl.png',
-      'InternVL3.5':  'static/images/logos/logo_internvl.png',
-      'Qwen3-VL':     'static/images/logos/logo_qwen.png',
-      'DOGR':         'static/images/logos/logo_dogr.png',
-    };
-    const genDocLogoFallback = {
-      'DocOwl-2':     'https://avatars.githubusercontent.com/u/1961952?v=4',
-      'InternVL3.5':  'https://avatars.githubusercontent.com/u/77686817?v=4',
-      'Qwen3-VL':     'https://avatars.githubusercontent.com/u/113365823?v=4',
-      'DOGR':         'https://avatars.githubusercontent.com/u/1961952?v=4',
-    };
-    const genDocColors = {
-      'M3Grounder-Q': 'rgba(50,  115, 220, 0.95)',
-      'M3Grounder-I': 'rgba(100, 155, 235, 0.80)',
-      'Qwen3-VL':     'rgba(147, 213, 162, 0.80)',
-      'InternVL3.5':  'rgba(120, 195, 145, 0.75)',
-      'DOGR':         'rgba(251, 191,  36, 0.80)',
-      'DocOwl-2':     'rgba(255, 138,  76, 0.78)',
-    };
-
-    const genDocImgs = {};
-    Object.entries(genDocLogoLocal).forEach(([model, localUrl]) => {
-      const img = new Image();
-      img.onload = () => { genDocImgs[model] = img; if (window._genDocChart) window._genDocChart.draw(); };
-      img.onerror = () => {
-        const fbUrl = genDocLogoFallback[model];
-        if (fbUrl) {
-          const fb = new Image(); fb.crossOrigin = 'anonymous';
-          fb.onload = () => { genDocImgs[model] = fb; if (window._genDocChart) window._genDocChart.draw(); };
-          fb.src = fbUrl;
-        }
-      };
-      img.src = localUrl;
-    });
-
-    const genDocLogoPlugin = {
-      id: 'genDocLogos',
-      afterDatasetsDraw(chart) {
-        const { ctx } = chart;
-        const meta = chart.getDatasetMeta(0);
-        chart.data.labels.forEach((model, i) => {
-          const img = genDocImgs[model];
-          if (!img) return;
-          const bar = meta.data[i];
-          const size = 26;
-          const x = Math.round(bar.x - size / 2);
-          const y = Math.round(bar.y - size - 7);
-          if (y < chart.chartArea.top - 4) return;
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-          ctx.clip();
-          ctx.drawImage(img, x, y, size, size);
-          ctx.restore();
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 1; ctx.stroke();
-          ctx.restore();
-        });
-      }
-    };
-
-    function initGenDocChart(benchKey) {
-      const models = generalDocData[benchKey].models;
-      const sorted = Object.entries(models).sort((a, b) => b[1] - a[1]);
-      const labels  = sorted.map(e => e[0]);
-      const values  = sorted.map(e => e[1]);
-      const colors  = labels.map(l => genDocColors[l] || 'rgba(200,200,200,0.65)');
-      const borders = colors.map(c => c.replace(/[\d.]+\)$/, '1)'));
-      const minVal  = Math.min(...values);
-      const maxVal  = Math.max(...values);
-      const yMin    = Math.max(0, Math.floor(minVal * 0.94));
-      const yMax    = Math.ceil(maxVal * 1.04);
-
-      const ctx = document.getElementById('genDocChart').getContext('2d');
-      if (window._genDocChart) window._genDocChart.destroy();
-      window._genDocChart = new Chart(ctx, {
-        type: 'bar',
-        plugins: [genDocLogoPlugin],
-        data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: borders, borderWidth: 1.5, borderRadius: 6, borderSkipped: false }] },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          animation: { duration: 350, easing: 'easeInOutQuart' },
-          layout: { padding: { top: 46, right: 10, left: 10, bottom: 4 } },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: { title: c => c[0].label, label: c => ` ${benchKey}: ${c.raw}` },
-              displayColors: true,
-              backgroundColor: 'rgba(25,25,25,0.92)',
-              titleFont: { family: "'Google Sans', sans-serif", size: 13, weight: '700' },
-              bodyFont:  { family: "'Noto Sans', sans-serif", size: 12 },
-              padding: 12, cornerRadius: 8,
-              borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1
-            }
-          },
-          scales: {
-            x: { grid: { display: false }, border: { display: false }, ticks: { font: { family: "'Noto Sans', sans-serif", size: 11 }, color: '#555' } },
-            y: {
-              min: yMin, max: yMax,
-              grid: { color: 'rgba(0,0,0,0.055)', drawTicks: false },
-              border: { dash: [4, 4], display: false },
-              ticks: { font: { family: "'Noto Sans', sans-serif", size: 11 }, color: '#999', padding: 6 },
-              title: { display: true, text: 'Score', font: { family: "'Google Sans', sans-serif", size: 11.5 }, color: '#888' }
-            }
-          }
-        }
+  /* ══════════════════════════════════
+     GENERAL DOC CHART
+  ══════════════════════════════════ */
+  const generalDocData = {
+    'Doc VQA':  {models:{'DocOwl-2':80.7,'InternVL3.5':92.3,'Qwen3-VL':96.1,'DOGR':91.7,'M3Grounder-I':90.3,'M3Grounder-Q':92.1}},
+    'Info VQA': {models:{'DocOwl-2':46.4,'InternVL3.5':79.1,'Qwen3-VL':83.1,'DOGR':70.7,'M3Grounder-I':76.2,'M3Grounder-Q':79.6}},
+    'Deep Form':{models:{'DocOwl-2':66.8,'DOGR':70.8,'M3Grounder-I':71.9,'M3Grounder-Q':72.8}},
+    'KLC':      {models:{'DocOwl-2':37.5,'DOGR':40.4,'M3Grounder-I':41.6,'M3Grounder-Q':42.8}},
+    'WTQ':      {models:{'DocOwl-2':36.5,'DOGR':58.8,'M3Grounder-I':59.7,'M3Grounder-Q':60.4}},
+    'Tab Fact': {models:{'DocOwl-2':78.2,'DOGR':84.5,'M3Grounder-I':81.9,'M3Grounder-Q':85.3}},
+    'Chart QA': {models:{'DocOwl-2':70.0,'InternVL3.5':86.7,'DOGR':83.6,'M3Grounder-I':82.2,'M3Grounder-Q':83.9}},
+    'Text VQA': {models:{'DocOwl-2':66.7,'InternVL3.5':78.2,'DOGR':76.6,'M3Grounder-I':78.6,'M3Grounder-Q':78.1}},
+    'Text Caps':{models:{'DocOwl-2':131.8,'DOGR':145.9,'M3Grounder-I':147.2,'M3Grounder-Q':148.1}},
+    'Visual MRC':{models:{'DocOwl-2':217.4,'DOGR':332.5,'M3Grounder-I':291.8,'M3Grounder-Q':334.2}}
+  };
+  const genDocLogoLocal = {
+    'M3Grounder-Q':'static/images/logos/logo_bharatgen.png','M3Grounder-I':'static/images/logos/logo_bharatgen.png',
+    'DocOwl-2':'static/images/logos/logo_docowl.png','InternVL3.5':'static/images/logos/logo_internvl.png',
+    'Qwen3-VL':'static/images/logos/logo_qwen.png','DOGR':'static/images/logos/logo_dogr.png'
+  };
+  const genDocLogoFallback = {
+    'DocOwl-2':'https://avatars.githubusercontent.com/u/1961952?v=4',
+    'InternVL3.5':'https://avatars.githubusercontent.com/u/77686817?v=4',
+    'Qwen3-VL':'https://avatars.githubusercontent.com/u/113365823?v=4',
+    'DOGR':'https://avatars.githubusercontent.com/u/1961952?v=4'
+  };
+  const genDocColors = {
+    'M3Grounder-Q':'rgba(79,126,248,.95)','M3Grounder-I':'rgba(79,126,248,.62)',
+    'Qwen3-VL':'rgba(147,213,162,.80)','InternVL3.5':'rgba(120,195,145,.75)',
+    'DOGR':'rgba(251,191,36,.80)','DocOwl-2':'rgba(255,138,76,.78)'
+  };
+  const genDocImgs = {};
+  Object.entries(genDocLogoLocal).forEach(([model,url]) => {
+    const img = new Image();
+    img.onload = () => { genDocImgs[model]=img; window._gc && window._gc.draw(); };
+    img.onerror = () => { const fb=genDocLogoFallback[model]; if(fb){ const f=new Image(); f.crossOrigin='anonymous'; f.onload=()=>{genDocImgs[model]=f; window._gc&&window._gc.draw();}; f.src=fb; } };
+    img.src=url;
+  });
+  const genDocLogoPlugin = {
+    id:'genDocLogos',
+    afterDatasetsDraw(chart) {
+      const {ctx}=chart, meta=chart.getDatasetMeta(0);
+      chart.data.labels.forEach((model,i)=>{
+        const img=genDocImgs[model]; if(!img) return;
+        const bar=meta.data[i], size=24;
+        const x=Math.round(bar.x-size/2), y=Math.round(bar.y-size-6);
+        if(y<chart.chartArea.top-4) return;
+        ctx.save(); ctx.beginPath(); ctx.arc(x+size/2,y+size/2,size/2,0,Math.PI*2); ctx.clip();
+        ctx.drawImage(img,x,y,size,size); ctx.restore();
+        ctx.save(); ctx.beginPath(); ctx.arc(x+size/2,y+size/2,size/2,0,Math.PI*2);
+        ctx.strokeStyle='rgba(0,0,0,.1)'; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
       });
     }
-  </script>
+  };
+  function initGenDocChart(key) {
+    const models = generalDocData[key].models;
+    const s = Object.entries(models).sort((a,b)=>b[1]-a[1]);
+    const labels=s.map(e=>e[0]), values=s.map(e=>e[1]);
+    const colors=labels.map(l=>genDocColors[l]||'rgba(200,200,200,.65)');
+    const borders=colors.map(c=>c.replace(/[\d.]+\)$/,'1)'));
+    const yMin=Math.max(0,Math.floor(Math.min(...values)*.94)), yMax=Math.ceil(Math.max(...values)*1.04);
+    const ctx=document.getElementById('genDocChart').getContext('2d');
+    if(window._gc) window._gc.destroy();
+    window._gc = new Chart(ctx, {
+      type:'bar', plugins:[genDocLogoPlugin],
+      data:{ labels, datasets:[{ data:values, backgroundColor:colors, borderColor:borders, borderWidth:1, borderRadius:6, borderSkipped:false }] },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        animation:{duration:480, easing:'easeInOutQuart'},
+        layout:{padding:{top:42,right:10,left:10,bottom:4}},
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{title:c=>c[0].label, label:c=>` ${key}: ${c.raw}`},
+            displayColors:true, backgroundColor:'rgba(12,12,12,.96)',
+            titleFont:{family:"'Inter',sans-serif",size:13,weight:'600'},
+            bodyFont:{family:"'Inter',sans-serif",size:12},
+            padding:12, cornerRadius:8, borderColor:'rgba(255,255,255,.1)', borderWidth:1}
+        },
+        scales:{
+          x:{grid:{display:false}, border:{display:false}, ticks:{font:{family:"'Inter',sans-serif",size:11},color:'#666'}},
+          y:{min:yMin,max:yMax,
+            grid:{color:'rgba(0,0,0,.055)',drawTicks:false}, border:{dash:[4,4],display:false},
+            ticks:{font:{family:"'Inter',sans-serif",size:11},color:'#999',padding:6},
+            title:{display:true,text:'Score',font:{family:"'Inter',sans-serif",size:11.5},color:'#888'}}
+        }
+      }
+    });
+  }
+  let gcInit=false;
+  new IntersectionObserver(entries => {
+    if(entries[0].isIntersecting && !gcInit){ gcInit=true; initGenDocChart('Doc VQA'); }
+  },{threshold:.15}).observe(document.getElementById('genDocChart').closest('.chart-scroll'));
+  document.querySelectorAll('.gen-doc-tab').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.gen-doc-tab').forEach(b=>b.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    initGenDocChart(btn.dataset.bench);
+  }));
+</script>
 
 </body>
-
 </html>
