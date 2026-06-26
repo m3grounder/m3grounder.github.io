@@ -30,6 +30,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body);"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <style>
     /* ── Base ── */
@@ -568,6 +569,40 @@
     .results-table td:first-child {
       text-align: left !important;
     }
+
+    /* ── Benchmark chart tabs ── */
+    .bench-tab {
+      background: #f0f0f0;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 20px;
+      padding: 0.35rem 1.1rem;
+      font-size: 0.84rem;
+      font-family: 'Google Sans', sans-serif;
+      font-weight: 600;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .bench-tab:hover {
+      background: #e8eeff;
+      border-color: #3273dc;
+      color: #3273dc;
+    }
+    .bench-tab.is-active {
+      background: #3273dc;
+      border-color: #3273dc;
+      color: #fff;
+    }
+    .chart-scroll-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .chart-inner {
+      position: relative;
+      min-width: 640px;
+      height: 400px;
+    }
   </style>
 </head>
 
@@ -587,6 +622,7 @@
           <a class="navbar-item" href="#video">Video</a>
           <a class="navbar-item" href="#method">Method</a>
           <a class="navbar-item" href="#results">Results</a>
+          <a class="navbar-item" href="#docvqa">DocVQA</a>
           <a class="navbar-item" href="#dataset">Dataset</a>
           <a class="navbar-item" href="#workshops">Workshops</a>
           <a class="navbar-item" href="#bibtex">BibTeX</a>
@@ -681,8 +717,8 @@
               <span class="icon"><i class="fas fa-image"></i></span><span>Poster</span>
             </a>
 
-            <a href="https://youtu.be/V9GlzdwNi3k?si=7mPamvzeuULW7MRd" target="_blank" class="button is-rounded" style="margin:0.2rem; background:#ff0000; color:#fff; border:none;">
-              <span class="icon"><i class="fab fa-youtube"></i></span><span>Video</span>
+            <a href="https://youtu.be/V9GlzdwNi3k?si=7mPamvzeuULW7MRd" target="_blank" class="button is-dark is-rounded" style="margin:0.2rem;">
+              <span class="icon"><i class="fab fa-youtube" style="color:#ff3333;"></i></span><span>Video</span>
             </a>
 
             <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;"
@@ -1146,6 +1182,25 @@
         substantially outperforms bounding-box approaches.
       </p>
 
+      <!-- ── Interactive Benchmark Chart ── -->
+      <div style="margin-bottom:3rem;">
+        <div id="bench-tabs" style="display:flex; gap:0.5rem; justify-content:center; margin-bottom:1.5rem; flex-wrap:wrap;">
+          <button class="bench-tab is-active" data-bench="GDQA-Bench">GDQA-Bench</button>
+          <button class="bench-tab" data-bench="BD-Test">BD-Test</button>
+          <button class="bench-tab" data-bench="DOGR-Bench">DOGR-Bench</button>
+          <button class="bench-tab" data-bench="MMDocBench">MMDocBench</button>
+        </div>
+        <div class="chart-scroll-wrap">
+          <div class="chart-inner">
+            <canvas id="benchChart"></canvas>
+          </div>
+        </div>
+        <p style="text-align:center; font-size:0.78rem; color:#aaa; margin-top:0.6rem;">
+          <i class="fas fa-hand-pointer" style="margin-right:4px;"></i>Hover bars for score · Sorted by performance (high → low)
+        </p>
+      </div>
+      <!-- ── End Chart ── -->
+
       <table class="table is-striped is-hoverable is-fullwidth results-table">
         <thead>
           <tr>
@@ -1371,6 +1426,92 @@
     </div>
   </section>
 
+  <section class="section section-alt" id="docvqa">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">General Document VQA</h2>
+      <p class="has-text-centered" style="color:#666; margin-bottom:2rem;">
+        M3Grounder retains strong performance across 10 general document understanding benchmarks,
+        showing no trade-off between grounding capability and VQA accuracy.
+        <strong>Bold</strong> = highest score, <u>underline</u> = second-highest. — = not reported.
+      </p>
+
+      <!-- ── Interactive Chart ── -->
+      <div style="margin-bottom:3rem;">
+        <div id="gen-doc-tabs" style="display:flex; gap:0.4rem; justify-content:center; margin-bottom:1.5rem; flex-wrap:wrap;">
+          <button class="bench-tab gen-doc-tab is-active" data-bench="Doc VQA">Doc VQA</button>
+          <button class="bench-tab gen-doc-tab" data-bench="Info VQA">Info VQA</button>
+          <button class="bench-tab gen-doc-tab" data-bench="Deep Form">Deep Form</button>
+          <button class="bench-tab gen-doc-tab" data-bench="KLC">KLC</button>
+          <button class="bench-tab gen-doc-tab" data-bench="WTQ">WTQ</button>
+          <button class="bench-tab gen-doc-tab" data-bench="Tab Fact">Tab Fact</button>
+          <button class="bench-tab gen-doc-tab" data-bench="Chart QA">Chart QA</button>
+          <button class="bench-tab gen-doc-tab" data-bench="Text VQA">Text VQA</button>
+          <button class="bench-tab gen-doc-tab" data-bench="Text Caps">Text Caps</button>
+          <button class="bench-tab gen-doc-tab" data-bench="Visual MRC">Visual MRC</button>
+        </div>
+        <div class="chart-scroll-wrap">
+          <div class="chart-inner">
+            <canvas id="genDocChart"></canvas>
+          </div>
+        </div>
+        <p style="text-align:center; font-size:0.78rem; color:#aaa; margin-top:0.6rem;">
+          <i class="fas fa-hand-pointer" style="margin-right:4px;"></i>Hover bars for score &middot; Sorted high → low &middot; Models with — excluded per benchmark
+        </p>
+      </div>
+
+      <!-- ── Table ── -->
+      <div class="table-container">
+        <table class="table is-bordered is-hoverable is-fullwidth results-table" style="font-size:0.84rem;">
+          <thead>
+            <tr>
+              <th>Model</th><th>Size</th>
+              <th>Doc VQA</th><th>Info VQA</th><th>Deep Form</th>
+              <th>KLC</th><th>WTQ</th><th>Tab Fact</th>
+              <th>Chart QA</th><th>Text VQA</th><th>Text Caps</th><th>Visual MRC</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>DocOwl-2</td><td>8B</td>
+              <td>80.7</td><td>46.4</td><td>66.8</td><td>37.5</td><td>36.5</td>
+              <td>78.2</td><td>70.0</td><td>66.7</td><td>131.8</td><td>217.4</td>
+            </tr>
+            <tr>
+              <td>InternVL3.5</td><td>8B</td>
+              <td><u>92.3</u></td><td>79.1</td><td>—</td><td>—</td><td>—</td>
+              <td>—</td><td><strong>86.7</strong></td><td><u>78.2</u></td><td>—</td><td>—</td>
+            </tr>
+            <tr>
+              <td>Qwen3-VL</td><td>8B</td>
+              <td><strong>96.1</strong></td><td><strong>83.1</strong></td><td>—</td><td>—</td><td>—</td>
+              <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+            </tr>
+            <tr>
+              <td>DOGR</td><td>8B</td>
+              <td>91.7</td><td>70.7</td><td>70.8</td><td>40.4</td><td>58.8</td>
+              <td><u>84.5</u></td><td>83.6</td><td>76.6</td><td>145.9</td><td><u>332.5</u></td>
+            </tr>
+            <tr class="ours">
+              <td><strong>M3Grounder-I</strong></td><td>8B</td>
+              <td>90.3</td><td>76.2</td><td><u>71.9</u></td><td><u>41.6</u></td><td><u>59.7</u></td>
+              <td>81.9</td><td>82.2</td><td><strong>78.6</strong></td><td><u>147.2</u></td><td>291.8</td>
+            </tr>
+            <tr class="ours">
+              <td><strong>M3Grounder-Q</strong></td><td>8B</td>
+              <td>92.1</td><td><u>79.6</u></td><td><strong>72.8</strong></td><td><strong>42.8</strong></td><td><strong>60.4</strong></td>
+              <td><strong>85.3</strong></td><td><u>83.9</u></td><td>78.1</td><td><strong>148.1</strong></td><td><strong>334.2</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="fig-caption" style="margin-top:1rem; text-align:left;">
+        <strong>Table 3. Performance comparison of M3Grounder across 10 general document QA benchmarks.</strong>
+        We compare against other models of similar size (8B). <strong>Bold</strong> = highest, <u>underline</u> = second-highest. — = not reported by the original work.
+      </p>
+
+    </div>
+  </section>
+
   <section class="section" id="workshops">
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">Workshop Acceptances</h2>
@@ -1534,6 +1675,366 @@
         if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
       });
     });
+
+    // ── Benchmark Charts ──────────────────────────────────────────────
+    const benchData = {
+      'GDQA-Bench': {
+        metric: 'F₁ᵍ',
+        models: {
+          'GPT-4o': 3.4, 'GPT-5': 4.5, 'Gemini 2.5 Pro': 43.4, 'Gemma-3': 1.5,
+          'Kimi VL': 0.5, 'mPLUG-DocOwl2': 0.0, 'InternVL3.5': 7.6, 'Qwen3-VL': 12.8,
+          'Kosmos 2.5': 0.0, 'InternVL3.5 ft.': 52.7, 'Qwen3-VL ft.': 60.6,
+          'M3Grounder-I': 71.3, 'M3Grounder-Q': 79.0
+        }
+      },
+      'BD-Test': {
+        metric: 'F₁ᵍ',
+        models: {
+          'GPT-4o': 2.3, 'GPT-5': 5.4, 'Gemini 2.5 Pro': 70.0, 'Gemma-3': 0.5,
+          'Kimi VL': 8.1, 'mPLUG-DocOwl2': 1.2, 'InternVL3.5': 41.5, 'Qwen3-VL': 44.5,
+          'Kosmos 2.5': 0.7, 'InternVL3.5 ft.': 58.7, 'Qwen3-VL ft.': 62.3,
+          'M3Grounder-I': 77.2, 'M3Grounder-Q': 81.4
+        }
+      },
+      'DOGR-Bench': {
+        metric: 'F₁ᵍ',
+        models: {
+          'GPT-4o': 2.9, 'GPT-5': 3.6, 'Gemini 2.5 Pro': 59.3, 'Gemma-3': 1.77,
+          'Kimi VL': 7.2, 'mPLUG-DocOwl2': 0.0, 'InternVL3.5': 12.5, 'Qwen3-VL': 27.6,
+          'Kosmos 2.5': 0.0, 'InternVL3.5 ft.': 27.6, 'Qwen3-VL ft.': 35.8,
+          'M3Grounder-I': 69.6, 'M3Grounder-Q': 73.3
+        }
+      },
+      'MMDocBench': {
+        metric: 'IoU',
+        models: {
+          'GPT-4o': 2.5, 'GPT-5': 9.3, 'Gemini 2.5 Pro': 49.4, 'Gemma-3': 1.6,
+          'Kimi VL': 3.5, 'mPLUG-DocOwl2': 0.0, 'InternVL3.5': 15.5, 'Qwen3-VL': 28.7,
+          'Kosmos 2.5': 0.0, 'InternVL3.5 ft.': 37.6, 'Qwen3-VL ft.': 43.4,
+          'M3Grounder-I': 65.5, 'M3Grounder-Q': 68.2
+        }
+      }
+    };
+
+    // GitHub org avatar URLs — very reliable, no CORS issues
+    const modelLogoUrls = {
+      'M3Grounder-Q':    'static/images/logos/logo_bharatgen.png',
+      'M3Grounder-I':    'static/images/logos/logo_bharatgen.png',
+      'GPT-4o':          'https://avatars.githubusercontent.com/u/14957082?v=4',
+      'GPT-5':           'https://avatars.githubusercontent.com/u/14957082?v=4',
+      'Gemini 2.5 Pro':  'https://avatars.githubusercontent.com/u/1342004?v=4',
+      'Gemma-3':         'https://avatars.githubusercontent.com/u/1342004?v=4',
+      'Kimi VL':         'https://avatars.githubusercontent.com/u/126619596?v=4',
+      'mPLUG-DocOwl2':   'https://avatars.githubusercontent.com/u/1961952?v=4',
+      'InternVL3.5':     'https://avatars.githubusercontent.com/u/77686817?v=4',
+      'InternVL3.5 ft.': 'https://avatars.githubusercontent.com/u/77686817?v=4',
+      'Qwen3-VL':        'https://avatars.githubusercontent.com/u/113365823?v=4',
+      'Qwen3-VL ft.':    'https://avatars.githubusercontent.com/u/113365823?v=4',
+      'Kosmos 2.5':      'https://avatars.githubusercontent.com/u/6154722?v=4',
+    };
+
+    const modelColors = {
+      'M3Grounder-Q':    'rgba(50,  115, 220, 0.95)',
+      'M3Grounder-I':    'rgba(100, 155, 235, 0.80)',
+      'Gemini 2.5 Pro':  'rgba(251, 191,  36, 0.72)',
+      'Qwen3-VL ft.':    'rgba(255, 138,  76, 0.78)',
+      'InternVL3.5 ft.': 'rgba(255, 160, 100, 0.72)',
+      'Qwen3-VL':        'rgba(147, 213, 162, 0.78)',
+      'InternVL3.5':     'rgba(120, 195, 145, 0.72)',
+      'GPT-5':           'rgba(180, 180, 205, 0.78)',
+      'GPT-4o':          'rgba(195, 195, 215, 0.72)',
+      'Kimi VL':         'rgba(170, 210, 240, 0.72)',
+      'Gemma-3':         'rgba(215, 190, 240, 0.72)',
+      'mPLUG-DocOwl2':   'rgba(210, 205, 195, 0.72)',
+      'Kosmos 2.5':      'rgba(205, 205, 215, 0.72)',
+    };
+
+    // Pre-load all logos
+    const logoImgs = {};
+    let loadedCount = 0;
+    const totalLogos = Object.keys(modelLogoUrls).length;
+    Object.entries(modelLogoUrls).forEach(([model, url]) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => { logoImgs[model] = img; loadedCount++; if (window._benchChart) window._benchChart.draw(); };
+      img.onerror = () => { loadedCount++; };
+      img.src = url;
+    });
+
+    // Plugin: draw circular logos above bars
+    const logoPlugin = {
+      id: 'logoAboveBars',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        const labels = chart.data.labels;
+        meta.data.forEach((bar, i) => {
+          const model = labels[i];
+          const img = logoImgs[model];
+          if (!img) return;
+          const size = 26;
+          const x = Math.round(bar.x - size / 2);
+          const y = Math.round(bar.y - size - 7);
+          if (y < chart.chartArea.top - 4) return;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.clip();
+          ctx.drawImage(img, x, y, size, size);
+          ctx.restore();
+          // thin circle border
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.restore();
+        });
+      }
+    };
+
+    function buildChartData(benchKey) {
+      const { metric, models } = benchData[benchKey];
+      const sorted = Object.entries(models).sort((a, b) => b[1] - a[1]);
+      return {
+        labels:  sorted.map(e => e[0]),
+        values:  sorted.map(e => e[1]),
+        colors:  sorted.map(e => modelColors[e[0]] || 'rgba(200,200,200,0.65)'),
+        borders: sorted.map(e => (modelColors[e[0]] || 'rgba(200,200,200,0.65)').replace(/[\d.]+\)$/, '1)')),
+        metric
+      };
+    }
+
+    function initBenchChart(benchKey) {
+      const { labels, values, colors, borders, metric } = buildChartData(benchKey);
+      const ctx = document.getElementById('benchChart').getContext('2d');
+      if (window._benchChart) window._benchChart.destroy();
+
+      window._benchChart = new Chart(ctx, {
+        type: 'bar',
+        plugins: [logoPlugin],
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: colors,
+            borderColor: borders,
+            borderWidth: 1.5,
+            borderRadius: 6,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 350, easing: 'easeInOutQuart' },
+          layout: { padding: { top: 46, right: 10, left: 10, bottom: 4 } },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: ctx => ctx[0].label,
+                label: ctx => ` ${benchKey}  ${metric}: ${ctx.raw}`
+              },
+              displayColors: true,
+              backgroundColor: 'rgba(25,25,25,0.92)',
+              titleFont: { family: "'Google Sans', sans-serif", size: 13, weight: '700' },
+              bodyFont:  { family: "'Noto Sans', sans-serif",  size: 12 },
+              padding: 12,
+              cornerRadius: 8,
+              borderColor: 'rgba(255,255,255,0.08)',
+              borderWidth: 1
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              border: { display: false },
+              ticks: {
+                font: { family: "'Noto Sans', sans-serif", size: 10.5 },
+                maxRotation: 30,
+                minRotation: 15,
+                color: '#555'
+              }
+            },
+            y: {
+              min: 0,
+              max: 100,
+              grid: { color: 'rgba(0,0,0,0.055)', drawTicks: false },
+              border: { dash: [4, 4], display: false },
+              ticks: {
+                font: { family: "'Noto Sans', sans-serif", size: 11 },
+                color: '#999',
+                padding: 6,
+                callback: v => v + '%'
+              },
+              title: {
+                display: true,
+                text: metric === 'IoU' ? 'IoU (%)' : 'F₁ Score (%)',
+                font: { family: "'Google Sans', sans-serif", size: 11.5 },
+                color: '#888',
+                padding: { bottom: 6 }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (document.getElementById('benchChart')) {
+        initBenchChart('GDQA-Bench');
+        document.querySelectorAll('.bench-tab:not(.gen-doc-tab)').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.bench-tab:not(.gen-doc-tab)').forEach(b => b.classList.remove('is-active'));
+            btn.classList.add('is-active');
+            initBenchChart(btn.dataset.bench);
+          });
+        });
+      }
+      if (document.getElementById('genDocChart')) {
+        initGenDocChart('Doc VQA');
+        document.querySelectorAll('.gen-doc-tab').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.gen-doc-tab').forEach(b => b.classList.remove('is-active'));
+            btn.classList.add('is-active');
+            initGenDocChart(btn.dataset.bench);
+          });
+        });
+      }
+    });
+
+    // ── General DocVQA Chart Data ─────────────────────────────────────
+    const generalDocData = {
+      'Doc VQA':   { models: { 'DocOwl-2': 80.7, 'InternVL3.5': 92.3, 'Qwen3-VL': 96.1, 'DOGR': 91.7, 'M3Grounder-I': 90.3, 'M3Grounder-Q': 92.1 } },
+      'Info VQA':  { models: { 'DocOwl-2': 46.4, 'InternVL3.5': 79.1, 'Qwen3-VL': 83.1, 'DOGR': 70.7, 'M3Grounder-I': 76.2, 'M3Grounder-Q': 79.6 } },
+      'Deep Form': { models: { 'DocOwl-2': 66.8, 'DOGR': 70.8, 'M3Grounder-I': 71.9, 'M3Grounder-Q': 72.8 } },
+      'KLC':       { models: { 'DocOwl-2': 37.5, 'DOGR': 40.4, 'M3Grounder-I': 41.6, 'M3Grounder-Q': 42.8 } },
+      'WTQ':       { models: { 'DocOwl-2': 36.5, 'DOGR': 58.8, 'M3Grounder-I': 59.7, 'M3Grounder-Q': 60.4 } },
+      'Tab Fact':  { models: { 'DocOwl-2': 78.2, 'DOGR': 84.5, 'M3Grounder-I': 81.9, 'M3Grounder-Q': 85.3 } },
+      'Chart QA':  { models: { 'DocOwl-2': 70.0, 'InternVL3.5': 86.7, 'DOGR': 83.6, 'M3Grounder-I': 82.2, 'M3Grounder-Q': 83.9 } },
+      'Text VQA':  { models: { 'DocOwl-2': 66.7, 'InternVL3.5': 78.2, 'DOGR': 76.6, 'M3Grounder-I': 78.6, 'M3Grounder-Q': 78.1 } },
+      'Text Caps': { models: { 'DocOwl-2': 131.8, 'DOGR': 145.9, 'M3Grounder-I': 147.2, 'M3Grounder-Q': 148.1 } },
+      'Visual MRC':{ models: { 'DocOwl-2': 217.4, 'DOGR': 332.5, 'M3Grounder-I': 291.8, 'M3Grounder-Q': 334.2 } },
+    };
+
+    // Local logo paths — upload these files to static/images/logos/ (see instructions below)
+    // Fallback to GitHub org avatars if local files not yet present
+    const genDocLogoLocal = {
+      'M3Grounder-Q': 'static/images/logos/logo_bharatgen.png',
+      'M3Grounder-I': 'static/images/logos/logo_bharatgen.png',
+      'DocOwl-2':     'static/images/logos/logo_docowl.png',
+      'InternVL3.5':  'static/images/logos/logo_internvl.png',
+      'Qwen3-VL':     'static/images/logos/logo_qwen.png',
+      'DOGR':         'static/images/logos/logo_dogr.png',
+    };
+    const genDocLogoFallback = {
+      'DocOwl-2':     'https://avatars.githubusercontent.com/u/1961952?v=4',
+      'InternVL3.5':  'https://avatars.githubusercontent.com/u/77686817?v=4',
+      'Qwen3-VL':     'https://avatars.githubusercontent.com/u/113365823?v=4',
+      'DOGR':         'https://avatars.githubusercontent.com/u/1961952?v=4',
+    };
+    const genDocColors = {
+      'M3Grounder-Q': 'rgba(50,  115, 220, 0.95)',
+      'M3Grounder-I': 'rgba(100, 155, 235, 0.80)',
+      'Qwen3-VL':     'rgba(147, 213, 162, 0.80)',
+      'InternVL3.5':  'rgba(120, 195, 145, 0.75)',
+      'DOGR':         'rgba(251, 191,  36, 0.80)',
+      'DocOwl-2':     'rgba(255, 138,  76, 0.78)',
+    };
+
+    const genDocImgs = {};
+    Object.entries(genDocLogoLocal).forEach(([model, localUrl]) => {
+      const img = new Image();
+      img.onload = () => { genDocImgs[model] = img; if (window._genDocChart) window._genDocChart.draw(); };
+      img.onerror = () => {
+        const fbUrl = genDocLogoFallback[model];
+        if (fbUrl) {
+          const fb = new Image(); fb.crossOrigin = 'anonymous';
+          fb.onload = () => { genDocImgs[model] = fb; if (window._genDocChart) window._genDocChart.draw(); };
+          fb.src = fbUrl;
+        }
+      };
+      img.src = localUrl;
+    });
+
+    const genDocLogoPlugin = {
+      id: 'genDocLogos',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        chart.data.labels.forEach((model, i) => {
+          const img = genDocImgs[model];
+          if (!img) return;
+          const bar = meta.data[i];
+          const size = 26;
+          const x = Math.round(bar.x - size / 2);
+          const y = Math.round(bar.y - size - 7);
+          if (y < chart.chartArea.top - 4) return;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(img, x, y, size, size);
+          ctx.restore();
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 1; ctx.stroke();
+          ctx.restore();
+        });
+      }
+    };
+
+    function initGenDocChart(benchKey) {
+      const models = generalDocData[benchKey].models;
+      const sorted = Object.entries(models).sort((a, b) => b[1] - a[1]);
+      const labels  = sorted.map(e => e[0]);
+      const values  = sorted.map(e => e[1]);
+      const colors  = labels.map(l => genDocColors[l] || 'rgba(200,200,200,0.65)');
+      const borders = colors.map(c => c.replace(/[\d.]+\)$/, '1)'));
+      const minVal  = Math.min(...values);
+      const maxVal  = Math.max(...values);
+      const yMin    = Math.max(0, Math.floor(minVal * 0.94));
+      const yMax    = Math.ceil(maxVal * 1.04);
+
+      const ctx = document.getElementById('genDocChart').getContext('2d');
+      if (window._genDocChart) window._genDocChart.destroy();
+      window._genDocChart = new Chart(ctx, {
+        type: 'bar',
+        plugins: [genDocLogoPlugin],
+        data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: borders, borderWidth: 1.5, borderRadius: 6, borderSkipped: false }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          animation: { duration: 350, easing: 'easeInOutQuart' },
+          layout: { padding: { top: 46, right: 10, left: 10, bottom: 4 } },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: { title: c => c[0].label, label: c => ` ${benchKey}: ${c.raw}` },
+              displayColors: true,
+              backgroundColor: 'rgba(25,25,25,0.92)',
+              titleFont: { family: "'Google Sans', sans-serif", size: 13, weight: '700' },
+              bodyFont:  { family: "'Noto Sans', sans-serif", size: 12 },
+              padding: 12, cornerRadius: 8,
+              borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, border: { display: false }, ticks: { font: { family: "'Noto Sans', sans-serif", size: 11 }, color: '#555' } },
+            y: {
+              min: yMin, max: yMax,
+              grid: { color: 'rgba(0,0,0,0.055)', drawTicks: false },
+              border: { dash: [4, 4], display: false },
+              ticks: { font: { family: "'Noto Sans', sans-serif", size: 11 }, color: '#999', padding: 6 },
+              title: { display: true, text: 'Score', font: { family: "'Google Sans', sans-serif", size: 11.5 }, color: '#888' }
+            }
+          }
+        }
+      });
+    }
   </script>
 
 </body>
