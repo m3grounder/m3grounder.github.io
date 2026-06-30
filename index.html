@@ -612,7 +612,6 @@
 
     <div class="qual-demo-tabs reveal" id="qual-tabs">
       <button class="qual-tab is-active" data-ex="finance">Finance</button>
-      <button class="qual-tab" data-ex="healthcare">Healthcare</button>
       <button class="qual-tab" data-ex="legal">Legal</button>
       <button class="qual-tab" data-ex="transcript">Transcript</button>
     </div>
@@ -1347,43 +1346,6 @@
         { type: 'span_end' },
         { type: 'ground',     spanIndex: 1 },
         { type: 'text',       content: ' for 2019.' },
-      ]
-    },
-    {
-      id: 'healthcare',
-      label: 'Healthcare',
-      image: 'static/images/qual/originals/healthcare_doc.png',
-      question: 'What can be inferred from the low values in this blood report?',
-      spans: [
-        {
-          text: 'MEAN CORPUSCULAR VOLUME, MCV of 72.0 fL',
-          bbox: {
-            phrase: [{ x:  8.0, y: 42.0, w: 55.0, h: 2.5 }], // TODO: fill real bbox values
-            line:   [{ x:  5.0, y: 41.5, w: 85.0, h: 3.5 }], // TODO: fill real bbox values
-            block:  [{ x:  5.0, y: 36.0, w: 90.0, h: 13.0 }] // TODO: fill real bbox values
-          }
-        },
-        {
-          text: 'Microcytic anemia',
-          bbox: {
-            phrase: [{ x: 10.0, y: 62.0, w: 28.0, h: 2.5 }], // TODO: fill real bbox values
-            line:   [{ x:  5.0, y: 61.5, w: 85.0, h: 3.5 }], // TODO: fill real bbox values
-            block:  [{ x:  5.0, y: 57.0, w: 90.0, h: 10.0 }] // TODO: fill real bbox values
-          }
-        }
-      ],
-      tokens: [
-        { type: 'text',       content: 'The report shows a low ' },
-        { type: 'span_start', spanIndex: 0 },
-        { type: 'text',       content: 'MEAN CORPUSCULAR VOLUME, MCV of 72.0 fL' },
-        { type: 'span_end' },
-        { type: 'ground',     spanIndex: 0 },
-        { type: 'text',       content: ' which indicates ' },
-        { type: 'span_start', spanIndex: 1 },
-        { type: 'text',       content: 'Microcytic anemia' },
-        { type: 'span_end' },
-        { type: 'ground',     spanIndex: 1 },
-        { type: 'text',       content: '.' },
       ]
     },
     {
