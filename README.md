@@ -1,12 +1,3 @@
-**GitHub Repo Description** (one-liner for the About field):
-
-> Project page for M3Grounder — mask-based multi-span & multi-granular grounding for Document QA. CVPR 2026.
-
----
-
-**README.md:**
-
-```markdown
 # M3Grounder — Project Page
 
 **[CVPR 2026]** Official project page for  
@@ -59,4 +50,4 @@ python -m http.server 8000
   year      = {2026}
 }
 ```
-```
+
