@@ -279,6 +279,47 @@
       .hero-logos img{height:36px;}
     }
   </style>
+  <style>
+    /* ── Interactive Demo (replaces static qual grid) ── */
+    .qual-demo-tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:32px;}
+    .qual-tab{background:transparent;border:1px solid var(--border);border-radius:var(--radius-pill);padding:7px 20px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s;}
+    .qual-tab:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+    .qual-tab.is-active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+    .qual-panel{display:grid;grid-template-columns:60fr 40fr;gap:28px;align-items:start;}
+
+    .image-panel{display:flex;flex-direction:column;gap:14px;}
+    .img-container{position:relative;width:100%;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border);background:var(--bg-1);}
+    .img-container img{width:100%;height:auto;display:block;}
+
+    .hl-div{position:absolute;pointer-events:none;border-radius:4px;clip-path:inset(0 100% 0 0);}
+    .hl-div.revealed{transition:left .3s ease,top .3s ease,width .3s ease,height .3s ease;}
+    @keyframes hlSweep{from{clip-path:inset(0 100% 0 0);}to{clip-path:inset(0 0% 0 0);}}
+    .hl-div.sweeping{animation:hlSweep .6s ease-out forwards;}
+
+    .gran-toggle{display:flex;gap:6px;justify-content:center;}
+    .gran-btn{background:transparent;border:1px solid var(--border);border-radius:var(--radius-pill);padding:5px 16px;font-size:12px;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s;}
+    .gran-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .gran-btn.is-active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+    .chat-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:24px;display:flex;flex-direction:column;gap:14px;min-height:300px;}
+    .q-bubble{align-self:flex-end;background:#f0f4ff;border-radius:12px 4px 12px 12px;padding:12px 16px;font-size:14px;line-height:1.65;color:var(--text-primary);max-width:90%;}
+    .chat-send-row{display:flex;justify-content:flex-end;}
+    .a-bubble{align-self:flex-start;background:#fff;border:1px solid var(--border);border-radius:4px 12px 12px 12px;padding:12px 16px;font-size:14px;line-height:1.75;color:var(--text-primary);max-width:90%;word-break:break-word;}
+    .answer-span{border-radius:3px;padding:1px 3px;}
+    @keyframes chipPulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.45);opacity:.65;}}
+    .ground-chip{display:inline-block;font-size:11px;vertical-align:middle;margin:0 2px;cursor:default;animation:chipPulse .5s ease 2;}
+    .legend-row{display:flex;flex-wrap:wrap;gap:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12.5px;color:var(--text-secondary);}
+    .legend-item{display:flex;align-items:center;gap:5px;}
+    .legend-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .reset-btn-wrap{display:flex;}
+
+    @media(max-width:768px){
+      .qual-panel{grid-template-columns:1fr;}
+      .image-panel{order:1;}
+      .chat-panel{order:2;}
+    }
+  </style>
 </head>
 <body>
 
@@ -561,34 +602,45 @@
   </div>
 </section>
 
-<!-- ═══════════ QUALITATIVE (dark) ═══════════ -->
+<!-- ═══════════ QUALITATIVE — INTERACTIVE DEMO ═══════════ -->
 <section id="qualitative">
   <div class="container">
     <div class="reveal sec-head dark">
-      <h2>Qualitative Results</h2>
-      <p>M3Grounder produces precise, hierarchical segmentation masks across diverse document types —
-      scanned documents, forms, charts, and curved-text banners.</p>
+      <h2>Interactive Demo</h2>
+      <p>Ask M3Grounder a question and watch it ground each answer span in real time.</p>
     </div>
-    <div class="qual-grid">
-      <div class="reveal">
-        <img src="static/images/qual/Examples-Finance.png" loading="lazy" alt="Finance qualitative example">
-        <p class="fig-cap dark mt16">Precise multi-span grounding in financial reports, linking narrative claims to both
-          textual evidence and tabular values.</p>
+
+    <div class="qual-demo-tabs reveal" id="qual-tabs">
+      <button class="qual-tab is-active" data-ex="finance">Finance</button>
+      <button class="qual-tab" data-ex="healthcare">Healthcare</button>
+      <button class="qual-tab" data-ex="legal">Legal</button>
+      <button class="qual-tab" data-ex="transcript">Transcript</button>
+    </div>
+
+    <div class="qual-panel reveal">
+      <!-- LEFT: image + granularity toggle -->
+      <div class="image-panel">
+        <div class="img-container" id="img-container">
+          <img id="qual-doc-img" src="" alt="Document image">
+        </div>
+        <div class="gran-toggle" id="gran-toggle">
+          <button class="gran-btn is-active" data-gran="phrase">Phrase</button>
+          <button class="gran-btn" data-gran="line">Line</button>
+          <button class="gran-btn" data-gran="block">Block</button>
+        </div>
       </div>
-      <div class="reveal">
-        <img src="static/images/qual/Examples-Healthcare.png" loading="lazy" alt="Healthcare qualitative example">
-        <p class="fig-cap dark mt16">Medical report reasoning with grounded evidence, connecting abnormal lab measurements
-          to diagnostic interpretation.</p>
-      </div>
-      <div class="reveal">
-        <img src="static/images/qual/Examples-Legal.png" loading="lazy" alt="Legal qualitative example">
-        <p class="fig-cap dark mt16">Dense multi-span grounding in legal documents, retrieving multiple clauses that jointly
-          satisfy a query.</p>
-      </div>
-      <div class="reveal">
-        <img src="static/images/qual/Examples-Transcript.png" loading="lazy" alt="Transcript qualitative example">
-        <p class="fig-cap dark mt16">Structured evidence grounding in academic records, extracting identifiers and
-          performance indicators across table rows.</p>
+
+      <!-- RIGHT: chat panel -->
+      <div class="chat-panel">
+        <div class="q-bubble" id="q-bubble"></div>
+        <div class="chat-send-row">
+          <button class="btn btn-primary" id="send-btn">Send →</button>
+        </div>
+        <div class="a-bubble" id="a-bubble" style="display:none;"></div>
+        <div class="legend-row" id="legend-row" style="display:none;"></div>
+        <div class="reset-btn-wrap" id="reset-btn-wrap" style="display:none;">
+          <button class="btn btn-ghost" id="reset-btn">↩ Reset</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1244,6 +1296,436 @@
     btn.classList.add('is-active');
     initGenDocChart(btn.dataset.bench);
   }));
+</script>
+
+<!-- ═══════════ INTERACTIVE DEMO SCRIPT ═══════════ -->
+<script>
+(function () {
+  'use strict';
+
+  const SPAN_COLORS = [
+    { fill: 'rgba(79,126,248,0.15)',  border: '#4f7ef8', text: '#2d5be3' },
+    { fill: 'rgba(255,107,53,0.15)', border: '#ff6b35', text: '#c94f1a' },
+    { fill: 'rgba(72,199,142,0.15)', border: '#48c78e', text: '#1e8a5e' },
+    { fill: 'rgba(245,166,35,0.15)', border: '#f5a623', text: '#b07d10' },
+    { fill: 'rgba(168,85,247,0.15)', border: '#a855f7', text: '#7c22d4' },
+  ];
+
+  const EXAMPLES = [
+    {
+      id: 'finance',
+      label: 'Finance',
+      image: 'static/images/qual/originals/finance_doc.png',
+      question: 'According to the document, what was the Customer Support renewal rate for the quarter ended June 30, 2019, and what was the Customer Support revenue in the Americas for 2019?',
+      spans: [
+        {
+          text: 'approximately 91%',
+          bbox: {
+            phrase: [{ x: 12.5, y: 34.2, w: 18.0, h: 2.1 }], // TODO: fill real bbox values
+            line:   [{ x:  5.0, y: 33.8, w: 85.0, h: 3.0 }], // TODO: fill real bbox values
+            block:  [{ x:  5.0, y: 28.0, w: 90.0, h: 12.0 }] // TODO: fill real bbox values
+          }
+        },
+        {
+          text: '$718,209',
+          bbox: {
+            phrase: [{ x: 22.0, y: 51.3, w: 10.0, h: 2.0 }], // TODO: fill real bbox values
+            line:   [{ x:  5.0, y: 50.9, w: 85.0, h: 2.8 }], // TODO: fill real bbox values
+            block:  [{ x:  5.0, y: 44.0, w: 90.0, h: 14.0 }] // TODO: fill real bbox values
+          }
+        }
+      ],
+      tokens: [
+        { type: 'text',       content: 'The document reports a Customer Support renewal rate of ' },
+        { type: 'span_start', spanIndex: 0 },
+        { type: 'text',       content: 'approximately 91%' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 0 },
+        { type: 'text',       content: ' and an Americas Customer Support revenue of ' },
+        { type: 'span_start', spanIndex: 1 },
+        { type: 'text',       content: '$718,209' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 1 },
+        { type: 'text',       content: ' for 2019.' },
+      ]
+    },
+    {
+      id: 'healthcare',
+      label: 'Healthcare',
+      image: 'static/images/qual/originals/healthcare_doc.png',
+      question: 'What can be inferred from the low values in this blood report?',
+      spans: [
+        {
+          text: 'MEAN CORPUSCULAR VOLUME, MCV of 72.0 fL',
+          bbox: {
+            phrase: [{ x:  8.0, y: 42.0, w: 55.0, h: 2.5 }], // TODO: fill real bbox values
+            line:   [{ x:  5.0, y: 41.5, w: 85.0, h: 3.5 }], // TODO: fill real bbox values
+            block:  [{ x:  5.0, y: 36.0, w: 90.0, h: 13.0 }] // TODO: fill real bbox values
+          }
+        },
+        {
+          text: 'Microcytic anemia',
+          bbox: {
+            phrase: [{ x: 10.0, y: 62.0, w: 28.0, h: 2.5 }], // TODO: fill real bbox values
+            line:   [{ x:  5.0, y: 61.5, w: 85.0, h: 3.5 }], // TODO: fill real bbox values
+            block:  [{ x:  5.0, y: 57.0, w: 90.0, h: 10.0 }] // TODO: fill real bbox values
+          }
+        }
+      ],
+      tokens: [
+        { type: 'text',       content: 'The report shows a low ' },
+        { type: 'span_start', spanIndex: 0 },
+        { type: 'text',       content: 'MEAN CORPUSCULAR VOLUME, MCV of 72.0 fL' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 0 },
+        { type: 'text',       content: ' which indicates ' },
+        { type: 'span_start', spanIndex: 1 },
+        { type: 'text',       content: 'Microcytic anemia' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 1 },
+        { type: 'text',       content: '.' },
+      ]
+    },
+    {
+      id: 'legal',
+      label: 'Legal',
+      image: 'static/images/qual/originals/legal_doc.png',
+      question: 'Which types of organizations may be considered as the Auditee according to this NDA?',
+      spans: [
+        {
+          text: 'Central Government Ministry/ Departments #/State Government Departments DLSP/DL Repository',
+          bbox: {
+            phrase: [
+              { x: 24.95, y: 14.09, w: 67.82, h: 2.24 },
+              { x: 9.23,  y: 16.34, w: 32.91, h: 2.37 }
+            ],
+            line: [
+              { x: 8.86, y: 14.03, w: 84.82, h: 2.24 },
+              { x: 8.68, y: 16.27, w: 34.55, h: 2.37 }
+            ],
+            block: [
+              { x: 8.68, y: 14.03, w: 84.09, h: 4.55 }
+            ]
+          }
+        },
+        {
+          text: 'Autonomous Societies/ Not-for-profit companies/ Public sector Undertakings/ Private sector DLSP/DL Repository',
+          bbox: {
+            phrase: [
+              { x: 25.5, y: 34.59, w: 67,    h: 2.31 },
+              { x: 9.05, y: 36.84, w: 47.91, h: 2.5 }
+            ],
+            line: [
+              { x: 9.14, y: 34.4,  w: 83.45, h: 2.18 },
+              { x: 9.05, y: 36.64, w: 47.91, h: 2.56 }
+            ],
+            block: [
+              { x: 9.14, y: 34.53, w: 84.45, h: 4.55 }
+            ]
+          }
+        }
+      ],
+      tokens: [
+        { type: 'text',       content: 'The NDA specifies that the Auditee may belong to ' },
+        { type: 'span_start', spanIndex: 0 },
+        { type: 'text',       content: 'Central Government Ministry/ Departments #/State Government Departments DLSP/DL Repository' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 0 },
+        { type: 'text',       content: ' as well as ' },
+        { type: 'span_start', spanIndex: 1 },
+        { type: 'text',       content: 'Autonomous Societies/ Not-for-profit companies/ Public sector Undertakings/ Private sector DLSP/DL Repository' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 1 },
+        { type: 'text',       content: '.' },
+      ]
+    },
+    {
+      id: 'transcript',
+      label: 'Transcript',
+      image: 'static/images/qual/originals/transcript_doc.png',
+      question: "What is the student's GPA and which course had the lowest grade?",
+      spans: [
+        {
+          text: '3.74',
+          bbox: {
+            phrase: [{ x: 65.0, y: 22.0, w: 12.0, h: 2.0 }], // TODO: fill real bbox values
+            line:   [{ x:  5.0, y: 21.5, w: 85.0, h: 3.0 }], // TODO: fill real bbox values
+            block:  [{ x:  5.0, y: 18.0, w: 90.0, h: 10.0 }] // TODO: fill real bbox values
+          }
+        },
+        {
+          text: 'Introduction to Algorithms — B+',
+          bbox: {
+            phrase: [{ x:  8.0, y: 55.0, w: 55.0, h: 2.5 }], // TODO: fill real bbox values
+            line:   [{ x:  5.0, y: 54.5, w: 85.0, h: 3.5 }], // TODO: fill real bbox values
+            block:  [{ x:  5.0, y: 50.0, w: 90.0, h: 12.0 }] // TODO: fill real bbox values
+          }
+        }
+      ],
+      tokens: [
+        { type: 'text',       content: "The student's GPA is " },
+        { type: 'span_start', spanIndex: 0 },
+        { type: 'text',       content: '3.74' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 0 },
+        { type: 'text',       content: ' and the course with the lowest grade was ' },
+        { type: 'span_start', spanIndex: 1 },
+        { type: 'text',       content: 'Introduction to Algorithms — B+' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 1 },
+        { type: 'text',       content: '.' },
+      ]
+    },
+  ];
+
+  /* ── State ── */
+  let activeExample  = EXAMPLES[0];
+  let activeGran     = 'phrase';
+  let streamInterval = null;
+  let highlightDivs  = [];
+  let revealedSet    = new Set();
+
+  /* ── DOM refs ── */
+  const imgEl         = document.getElementById('qual-doc-img');
+  const imgContainer  = document.getElementById('img-container');
+  const qBubble       = document.getElementById('q-bubble');
+  const aBubble       = document.getElementById('a-bubble');
+  const sendBtn       = document.getElementById('send-btn');
+  const resetBtnWrap  = document.getElementById('reset-btn-wrap');
+  const resetBtn      = document.getElementById('reset-btn');
+  const legendRow     = document.getElementById('legend-row');
+
+  /* ── Load example ── */
+  function loadExample(ex) {
+    if (streamInterval) { clearInterval(streamInterval); streamInterval = null; }
+    activeExample = ex;
+    activeGran    = 'phrase';
+    revealedSet   = new Set();
+
+    imgEl.src             = ex.image;
+    qBubble.textContent   = ex.question;
+    aBubble.innerHTML     = '';
+    aBubble.style.display = 'none';
+    legendRow.innerHTML   = '';
+    legendRow.style.display    = 'none';
+    resetBtnWrap.style.display = 'none';
+    sendBtn.disabled           = false;
+    sendBtn.style.opacity      = '';
+
+    document.querySelectorAll('.gran-btn').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.gran === 'phrase');
+    });
+
+    /* Recreate highlight divs */
+    highlightDivs.forEach(divArr => divArr.forEach(d => d.remove()));
+    highlightDivs = [];
+    ex.spans.forEach((span, i) => {
+      const c = SPAN_COLORS[i];
+      const divArr = span.bbox.phrase.map(b => {
+        const div = document.createElement('div');
+        div.className        = 'hl-div';
+        div.style.background = c.fill;
+        div.style.border     = '2px solid ' + c.border;
+        div.style.left   = b.x + '%';
+        div.style.top    = b.y + '%';
+        div.style.width  = b.w + '%';
+        div.style.height = b.h + '%';
+        imgContainer.appendChild(div);
+        return div;
+      });
+      highlightDivs.push(divArr);
+    });
+  }
+
+  /* ── Reveal a highlight with sweep animation ── */
+  function revealHighlight(spanIndex) {
+    const divArr = highlightDivs[spanIndex];
+    if (!divArr) return;
+    revealedSet.add(spanIndex);
+    divArr.forEach(div => {
+      div.classList.add('revealed');
+      div.classList.remove('sweeping');
+    });
+    // Single reflow so all rects start their animation at the same time
+    divArr[0] && void divArr[0].offsetWidth;
+    divArr.forEach(div => div.classList.add('sweeping'));
+  }
+
+  /* ── Granularity change: fade out old rects, swap to new granularity's rects ── */
+  function setGranularity(gran) {
+    activeGran = gran;
+    revealedSet.forEach(i => {
+      const oldDivs = highlightDivs[i];
+      oldDivs.forEach(div => {
+        div.style.transition = 'opacity 150ms';
+        div.style.opacity    = '0';
+      });
+      const span = activeExample.spans[i];
+      const c    = SPAN_COLORS[i];
+      setTimeout(() => {
+        oldDivs.forEach(div => div.remove());
+        const newDivs = span.bbox[gran].map(b => {
+          const div = document.createElement('div');
+          div.className        = 'hl-div revealed';
+          div.style.background = c.fill;
+          div.style.border     = '2px solid ' + c.border;
+          div.style.left   = b.x + '%';
+          div.style.top    = b.y + '%';
+          div.style.width  = b.w + '%';
+          div.style.height = b.h + '%';
+          div.style.clipPath   = 'inset(0 0% 0 0)'; // already revealed — override default clip
+          div.style.opacity    = '0';
+          div.style.transition = 'opacity 150ms';
+          imgContainer.appendChild(div);
+          return div;
+        });
+        requestAnimationFrame(() => newDivs.forEach(div => { div.style.opacity = '1'; }));
+        highlightDivs[i] = newDivs;
+      }, 150);
+    });
+  }
+
+  /* ── Flatten token stream → render events ── */
+  function flattenTokens(tokens) {
+    const events = [];
+    let inSpan = null;
+    for (const tok of tokens) {
+      if (tok.type === 'text') {
+        for (const ch of tok.content) {
+          events.push({ type: 'char', char: ch, spanIndex: inSpan });
+        }
+      } else if (tok.type === 'span_start') {
+        inSpan = tok.spanIndex;
+      } else if (tok.type === 'span_end') {
+        inSpan = null;
+        events.push({ type: 'span_end' });
+      } else if (tok.type === 'ground') {
+        events.push({ type: 'ground', spanIndex: tok.spanIndex });
+      }
+    }
+    return events;
+  }
+
+  /* ── Show legend after streaming completes ── */
+  function showLegend() {
+    legendRow.innerHTML = '';
+    activeExample.spans.forEach((span, i) => {
+      const c    = SPAN_COLORS[i];
+      const item = document.createElement('span');
+      item.className = 'legend-item';
+      const dot  = document.createElement('span');
+      dot.className  = 'legend-dot';
+      dot.style.background = c.border;
+      const label = document.createElement('span');
+      label.style.cssText = 'color:' + c.text + ';font-weight:600;';
+      label.textContent = 'Span ' + (i + 1);
+      const txt = document.createTextNode(' ' + span.text);
+      item.appendChild(dot);
+      item.appendChild(label);
+      item.appendChild(txt);
+      legendRow.appendChild(item);
+    });
+    legendRow.style.display    = 'flex';
+    resetBtnWrap.style.display = '';
+  }
+
+  /* ── Streaming ── */
+  function startStreaming() {
+    sendBtn.disabled      = true;
+    sendBtn.style.opacity = '0.45';
+    aBubble.innerHTML     = '';
+    aBubble.style.display = '';
+
+    const events = flattenTokens(activeExample.tokens);
+    let idx             = 0;
+    let currentSpanEl   = null;
+    let currentSpanIdx  = null;
+    let plainEl         = null;
+
+    streamInterval = setInterval(function () {
+      if (idx >= events.length) {
+        clearInterval(streamInterval);
+        streamInterval = null;
+        showLegend();
+        return;
+      }
+
+      const ev = events[idx++];
+
+      if (ev.type === 'char') {
+        if (ev.spanIndex !== null) {
+          /* Inside a colored span */
+          if (!currentSpanEl || currentSpanIdx !== ev.spanIndex) {
+            currentSpanEl  = document.createElement('span');
+            currentSpanEl.className = 'answer-span';
+            const c = SPAN_COLORS[ev.spanIndex];
+            currentSpanEl.style.cssText =
+              'background:' + c.fill + ';color:' + c.text + ';border-radius:3px;padding:0 3px;';
+            aBubble.appendChild(currentSpanEl);
+            currentSpanIdx = ev.spanIndex;
+            plainEl        = null;
+          }
+          currentSpanEl.appendChild(document.createTextNode(ev.char));
+        } else {
+          /* Plain text */
+          if (currentSpanIdx !== null) {
+            currentSpanEl  = null;
+            currentSpanIdx = null;
+            plainEl        = null;
+          }
+          if (!plainEl) {
+            plainEl = document.createElement('span');
+            aBubble.appendChild(plainEl);
+          }
+          plainEl.appendChild(document.createTextNode(ev.char));
+        }
+
+      } else if (ev.type === 'span_end') {
+        currentSpanEl  = null;
+        currentSpanIdx = null;
+        plainEl        = null;
+
+      } else if (ev.type === 'ground') {
+        /* Insert pulsing chip + trigger highlight */
+        const chip = document.createElement('span');
+        chip.className        = 'ground-chip';
+        chip.style.color      = SPAN_COLORS[ev.spanIndex].border;
+        chip.textContent      = '[GROUND]';
+        aBubble.appendChild(chip);
+        plainEl        = null;
+        currentSpanEl  = null;
+        currentSpanIdx = null;
+        revealHighlight(ev.spanIndex);
+      }
+    }, 28);
+  }
+
+  /* ── Wire up tabs ── */
+  document.querySelectorAll('.qual-tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.qual-tab').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      const ex = EXAMPLES.find(e => e.id === btn.dataset.ex);
+      if (ex) loadExample(ex);
+    });
+  });
+
+  /* ── Wire up granularity toggle ── */
+  document.querySelectorAll('.gran-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.gran-btn').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      setGranularity(btn.dataset.gran);
+    });
+  });
+
+  /* ── Send / Reset ── */
+  sendBtn.addEventListener('click', function () { startStreaming(); });
+  resetBtn.addEventListener('click', function () { loadExample(activeExample); });
+
+  /* ── Initial load ── */
+  loadExample(EXAMPLES[0]);
+})();
 </script>
 
 </body>
