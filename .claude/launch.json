@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "m3grounder",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "${PORT}"],
+      "port": 8744,
+      "autoPort": true
+    }
+  ]
+}

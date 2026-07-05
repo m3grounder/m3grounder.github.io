@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>M3Grounder — Interactive Demo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+<style>
+/* ══════════════════════════════════════════════
+   DESIGN TOKENS (M3Grounder palette)
+══════════════════════════════════════════════ */
+:root {
+  --accent:     #4f7ef8;
+  --accent-dim: rgba(79,126,248,0.12);
+  --accent-200: rgba(79,126,248,0.25);
+  --t1: #111111;
+  --t2: #52525e;
+  --t3: #8a8a96;
+  --bg:  #ffffff;
+  --bg2: #f5f5f7;
+  --bg3: #efeff3;
+  --b0:  rgba(0,0,0,0.12);
+  --b1:  rgba(0,0,0,0.09);
+  --s1: 0 2px 8px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --s2: 0 8px 24px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+  --ra: 8px; --rb: 14px; --rc: 20px;
+  --e1: cubic-bezier(0.25,0.46,0.45,0.94);
+  --e2: cubic-bezier(0.16,1,0.3,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0a0a0a;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  overflow: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ══════════════════════════════════════════════
+   FIXED 1920×1080 RECORDING FRAME
+══════════════════════════════════════════════ */
+#recordFrame {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg);
+  border-radius: var(--rc);
+  box-shadow: 0 0 0 1px var(--b1), var(--s2);
+  display: flex;
+  flex-direction: column;
+  transform-origin: top center;
+}
+
+/* ══════════════════════════════════════════════
+   TOP BAR — 72px
+══════════════════════════════════════════════ */
+#topBar {
+  height: 72px;
+  min-height: 72px;
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--b1);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+
+/* Brand pill on the far left */
+#brandPill {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  padding: 0 1.5rem 0 1.8rem;
+  border-right: 1px solid var(--b1);
+  flex-shrink: 0;
+}
+#brandPill .brand-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -.02em;
+}
+#brandPill .brand-badge {
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-200);
+  border-radius: 100px;
+  padding: 3px 10px;
+}
+
+/* Tabs fill available space */
+.qd-tabs {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background: transparent;
+}
+.qd-tab {
+  padding: 0 1.8rem;
+  height: 100%;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--t2);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: color .18s, border-color .18s, background .18s;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.qd-tab:hover { color: var(--t1); background: var(--bg); }
+.qd-tab.on { color: var(--accent); border-bottom-color: var(--accent); background: var(--bg); }
+
+/* Granularity toggle — right side of top bar */
+#granControls {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: 0 1.5rem;
+  border-left: 1px solid var(--b1);
+  flex-shrink: 0;
+}
+#granControls .gran-label {
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--t3);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.gran-btn {
+  background: transparent;
+  border: 1.5px solid var(--b0);
+  border-radius: 100px;
+  padding: .38rem 1.1rem;
+  font-size: .92rem;
+  font-weight: 600;
+  color: var(--t2);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .18s;
+  white-space: nowrap;
+}
+.gran-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.gran-btn.is-active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ══════════════════════════════════════════════
+   CONTENT AREA — 1008px (1080 - 72)
+══════════════════════════════════════════════ */
+#demoPanel {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 57fr 43fr;
+  height: 1008px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* LEFT — image panel */
+.qd-img-panel {
+  border-right: 1px solid var(--b1);
+  background: var(--bg2);
+  padding: 2rem 2.25rem;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qd-img-wrap {
+  position: relative;
+  width: 100%;
+}
+.qd-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--ra);
+  border: 1px solid var(--b1);
+}
+
+/* Highlight overlays — positioned absolutely over the image */
+.hl-div {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 4px;
+  clip-path: inset(0 100% 0 0);
+}
+.hl-div.revealed {
+  transition: left .3s ease, top .3s ease, width .3s ease, height .3s ease;
+}
+@keyframes hlSweep { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0% 0 0); } }
+.hl-div.sweeping { animation: hlSweep .6s ease-out forwards; }
+
+/* RIGHT — chat panel */
+.qd-chat-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 2.25rem;
+  height: 100%;
+  overflow: hidden;
+  gap: 0;
+}
+
+/* Question bubble */
+.qd-question-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .9rem;
+  margin-bottom: 1.4rem;
+  flex-shrink: 0;
+}
+.qd-bubble {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 18px 18px 5px 18px;
+  padding: 1.05rem 1.55rem;
+  font-size: 1.08rem;
+  line-height: 1.6;
+  max-width: 94%;
+  text-align: left;
+}
+.qd-send-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: .58rem 1.65rem;
+  font-size: 1.02rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  transition: opacity .2s, transform .2s var(--e1);
+}
+.qd-send-btn:hover:not(:disabled) { transform: translateY(-1px); opacity: .88; }
+.qd-send-btn:disabled { opacity: .42; cursor: not-allowed; }
+
+/* Answer area — scrolls internally */
+.qd-answer-area {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.qd-answer-area::-webkit-scrollbar { width: 6px; }
+.qd-answer-area::-webkit-scrollbar-thumb { background: var(--b0); border-radius: 3px; }
+
+/* Answer bubble */
+.qd-a-bubble {
+  align-self: flex-start;
+  background: var(--bg);
+  border: 1px solid var(--b1);
+  border-radius: 5px 18px 18px 18px;
+  padding: 1.05rem 1.45rem;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--t1);
+  max-width: 96%;
+  word-break: break-word;
+  box-shadow: var(--s1);
+}
+
+/* Span highlight in answer */
+.answer-span {
+  border-radius: 3px;
+  padding: 0 4px;
+}
+
+/* [GROUND] chip */
+@keyframes chipPulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.45);opacity:.65;} }
+.ground-chip {
+  display: inline-block;
+  font-size: .78em;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  vertical-align: middle;
+  margin: 0 3px;
+  cursor: default;
+  animation: chipPulse .5s ease 2;
+}
+
+/* Legend */
+.qd-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .85rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--b1);
+  font-size: .95rem;
+  color: var(--t2);
+  flex-shrink: 0;
+}
+.legend-item { display: flex; align-items: center; gap: .45rem; }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+/* Reset row */
+.qd-reset-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.1rem;
+  flex-shrink: 0;
+}
+.qd-reset-btn {
+  background: var(--bg2);
+  color: var(--t2);
+  border: 1.5px solid var(--b0);
+  border-radius: 100px;
+  padding: .5rem 1.45rem;
+  font-size: .98rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  transition: color .18s, border-color .18s, background .18s;
+}
+.qd-reset-btn:hover { color: var(--accent); border-color: var(--accent-200); background: var(--accent-dim); }
+</style>
+</head>
+<body>
+
+<div id="recordFrame">
+
+  <!-- TOP BAR -->
+  <div id="topBar">
+
+    <!-- Brand -->
+    <div id="brandPill">
+      <span class="brand-name">M3Grounder</span>
+      <span class="brand-badge">CVPR 2026</span>
+    </div>
+
+    <!-- Example tabs -->
+    <div class="qd-tabs" id="qdTabs">
+      <button class="qd-tab on" data-ex="finance">
+        <i class="ti ti-chart-bar"></i> Finance
+      </button>
+      <button class="qd-tab" data-ex="legal">
+        <i class="ti ti-scale"></i> Legal
+      </button>
+      <button class="qd-tab" data-ex="transcript">
+        <i class="ti ti-school"></i> Transcript
+      </button>
+    </div>
+
+    <!-- Granularity toggle -->
+    <div id="granControls">
+      <span class="gran-label">Granularity</span>
+      <button class="gran-btn is-active" data-gran="phrase">Phrase</button>
+      <button class="gran-btn" data-gran="line">Line</button>
+      <button class="gran-btn" data-gran="block">Block</button>
+    </div>
+
+  </div><!-- /topBar -->
+
+  <!-- DEMO CONTENT -->
+  <div id="demoPanel">
+
+    <!-- LEFT: document image with highlight overlays -->
+    <div class="qd-img-panel">
+      <div class="qd-img-wrap" id="imgWrap">
+        <img class="qd-img" id="qdImg" src="" alt="Document image">
+      </div>
+    </div>
+
+    <!-- RIGHT: chat panel -->
+    <div class="qd-chat-panel">
+      <div class="qd-question-row">
+        <div class="qd-bubble" id="qdBubble"></div>
+        <button class="qd-send-btn" id="qdSendBtn">
+          <i class="ti ti-send"></i>&ensp;Send
+        </button>
+      </div>
+
+      <div class="qd-answer-area" id="qdAnswerArea">
+        <div class="qd-a-bubble" id="qdABubble" style="display:none;"></div>
+        <div class="qd-legend" id="qdLegend" style="display:none;"></div>
+      </div>
+
+      <div class="qd-reset-row" id="qdResetRow" style="display:none;">
+        <button class="qd-reset-btn" id="qdResetBtn">
+          <i class="ti ti-refresh"></i>&ensp;Reset
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /demoPanel -->
+
+</div><!-- /recordFrame -->
+
+<!-- Scale 1920×1080 frame to fit viewport -->
+<script>
+(function scaleFrame() {
+  const FRAME_W = 1920, FRAME_H = 1080;
+  const frame = document.getElementById('recordFrame');
+  function fit() {
+    const scaleX = (window.innerWidth  - 40) / FRAME_W;
+    const scaleY = (window.innerHeight - 40) / FRAME_H;
+    const s = Math.min(scaleX, scaleY, 1);
+    frame.style.transform = `scale(${s})`;
+    document.body.style.minHeight = (FRAME_H * s + 40) + 'px';
+  }
+  window.addEventListener('resize', fit);
+  document.addEventListener('DOMContentLoaded', fit);
+  if (document.readyState !== 'loading') fit();
+})();
+</script>
+
+<!-- ════════════════════════════════════════════
+     INTERACTIVE DEMO
+════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  const SPAN_COLORS = [
+    { fill: 'rgba(79,126,248,0.18)',  border: '#4f7ef8', text: '#2d5be3' },
+    { fill: 'rgba(255,107,53,0.18)',  border: '#ff6b35', text: '#c94f1a' },
+    { fill: 'rgba(72,199,142,0.18)',  border: '#48c78e', text: '#1e8a5e' },
+    { fill: 'rgba(245,166,35,0.18)',  border: '#f5a623', text: '#b07d10' },
+    { fill: 'rgba(168,85,247,0.18)',  border: '#a855f7', text: '#7c22d4' },
+  ];
+
+  const EXAMPLES = [
+    {
+      id: 'finance',
+      label: 'Finance',
+      image: 'static/images/qual/originals/finance_doc.png',
+      question: 'According to the document, what was the Customer Support renewal rate for the quarter ended June 30, 2019, and what was the Customer Support revenue in the Americas for 2019?',
+      spans: [
+        {
+          text: 'approximately 91%',
+          bbox: {
+            phrase: [{ x: 33.86, y: 32.52, w: 13.64, h: 1.61 }],
+            line:   [{ x:  7.86, y: 32.52, w: 83.36, h: 1.88 }],
+            block:  [{ x:  7.77, y: 20.45, w: 84.36, h: 15.14 }]
+          }
+        },
+        {
+          text: '$718,209',
+          bbox: {
+            phrase: [{ x: 41.68, y: 49.06, w:  9.45, h: 1.81 }],
+            line:   [{ x:  7.95, y: 48.92, w: 83.27, h: 2.09 }],
+            block:  [{ x:  7.59, y: 40.96, w: 84.36, h: 20.66 }]
+          }
+        }
+      ],
+      tokens: [
+        { type: 'text',       content: 'The document reports a Customer Support renewal rate of ' },
+        { type: 'span_start', spanIndex: 0 },
+        { type: 'text',       content: 'approximately 91%' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 0 },
+        { type: 'text',       content: ' and an Americas Customer Support revenue of ' },
+        { type: 'span_start', spanIndex: 1 },
+        { type: 'text',       content: '$718,209' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 1 },
+        { type: 'text',       content: ' for 2019.' },
+      ]
+    },
+    {
+      id: 'legal',
+      label: 'Legal',
+      image: 'static/images/qual/originals/legal_doc.png',
+      question: 'Which types of organizations may be considered as the Auditee according to this NDA?',
+      spans: [
+        {
+          text: 'Central Government Ministry/ Departments / State Government Departments',
+          bbox: {
+            phrase: [
+              { x: 24.95, y: 14.09, w: 67.82, h: 2.24 },
+              { x:  9.23, y: 16.34, w: 32.91, h: 2.37 }
+            ],
+            line: [
+              { x: 8.86, y: 14.03, w: 84.82, h: 2.24 },
+              { x: 8.68, y: 16.27, w: 34.55, h: 2.37 }
+            ],
+            block: [
+              { x: 8.68, y: 14.03, w: 84.09, h: 4.55 }
+            ]
+          }
+        },
+        {
+          text: 'Autonomous Societies/ Not-for-profit companies/ Public sector Undertakings/ Private sector',
+          bbox: {
+            phrase: [
+              { x: 25.5,  y: 34.59, w: 67,    h: 2.31 },
+              { x:  9.05, y: 36.84, w: 47.91, h: 2.5  }
+            ],
+            line: [
+              { x: 9.14, y: 34.4,  w: 83.45, h: 2.18 },
+              { x: 9.05, y: 36.64, w: 47.91, h: 2.56 }
+            ],
+            block: [
+              { x: 9.14, y: 34.53, w: 84.45, h: 4.55 }
+            ]
+          }
+        }
+      ],
+      tokens: [
+        { type: 'text',       content: 'The NDA specifies that the Auditee may belong to ' },
+        { type: 'span_start', spanIndex: 0 },
+        { type: 'text',       content: 'Central Government Ministry/ Departments / State Government Departments' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 0 },
+        { type: 'text',       content: ' as well as ' },
+        { type: 'span_start', spanIndex: 1 },
+        { type: 'text',       content: 'Autonomous Societies/ Not-for-profit companies/ Public sector Undertakings/ Private sector' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 1 },
+        { type: 'text',       content: '.' },
+      ]
+    },
+    {
+      id: 'transcript',
+      label: 'Transcript',
+      image: 'static/images/qual/originals/transcript_doc.png',
+      question: "What is the student's ID number and what grade did Data Analytics receive?",
+      spans: [
+        {
+          text: '3123456',
+          bbox: {
+            phrase: [{ x: 22.95, y: 13.90, w:  7.73, h: 1.67 }],
+            line:   [{ x:  7.23, y: 13.90, w: 23.73, h: 1.80 }],
+            block:  [{ x:  7.32, y: 13.77, w: 23.27, h: 1.99 }]
+          }
+        },
+        {
+          text: 'HD',
+          bbox: {
+            phrase: [{ x: 85.50, y: 27.61, w:  3.45, h: 1.48 }],
+            line:   [{ x: 15.23, y: 27.48, w: 73.73, h: 1.80 }],
+            block:  [{ x:  6.95, y: 22.33, w: 84.36, h: 15.38 }]
+          }
+        }
+      ],
+      tokens: [
+        { type: 'text',       content: "The student ID is " },
+        { type: 'span_start', spanIndex: 0 },
+        { type: 'text',       content: '3123456' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 0 },
+        { type: 'text',       content: ' and the grade for Data Analytics is ' },
+        { type: 'span_start', spanIndex: 1 },
+        { type: 'text',       content: 'HD' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 1 },
+        { type: 'text',       content: '.' },
+      ]
+    },
+  ];
+
+  /* ── State ── */
+  let activeExample  = EXAMPLES[0];
+  let activeGran     = 'phrase';
+  let streamInterval = null;
+  let highlightDivs  = [];
+  let revealedSet    = new Set();
+
+  /* ── DOM refs ── */
+  const imgEl        = document.getElementById('qdImg');
+  const imgWrap      = document.getElementById('imgWrap');
+  const qBubble      = document.getElementById('qdBubble');
+  const aBubble      = document.getElementById('qdABubble');
+  const sendBtn      = document.getElementById('qdSendBtn');
+  const resetRow     = document.getElementById('qdResetRow');
+  const resetBtn     = document.getElementById('qdResetBtn');
+  const legendEl     = document.getElementById('qdLegend');
+
+  /* ── Load example ── */
+  function loadExample(ex) {
+    if (streamInterval) { clearInterval(streamInterval); streamInterval = null; }
+    activeExample = ex;
+    activeGran    = 'phrase';
+    revealedSet   = new Set();
+
+    imgEl.src             = ex.image;
+    qBubble.textContent   = ex.question;
+    aBubble.innerHTML     = '';
+    aBubble.style.display = 'none';
+    legendEl.innerHTML    = '';
+    legendEl.style.display    = 'none';
+    resetRow.style.display    = 'none';
+    sendBtn.disabled          = false;
+    sendBtn.style.opacity     = '';
+
+    /* Reset granularity buttons */
+    document.querySelectorAll('.gran-btn').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.gran === 'phrase');
+    });
+
+    /* Remove old highlight divs */
+    highlightDivs.forEach(arr => arr.forEach(d => d.remove()));
+    highlightDivs = [];
+
+    /* Create new highlight divs with direct % positioning (like index.html) */
+    ex.spans.forEach((span, i) => {
+      const c = SPAN_COLORS[i];
+      const arr = span.bbox.phrase.map(b => {
+        const div = document.createElement('div');
+        div.className        = 'hl-div';
+        div.style.background = c.fill;
+        div.style.border     = '2.5px solid ' + c.border;
+        div.style.left       = b.x + '%';
+        div.style.top        = b.y + '%';
+        div.style.width      = b.w + '%';
+        div.style.height     = b.h + '%';
+        imgWrap.appendChild(div);
+        return div;
+      });
+      highlightDivs.push(arr);
+    });
+  }
+
+  /* ── Reveal a highlight with sweep animation ── */
+  function revealHighlight(spanIndex) {
+    const divArr = highlightDivs[spanIndex];
+    if (!divArr) return;
+    revealedSet.add(spanIndex);
+    divArr.forEach(div => {
+      div.classList.add('revealed');
+      div.classList.remove('sweeping');
+    });
+    divArr[0] && void divArr[0].offsetWidth;
+    divArr.forEach(div => div.classList.add('sweeping'));
+  }
+
+  /* ── Granularity change ── */
+  function setGranularity(gran) {
+    activeGran = gran;
+    revealedSet.forEach(i => {
+      const oldDivs = highlightDivs[i];
+      oldDivs.forEach(div => {
+        div.style.transition = 'opacity 150ms';
+        div.style.opacity    = '0';
+      });
+      const span = activeExample.spans[i];
+      const c    = SPAN_COLORS[i];
+      setTimeout(() => {
+        oldDivs.forEach(div => div.remove());
+        const newDivs = span.bbox[gran].map(b => {
+          const div = document.createElement('div');
+          div.className        = 'hl-div revealed';
+          div.style.background = c.fill;
+          div.style.border     = '2.5px solid ' + c.border;
+          div.style.left       = b.x + '%';
+          div.style.top        = b.y + '%';
+          div.style.width      = b.w + '%';
+          div.style.height     = b.h + '%';
+          div.style.clipPath   = 'inset(0 0% 0 0)';
+          div.style.opacity    = '0';
+          div.style.transition = 'opacity 150ms';
+          imgWrap.appendChild(div);
+          return div;
+        });
+        requestAnimationFrame(() => newDivs.forEach(div => { div.style.opacity = '1'; }));
+        highlightDivs[i] = newDivs;
+      }, 150);
+    });
+  }
+
+  /* ── Build streaming event list ── */
+  function flattenTokens(tokens) {
+    const events = [];
+    let inSpan = null;
+    for (const tok of tokens) {
+      if (tok.type === 'text') {
+        for (const ch of tok.content) {
+          events.push({ type: 'char', char: ch, spanIndex: inSpan });
+        }
+      } else if (tok.type === 'span_start') {
+        inSpan = tok.spanIndex;
+      } else if (tok.type === 'span_end') {
+        inSpan = null;
+        events.push({ type: 'span_end' });
+      } else if (tok.type === 'ground') {
+        events.push({ type: 'ground', spanIndex: tok.spanIndex });
+      }
+    }
+    return events;
+  }
+
+  /* ── Show legend ── */
+  function showLegend() {
+    legendEl.innerHTML = '';
+    activeExample.spans.forEach((span, i) => {
+      const c    = SPAN_COLORS[i];
+      const item = document.createElement('span');
+      item.className = 'legend-item';
+      const dot  = document.createElement('span');
+      dot.className  = 'legend-dot';
+      dot.style.background = c.border;
+      const label = document.createElement('span');
+      label.style.cssText = 'color:' + c.text + ';font-weight:700;';
+      label.textContent = 'Span ' + (i + 1);
+      const txt = document.createTextNode(' ' + span.text);
+      item.appendChild(dot);
+      item.appendChild(label);
+      item.appendChild(txt);
+      legendEl.appendChild(item);
+    });
+    legendEl.style.display    = 'flex';
+    resetRow.style.display    = 'flex';
+  }
+
+  /* ── Streaming ── */
+  function startStreaming() {
+    sendBtn.disabled      = true;
+    sendBtn.style.opacity = '0.42';
+    aBubble.innerHTML     = '';
+    aBubble.style.display = '';
+
+    const events = flattenTokens(activeExample.tokens);
+    let idx            = 0;
+    let currentSpanEl  = null;
+    let currentSpanIdx = null;
+    let plainEl        = null;
+
+    streamInterval = setInterval(function () {
+      if (idx >= events.length) {
+        clearInterval(streamInterval);
+        streamInterval = null;
+        showLegend();
+        return;
+      }
+
+      const ev = events[idx++];
+
+      if (ev.type === 'char') {
+        if (ev.spanIndex !== null) {
+          if (!currentSpanEl || currentSpanIdx !== ev.spanIndex) {
+            currentSpanEl  = document.createElement('span');
+            currentSpanEl.className = 'answer-span';
+            const c = SPAN_COLORS[ev.spanIndex];
+            currentSpanEl.style.cssText =
+              'background:' + c.fill + ';color:' + c.text + ';border-radius:3px;padding:0 4px;';
+            aBubble.appendChild(currentSpanEl);
+            currentSpanIdx = ev.spanIndex;
+            plainEl        = null;
+          }
+          currentSpanEl.appendChild(document.createTextNode(ev.char));
+        } else {
+          if (currentSpanIdx !== null) {
+            currentSpanEl  = null;
+            currentSpanIdx = null;
+            plainEl        = null;
+          }
+          if (!plainEl) {
+            plainEl = document.createElement('span');
+            aBubble.appendChild(plainEl);
+          }
+          plainEl.appendChild(document.createTextNode(ev.char));
+        }
+
+      } else if (ev.type === 'span_end') {
+        currentSpanEl  = null;
+        currentSpanIdx = null;
+        plainEl        = null;
+
+      } else if (ev.type === 'ground') {
+        const chip = document.createElement('span');
+        chip.className   = 'ground-chip';
+        chip.style.color = SPAN_COLORS[ev.spanIndex].border;
+        chip.textContent = '[GROUND]';
+        aBubble.appendChild(chip);
+        plainEl        = null;
+        currentSpanEl  = null;
+        currentSpanIdx = null;
+        revealHighlight(ev.spanIndex);
+      }
+    }, 28);
+  }
+
+  /* ── Wire up example tabs ── */
+  document.querySelectorAll('.qd-tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.qd-tab').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      const ex = EXAMPLES.find(e => e.id === btn.dataset.ex);
+      if (ex) loadExample(ex);
+    });
+  });
+
+  /* ── Wire up granularity buttons ── */
+  document.querySelectorAll('.gran-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.gran-btn').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      setGranularity(btn.dataset.gran);
+    });
+  });
+
+  /* ── Send / Reset ── */
+  sendBtn.addEventListener('click', function () { startStreaming(); });
+  resetBtn.addEventListener('click', function () { loadExample(activeExample); });
+
+  /* ── Initial load ── */
+  loadExample(EXAMPLES[0]);
+
+})();
+</script>
+
+</body>
+</html>

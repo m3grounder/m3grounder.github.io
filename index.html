@@ -1405,10 +1405,10 @@
       id: 'transcript',
       label: 'Transcript',
       image: 'static/images/qual/originals/transcript_doc.png',
-      question: "What is the student's GPA and which course had the lowest grade?",
+      question: "What is the student's ID number and what grade did Data Analytics receive?",
       spans: [
         {
-          text: '3.74',
+          text: '3123456',
           bbox: {
             phrase: [{ x: 22.95, y: 13.90, w:  7.73, h: 1.67 }],
             line:   [{ x:  7.23, y: 13.90, w: 23.73, h: 1.80 }],
@@ -1416,7 +1416,7 @@
           }
         },
         {
-          text: 'Introduction to Algorithms — B+',
+          text: 'HD',
           bbox: {
             phrase: [{ x: 85.50, y: 27.61, w:  3.45, h: 1.48 }],
             line:   [{ x: 15.23, y: 27.48, w: 73.73, h: 1.80 }],
@@ -1425,14 +1425,14 @@
         }
       ],
       tokens: [
-        { type: 'text',       content: "The student's GPA is " },
+        { type: 'text',       content: "The student ID is " },
         { type: 'span_start', spanIndex: 0 },
-        { type: 'text',       content: '3.74' },
+        { type: 'text',       content: '3123456' },
         { type: 'span_end' },
         { type: 'ground',     spanIndex: 0 },
-        { type: 'text',       content: ' and the course with the lowest grade was ' },
+        { type: 'text',       content: ' and the grade for Data Analytics is ' },
         { type: 'span_start', spanIndex: 1 },
-        { type: 'text',       content: 'Introduction to Algorithms — B+' },
+        { type: 'text',       content: 'HD' },
         { type: 'span_end' },
         { type: 'ground',     spanIndex: 1 },
         { type: 'text',       content: '.' },
