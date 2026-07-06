@@ -4,9 +4,8 @@
     {
       "name": "m3grounder",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "${PORT}"],
-      "port": 8744,
-      "autoPort": true
+      "runtimeArgs": ["-m", "http.server", "8744", "--directory", "."],
+      "port": 8744
     }
   ]
 }
