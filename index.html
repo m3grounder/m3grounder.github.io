@@ -296,6 +296,8 @@
     .hl-div.revealed{transition:left .3s ease,top .3s ease,width .3s ease,height .3s ease;}
     @keyframes hlSweep{from{clip-path:inset(0 100% 0 0);}to{clip-path:inset(0 0% 0 0);}}
     .hl-div.sweeping{animation:hlSweep .6s ease-out forwards;}
+    .hl-poly{clip-path:inset(0 100% 0 0);}
+    .hl-poly.sweeping{animation:hlSweep .6s ease-out forwards;}
 
     .gran-toggle{display:flex;gap:6px;justify-content:center;}
     .gran-btn{background:transparent;border:1px solid var(--border);border-radius:var(--radius-pill);padding:5px 16px;font-size:12px;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s;}
@@ -614,6 +616,7 @@
       <button class="qual-tab is-active" data-ex="finance">Finance</button>
       <button class="qual-tab" data-ex="legal">Legal</button>
       <button class="qual-tab" data-ex="transcript">Transcript</button>
+      <button class="qual-tab" data-ex="coffee_chart">Coffee Chart</button>
       <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen" style="margin-left:auto;opacity:.7;transition:opacity .2s;display:flex;align-items:center;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">
         <img src="static/images/logos/logo_bharatgen.png" alt="BharatGen" style="height:40px;width:auto;">
       </a>
@@ -1441,6 +1444,51 @@
         { type: 'text',       content: '.' },
       ]
     },
+    {
+      id: 'coffee_chart',
+      label: 'Coffee Chart',
+      image: 'static/images/qual/originals/coffee_chart.png',
+      question: 'According to the chart, which coffee brand is being compared, and what is the average coffee price for New York?',
+      spans: [
+        {
+          text: 'Starbucks Coffee',
+          masks: [
+            { points: [[82.18,47.77],[82.73,45.01],[83.91,42.55],[86.27,39.78],[88.45,39.02],[91.18,39.17],[92.64,41.17],[94.36,43.01],[95,45.78],[95.73,49.16],[93.55,49.31],[92.55,47.16],[91.64,44.85],[90.73,43.47],[88.73,43.01],[87.73,42.86],[86.18,44.7],[84.91,47.77],[84.27,50.38]] },
+            { points: [[83.55,55.76],[85.18,53.61],[86.82,55.91],[88.36,56.99],[90.09,56.68],[91.45,55.15],[92.55,53.3],[94.09,56.37],[93.09,58.37],[90.64,60.37],[88.18,60.98],[84.73,58.99]] }
+          ]
+        },
+        {
+          text: 'New York',
+          masks: [
+            { points: [[3,41.01],[12.27,41.01],[12.27,44.55],[3,44.55]] }
+          ]
+        },
+        {
+          text: '$3.45',
+          masks: [
+            { points: [[62.45,41.32],[68,41.32],[68,44.39],[62.45,44.39]] }
+          ]
+        }
+      ],
+      tokens: [
+        { type: 'text',       content: 'The coffee brand being compared is ' },
+        { type: 'span_start', spanIndex: 0 },
+        { type: 'text',       content: 'Starbucks Coffee' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 0 },
+        { type: 'text',       content: ', and the average coffee price for ' },
+        { type: 'span_start', spanIndex: 1 },
+        { type: 'text',       content: 'New York' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 1 },
+        { type: 'text',       content: ' is ' },
+        { type: 'span_start', spanIndex: 2 },
+        { type: 'text',       content: '$3.45' },
+        { type: 'span_end' },
+        { type: 'ground',     spanIndex: 2 },
+        { type: 'text',       content: '.' },
+      ]
+    },
   ];
 
   /* ── State ── */
@@ -1449,6 +1497,7 @@
   let streamInterval = null;
   let highlightDivs  = [];
   let revealedSet    = new Set();
+  let svgOverlay     = null;
 
   /* ── DOM refs ── */
   const imgEl         = document.getElementById('qual-doc-img');
@@ -1459,6 +1508,11 @@
   const resetBtnWrap  = document.getElementById('reset-btn-wrap');
   const resetBtn      = document.getElementById('reset-btn');
   const legendRow     = document.getElementById('legend-row');
+
+  /* ── Detect mask-based example ── */
+  function isMaskExample(ex) {
+    return ex.spans.length > 0 && Array.isArray(ex.spans[0].masks);
+  }
 
   /* ── Load example ── */
   function loadExample(ex) {
@@ -1481,25 +1535,52 @@
       b.classList.toggle('is-active', b.dataset.gran === 'phrase');
     });
 
-    /* Recreate highlight divs */
+    /* Recreate highlight divs / SVG overlays */
     highlightDivs.forEach(divArr => divArr.forEach(d => d.remove()));
     highlightDivs = [];
-    ex.spans.forEach((span, i) => {
-      const c = SPAN_COLORS[i];
-      const divArr = span.bbox.phrase.map(b => {
-        const div = document.createElement('div');
-        div.className        = 'hl-div';
-        div.style.background = c.fill;
-        div.style.border     = '2px solid ' + c.border;
-        div.style.left   = b.x + '%';
-        div.style.top    = b.y + '%';
-        div.style.width  = b.w + '%';
-        div.style.height = b.h + '%';
-        imgContainer.appendChild(div);
-        return div;
+    if (svgOverlay) { svgOverlay.remove(); svgOverlay = null; }
+
+    if (isMaskExample(ex)) {
+      document.querySelector('.gran-toggle').style.display = 'none';
+      svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svgOverlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;';
+      svgOverlay.setAttribute('viewBox', '0 0 100 100');
+      svgOverlay.setAttribute('preserveAspectRatio', 'none');
+      imgContainer.appendChild(svgOverlay);
+      ex.spans.forEach((span, i) => {
+        const c = SPAN_COLORS[i];
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', 'hl-poly');
+        span.masks.forEach(mask => {
+          const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          poly.setAttribute('points', mask.points.map(p => p.join(',')).join(' '));
+          poly.setAttribute('fill', c.fill);
+          poly.setAttribute('stroke', c.border);
+          poly.setAttribute('stroke-width', '0.5');
+          g.appendChild(poly);
+        });
+        svgOverlay.appendChild(g);
+        highlightDivs.push([g]);
       });
-      highlightDivs.push(divArr);
-    });
+    } else {
+      document.querySelector('.gran-toggle').style.display = '';
+      ex.spans.forEach((span, i) => {
+        const c = SPAN_COLORS[i];
+        const divArr = span.bbox.phrase.map(b => {
+          const div = document.createElement('div');
+          div.className        = 'hl-div';
+          div.style.background = c.fill;
+          div.style.border     = '2px solid ' + c.border;
+          div.style.left   = b.x + '%';
+          div.style.top    = b.y + '%';
+          div.style.width  = b.w + '%';
+          div.style.height = b.h + '%';
+          imgContainer.appendChild(div);
+          return div;
+        });
+        highlightDivs.push(divArr);
+      });
+    }
   }
 
   /* ── Reveal a highlight with sweep animation ── */
@@ -1511,14 +1592,15 @@
       div.classList.add('revealed');
       div.classList.remove('sweeping');
     });
-    // Single reflow so all rects start their animation at the same time
-    divArr[0] && void divArr[0].offsetWidth;
+    // Single reflow so all rects start their animation at the same time (works for both HTML and SVG)
+    divArr[0] && divArr[0].getBoundingClientRect();
     divArr.forEach(div => div.classList.add('sweeping'));
   }
 
   /* ── Granularity change: fade out old rects, swap to new granularity's rects ── */
   function setGranularity(gran) {
     activeGran = gran;
+    if (isMaskExample(activeExample)) return;
     revealedSet.forEach(i => {
       const oldDivs = highlightDivs[i];
       oldDivs.forEach(div => {
