@@ -131,6 +131,32 @@
     /* ── Method (dark) ── */
     section#method{background:var(--bg-1);}
     section#method video{width:100%;border-radius:var(--radius-md);border:1px solid var(--border);}
+
+    /* ── Animated architecture walkthrough (embedded) ── */
+    .walk-section{margin-top:60px;}
+    .walk-head{text-align:center;margin-bottom:22px;}
+    .walk-head h3{font-size:22px;font-weight:600;color:var(--text-primary);letter-spacing:-.01em;}
+    .walk-head p{font-size:14px;color:var(--text-secondary);margin-top:8px;}
+    .walk-frame{position:relative;width:100%;height:clamp(540px,74vh,780px);border-radius:var(--radius-md);
+      border:1px solid var(--border);overflow:hidden;background:#f6f7fb;}
+    .walk-frame iframe{width:100%;height:100%;border:0;display:block;}
+    .walk-frame:fullscreen{height:100%;border-radius:0;border:0;}
+    .walk-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:16px;background:#f6f7fb;text-align:center;padding:24px;
+      opacity:1;transition:opacity .4s ease;}
+    .walk-ph.gone{opacity:0;pointer-events:none;}
+    .walk-ph span{font-size:14px;font-weight:500;color:var(--text-muted);}
+    .walk-ph-play{width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;border:0;
+      font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      box-shadow:0 6px 20px rgba(79,126,248,.35);transition:transform .18s;font-family:'Inter',sans-serif;}
+    .walk-ph-play:hover{transform:scale(1.07);}
+    .walk-actions{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap;}
+    .walk-btn{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid var(--border);
+      border-radius:var(--radius-pill);padding:7px 18px;font-size:13px;font-weight:600;color:var(--text-secondary);
+      cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s;text-decoration:none;}
+    .walk-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+    .walk-hint{font-size:12.5px;color:var(--text-muted);text-align:center;margin-top:10px;}
+
     .method-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:44px;}
     .method-card{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:28px;}
     .method-card h4{font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:10px;line-height:1.4;}
@@ -278,6 +304,9 @@
       .method-cards,.gran-grid,.loss-grid,.qual-grid,.ds-cols,.hero-stats{grid-template-columns:1fr;}
       .hero-logos{gap:20px;}
       .hero-logos img{height:36px;}
+      /* the diagram is 2.45:1 — extra height buys nothing once width is the
+         constraint, so keep the frame short and push people to the full view */
+      .walk-frame{height:440px;}
     }
   </style>
   <style>
@@ -507,6 +536,28 @@
         granularities. The prompt embeddings are decoded by a mask decoder to produce hierarchical grounding masks
         <strong>(6)</strong>, mapping each answer span to its evidence at all granularities.
       </p>
+    </div>
+
+    <!-- ── Animated architecture walkthrough ── -->
+    <div class="walk-section reveal" id="walkthrough">
+      <div class="walk-head">
+        <h3>Animated Architecture Walkthrough</h3>
+        <p>Step through the full pipeline — from document and question, to <code>[GROUND]</code> tokens,
+        to the three granularity heads and the hierarchical masks they decode.</p>
+      </div>
+
+      <div class="walk-frame" id="walk-frame">
+        <div class="walk-ph" id="walk-ph">
+          <button class="walk-ph-play" id="walk-ph-play" aria-label="Load architecture walkthrough">▶</button>
+          <span>Interactive walkthrough · plays automatically when it scrolls into view</span>
+        </div>
+      </div>
+
+      <div class="walk-actions">
+        <button class="walk-btn" id="walk-fs">⤢ Fullscreen</button>
+        <a class="walk-btn" href="m3grounder-walkthrough.html" target="_blank" rel="noopener">↗ Open in new tab</a>
+      </div>
+      <p class="walk-hint">Drag to pan · scroll to zoom · <kbd>Space</kbd> to play/pause. Best viewed on a wide screen.</p>
     </div>
 
     <div class="method-cards reveal">
@@ -1088,6 +1139,46 @@
   document.querySelectorAll('.ws-card, .qual-grid > div').forEach((el, i) => {
     el.dataset.delay = i * 80;
   });
+
+  /* ── Architecture walkthrough: inject the iframe only once it scrolls near ── */
+  (function () {
+    const frame = document.getElementById('walk-frame');
+    const ph    = document.getElementById('walk-ph');
+    if (!frame || !ph) return;
+    let loaded = false;
+
+    function reveal() {
+      if (ph.classList.contains('gone')) return;
+      ph.classList.add('gone');
+      setTimeout(() => ph.remove(), 500);
+    }
+
+    function load() {
+      if (loaded) return;
+      loaded = true;
+      const f = document.createElement('iframe');
+      f.src = 'm3grounder-walkthrough.html';
+      f.title = 'M3Grounder — animated architecture walkthrough';
+      f.setAttribute('allowfullscreen', '');
+      f.addEventListener('load', reveal);
+      frame.appendChild(f);
+      /* the walkthrough pulls a webfont; never let a slow/blocked request
+         leave the placeholder sitting on top of a diagram that already drew */
+      setTimeout(reveal, 2500);
+    }
+
+    document.getElementById('walk-ph-play').addEventListener('click', load);
+    new IntersectionObserver((entries, obs) => {
+      entries.forEach(e => { if (e.isIntersecting) { load(); obs.disconnect(); } });
+    }, { rootMargin: '200px' }).observe(frame);
+
+    document.getElementById('walk-fs').addEventListener('click', () => {
+      load();
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (frame.requestFullscreen) frame.requestFullscreen();
+      else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
+    });
+  })();
 
   /* ── Count-up for hero stats ── */
   function countUp(el, target, dec, dur = 1200) {
