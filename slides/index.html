@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M3Grounder — CVPR 2026</title>
+<style>
+:root{
+  --blue:#05539C; --orange:#F59222; --ink:#16222e; --muted:#5b6b7a; --faint:#8a97a5;
+  --bg:#f6f8fa; --card:#ffffff; --line:#dde5ec;
+  --m3:#05539C; --docog:#7C3AED; --dlvl:#0E7C61; --intro:#C2410C;
+  --neut:#7d8b99; --neut2:#a5b2be; --bad:#b42318;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0d1117}
+body{font-family:"Avenir Next","Segoe UI",Inter,system-ui,-apple-system,sans-serif;color:var(--ink)}
+.deck{position:relative;width:100vw;height:100vh;overflow:hidden}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg);
+  padding:3.8vh 4vw 6vh;overflow:hidden}
+.slide.on{display:flex}
+.slide h2{font-size:4.3vh;line-height:1.12;margin-bottom:1.2vh;font-weight:700}
+.slide h2 .k{color:var(--accent,var(--blue))}
+.slide h2 .x{color:var(--bad)}
+.kicker{font-size:1.8vh;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--accent,var(--blue));margin-bottom:.8vh}
+.slide p{font-size:2.3vh;line-height:1.45}
+.small{font-size:1.8vh;color:var(--muted)}
+.tiny{font-size:1.6vh;color:var(--faint)}
+.vc{margin-top:auto;margin-bottom:auto}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:2vw;align-items:center;min-height:0}
+.rowflex{display:flex;gap:1.5vw;align-items:stretch;min-height:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1.8vh 1.8vh;box-shadow:0 2px 10px rgba(10,30,60,.05)}
+.card h3{font-size:2.3vh;margin-bottom:.8vh;color:var(--accent,var(--blue))}
+.card p{font-size:2vh;color:#33424f}
+.fig{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}
+.fig img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;background:#fff}
+.fig.framed img{border:1px solid var(--line);box-shadow:0 3px 14px rgba(10,30,60,.08);padding:1vh;background:#fff}
+.fig figcaption{font-size:1.75vh;color:var(--muted);margin-top:.9vh;text-align:center;max-width:60ch}
+.tok{font-family:ui-monospace,Menlo,monospace;font-size:.9em;background:#0d2740;color:#ffd28a;border-radius:6px;padding:.12vh .7vh;white-space:nowrap;margin:0 .2em}
+.tok.g{background:#2b1a4d;color:#e6d5ff}
+.tok.l{background:#0c352b;color:#b9f0dc}
+.spanchip{font-family:ui-monospace,Menlo,monospace;font-size:.9em;background:#fff3e0;border:1.5px solid var(--orange);border-radius:6px;padding:.12vh .7vh;color:#8a4b00;white-space:nowrap}
+.pill{display:inline-block;font-size:1.85vh;border:1.5px solid var(--accent,var(--blue));color:var(--accent,var(--blue));border-radius:999px;padding:.35vh 1.3vh;margin:.3vh .5vh .3vh 0;font-weight:600;background:#fff}
+.eqrow{display:flex;align-items:center;justify-content:center;gap:.8vw;flex-wrap:wrap;margin:1.2vh 0}
+.eqb{border-radius:12px;padding:1.2vh 1.4vh;font-family:Georgia,serif;font-style:italic;font-size:2.6vh;background:#fff;border:2px solid var(--line)}
+.eqb small{display:block;font-family:"Avenir Next",system-ui,sans-serif;font-style:normal;font-size:1.5vh;color:var(--muted);text-align:center;margin-top:.3vh}
+.eqb.hl{border-color:var(--accent,var(--blue));background:color-mix(in srgb,var(--accent,var(--blue)) 6%,#fff)}
+.eqop{font-size:3vh;color:var(--muted);font-weight:700}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1.6vh 2vh;text-align:center;box-shadow:0 2px 10px rgba(10,30,60,.05)}
+.stat .v{font-size:5vh;font-weight:700;color:var(--accent,var(--blue));line-height:1.05}
+.stat .v.bad{color:var(--bad)}
+.stat .l{font-size:1.75vh;color:var(--muted);margin-top:.4vh}
+.statrow{display:grid;grid-auto-flow:column;gap:1.2vw;margin:1.2vh 0}
+.hero{justify-content:center;align-items:center;text-align:center;background:
+  radial-gradient(90vw 70vh at 15% -10%, #dbeafe 0%, transparent 55%),
+  radial-gradient(80vw 60vh at 100% 110%, #ffedd5 0%, transparent 55%), var(--bg)}
+.hero h1{font-size:6.6vh;line-height:1.1;max-width:80vw}
+.hero h1 .k{color:var(--blue)}
+.hero .sub{font-size:2.6vh;color:var(--muted);margin-top:2vh;max-width:72vw}
+.divider{justify-content:center;background:
+  linear-gradient(120deg, color-mix(in srgb, var(--accent) 92%, #000) 0%, var(--accent) 60%, color-mix(in srgb, var(--accent) 72%, #fff) 100%)}
+.divider .kicker{color:#ffffffcc;font-size:2.1vh;letter-spacing:.16em}
+.divider h2{color:#fff;font-size:8.4vh}
+.divider p{color:#ffffffdd;font-size:3.4vh;margin-top:1.6vh;max-width:82vw}
+.divider .time{position:absolute;top:4vh;right:4vw;color:#fff;border:2px solid #ffffff88;border-radius:999px;padding:.8vh 2.2vh;font-size:2.3vh;font-weight:700}
+.footer{position:absolute;left:0;right:0;bottom:0;height:4.4vh;display:flex;align-items:center;justify-content:space-between;padding:0 9vw 0 4vw;font-size:1.6vh;color:var(--muted)}
+.footer .act{font-weight:700;color:var(--accent,var(--blue))}
+#bar{position:fixed;left:0;bottom:0;height:.7vh;background:linear-gradient(90deg,var(--blue),var(--orange));width:0;z-index:50;transition:width .25s}
+#count{position:fixed;right:1.1vw;bottom:1.3vh;z-index:50;font-size:1.7vh;color:#9fb0c0;font-family:ui-monospace,Menlo,monospace}
+.frag{opacity:0;transform:translateY(1.2vh);transition:all .3s}
+.frag.show{opacity:1;transform:none}
+.callout{background:#fff;border:1px solid var(--line);border-left:6px solid var(--orange);border-radius:12px;padding:1.3vh 1.8vh;font-size:2.15vh}
+.callout b{color:var(--blue)}
+.logos{display:flex;gap:1.8vw;align-items:center;justify-content:center;margin-top:3.4vh}
+.logos span{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.4vh 2.2vh;display:flex;align-items:center;box-shadow:0 2px 8px rgba(10,30,60,.06)}
+.logos img{height:8.4vh;object-fit:contain}
+.papers{display:flex;gap:1.4vw;align-items:stretch;justify-content:center;margin-top:2.4vh}
+.papers .paper{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.6vh 2.4vh;min-width:11vw;box-shadow:0 2px 8px rgba(10,30,60,.06)}
+.papers h4{margin:0;font-size:2.1vh;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.papers span{display:block;margin-top:.5vh;font-size:1.55vh;color:var(--muted)}
+.papers .oral{font-size:inherit;font-weight:700;color:var(--orange)}
+.storyline{display:grid;grid-template-columns:repeat(3,1fr);align-items:stretch;gap:1.4vw}
+.storyline .chap{border-radius:18px;padding:2.8vh 2.4vh;color:#fff;display:flex;flex-direction:column;gap:1vh}
+.recipe{text-align:center;font-size:2.5vh;color:var(--ink);margin-bottom:3.2vh}
+.recipe b{color:var(--blue)}
+.probs{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6vw;margin-top:2.6vh}
+.probs .prob{background:#fdf2f0;border:1px solid #f3d4cf;border-radius:16px;padding:2.2vh 2vh}
+.probs .prob h3{font-size:2.2vh;color:#b42318;margin-bottom:.9vh}
+.probs .prob p{font-size:1.9vh;color:#7a4a44;line-height:1.45}
+.abl{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+.abl th{font-size:1.55vh;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.7vh .9vh;border-bottom:2px solid var(--line);text-align:center}
+.abl td{font-size:1.95vh;color:#33424f;padding:1vh .9vh;border-bottom:1px solid var(--line);text-align:center}
+.abl td:first-child{text-align:left}
+.abl tr.ours td{background:#eaf1f8;font-weight:700;color:var(--m3);border-bottom:none}
+.sw{display:inline-block;width:1.6vh;height:1.6vh;border-radius:4px;margin-right:.6vw;vertical-align:baseline;transform:translateY(.15vh)}
+.fracline{height:2.5px;background:var(--ink);border-radius:2px;margin:.9vh 0}
+.storyline .chap h3{font-size:3vh;color:#fff}
+.storyline .chap p{font-size:2.05vh;color:#ffffffdd}
+.storyline .chap .v{font-size:1.6vh;font-weight:700;letter-spacing:.08em;color:#ffffffb0;text-transform:uppercase}
+.storyline .chap svg{margin-top:auto}
+.storyline .chap .keyline{font-size:1.9vh;color:#fff;font-weight:700;margin-top:1vh}
+.storyline .arr{align-self:center;font-size:4.4vh;color:#8aa2b8;font-weight:800}
+kbd{font-family:ui-monospace,Menlo,monospace;background:#fff;border:1px solid var(--line);border-bottom-width:3px;border-radius:6px;padding:.1vh .7vh;font-size:1.7vh}
+.svgbox{min-height:0;display:flex;align-items:center;justify-content:center}
+.svgbox svg{max-width:100%;max-height:100%;height:auto}
+svg text{font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+.chartcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:1.8vh;box-shadow:0 2px 10px rgba(10,30,60,.06);display:flex;flex-direction:column;min-height:0}
+.chartcard h3{font-size:2.1vh;margin-bottom:.4vh}
+.chartcard .sub{font-size:1.7vh;color:var(--muted);margin-bottom:1vh}
+.ifwrap{flex:1;min-height:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.1);background:#fff}
+.ifwrap iframe{width:100%;height:100%;border:0;display:block}
+.ifbar{display:flex;justify-content:space-between;align-items:center;margin-top:.8vh;padding-right:8vw}
+.ifbar a{color:var(--accent,var(--blue));font-weight:700;font-size:1.8vh;text-decoration:none}
+.navbtns{position:absolute;right:1.2vw;bottom:5.4vh;display:flex;gap:.6vw;z-index:30}
+.navbtns button{width:5vh;height:5vh;border-radius:50%;border:1px solid var(--line);background:#fff;
+  font-size:2.6vh;color:var(--accent,var(--blue));cursor:pointer;box-shadow:0 2px 8px rgba(10,30,60,.15);font-weight:700}
+.navbtns button:hover{background:var(--accent,var(--blue));color:#fff}
+.nb{white-space:nowrap}
+.deck.overview{overflow:auto;background:#0d1117;padding:2vh}
+.deck.overview .slide{display:flex;position:relative;inset:auto;width:32vw;height:18vw;float:left;margin:.5vw;border-radius:8px;overflow:hidden;cursor:pointer;zoom:.32}
+.deck.overview .ifwrap iframe{display:none}
+@media print{
+  html,body{background:#fff}
+  .deck .slide{display:flex !important;position:relative;inset:auto;width:100%;height:100vh;page-break-after:always}
+  .frag{opacity:1 !important;transform:none !important}
+  #bar,#count,.navbtns{display:none}
+}
+
+/* ---- carried over from the talk for team + QR slides ---- */
+/* ---- team slides ---- */
+/* wraps to centred rows of four — names get room instead of colliding */
+.team{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;
+  gap:2.6vh 2vw;margin:auto;padding:1vh 0;max-width:74vw}
+.person{display:flex;flex-direction:column;align-items:center;gap:1vh;width:15.5vw;
+  overflow-wrap:break-word}
+.person .ph{position:relative;width:8.6vw;height:8.6vw;border-radius:50%;overflow:hidden;
+  background:color-mix(in srgb,var(--accent) 12%,#fff);border:.35vh solid var(--accent);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(10,30,60,.10)}
+.person .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.person .ini{font-size:3vh;font-weight:800;color:var(--accent);letter-spacing:.04em}
+.person figcaption{font-size:1.8vh;line-height:1.25;color:var(--ink);text-align:center;
+  font-weight:600;width:100%}
+.person sup{color:var(--accent);font-weight:800}
+.teamfoot{text-align:center;font-size:1.8vh;color:var(--muted);padding-bottom:1vh}
+.teamfoot .tiny{color:var(--faint)}
+/* ---- project-page QR codes on the closing slide ----
+   Each tile hides itself if its PNG is missing, so the row stays tidy while
+   the codes are still being generated. */
+.qrrow{display:flex;gap:2.2vw;justify-content:center;align-items:flex-start;margin-top:2.4vh}
+.qrcard{display:flex;flex-direction:column;align-items:center;gap:.9vh;width:13vw}
+.qrcard img{width:9.6vw;height:9.6vw;object-fit:contain;background:#fff;padding:.7vh;
+  border:1px solid var(--line);border-radius:10px;box-shadow:0 2px 10px rgba(10,30,60,.08)}
+.qrcard .nm{font-size:1.95vh;font-weight:700;color:var(--qc,var(--blue));line-height:1.15}
+.qrcard .url{font-family:ui-monospace,Menlo,monospace;font-size:1.4vh;color:var(--faint);
+  word-break:break-all;line-height:1.25}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- ====== 7 · M3G DIVIDER ====== -->
+<section class="slide divider" style="--accent:var(--m3)">
+  <div class="kicker">CVPR 2026</div>
+  <h2>M3Grounder</h2>
+  <p>Mask-Based <b>Multi-Span</b> and <b>Multi-Granular</b> Grounding for Document QA</p>
+  <p style="font-size:2.45vh;margin-top:3vh"><span class="nb">Venkata Kesav Venna*</span> · <span class="nb">Sai Madhusudan Gunda*</span> · <span class="nb">Jyothi Swaroopa Jinka†</span> · <span class="nb">Hrithik Sagar Rachakonda†</span> · <span class="nb">Anirudh Srinivasan</span> · <span class="nb">Ravi Kiran Sarvadevabhatla</span><br><span style="font-size:2.05vh;color:#ffffffbb">*, † equal contribution &nbsp;·&nbsp; BharatGen · IIIT Hyderabad &nbsp;·&nbsp; m3grounder.github.io</span></p>
+</section>
+
+<!-- ====== 8a · M3G TEASER: A + B ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · In one picture</div>
+  <h2>Any shape of evidence — <span class="k">one span or many</span></h2>
+  <div class="cols" style="grid-template-columns:.75fr 1.25fr;flex:1;min-height:0;align-items:start">
+    <figure class="fig framed" style="height:100%">
+      <img src="assets/m3_teaser_A.png" alt="Single-span grounding on a map" style="max-height:56vh">
+      <figcaption style="font-size:2.2vh">(A) one span: <span class="spanchip">&lt;e&gt;River Thames&lt;/e&gt;</span><span class="tok">[GROUND]</span> → the curved river itself — no box could do this.</figcaption>
+    </figure>
+    <figure class="fig framed" style="height:100%">
+      <img src="assets/m3_teaser_B.png" alt="Multi-span grounding on a chart" style="max-height:56vh">
+      <figcaption style="font-size:2.2vh">(B) multi-span: the logo and three city rows each get their own mask, in one answer.</figcaption>
+    </figure>
+  </div>
+  <div class="footer"><span class="act">M3Grounder</span><span>Teaser · spans</span></div>
+</section>
+
+<!-- ====== 8b · M3G TEASER: C ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · In one picture</div>
+  <h2>…and the same evidence at <span class="k">three granularities</span></h2>
+  <figure class="fig framed" style="flex:1;width:100%">
+    <img src="assets/m3_teaser_C.png" alt="Phrase, line and block granularity on a bank statement" style="max-height:64vh;width:98%">
+    <figcaption style="font-size:2.2vh">(C1)–(C3) phrase ⊂ line ⊂ block on a bank statement — cite the number, redact the transaction row, or chunk the whole table. Same [GROUND] token, three nested masks.</figcaption>
+  </figure>
+  <div class="footer"><span class="act">M3Grounder</span><span>Teaser · granularity</span></div>
+</section>
+
+<!-- ====== 9 · M3G TASK ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · Task</div>
+  <h2>What the model actually outputs</h2>
+  <div class="vc" style="display:flex;flex-direction:column;gap:2.2vh">
+  <div class="card" style="font-size:2.4vh;line-height:2;padding:2.2vh">
+    <p style="color:var(--muted);font-size:2.15vh;margin-bottom:.6vh">Q: “Which value is abnormal, and what does it indicate?”</p>
+    <p>A: "The report shows a low <span class="spanchip">&lt;e&gt;MCV of 72.0 fL&lt;/e&gt;</span><span class="tok">[GROUND]</span> which indicates <span class="spanchip">&lt;e&gt;Microcytic anemia&lt;/e&gt;</span><span class="tok">[GROUND]</span>"</p>
+  </div>
+  <div class="cols" style="grid-template-columns:1.05fr .95fr">
+    <div class="card frag" style="display:flex;align-items:center;gap:1.5vw;padding:2.2vh">
+      <svg viewBox="0 0 200 130" style="width:19vw">
+        <rect x="10" y="10" width="180" height="110" rx="10" fill="#eaf1f8" stroke="#05539C" stroke-width="2"/>
+        <rect x="24" y="30" width="152" height="42" rx="8" fill="#cfe0f2" stroke="#05539C" stroke-width="2"/>
+        <rect x="38" y="42" width="70" height="18" rx="5" fill="#05539C"/>
+        <text x="73" y="55" text-anchor="middle" font-size="11" fill="#fff" font-weight="700">phrase</text>
+        <text x="140" y="58" font-size="11" fill="#3d5568">line</text>
+        <text x="150" y="110" font-size="11" fill="#3d5568">block</text>
+      </svg>
+      <p style="font-size:2.1vh">f<sub>θ</sub>(x, q) → (â, {M̂<sub>k</sub><sup>(i)</sup>}<sub>k=1…K</sub>)<br>each <span class="tok">[GROUND]</span> k → <b>three nested masks</b>, i ∈ {p, l, b}</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1.4vh;justify-content:center">
+      <div class="card frag"><h3>Multi-span</h3><p>K is free — one answer, many disjoint regions. K = 0 → M̂ = ∅, a plain answer.</p></div>
+      <div class="card frag"><h3>Multi-granular</h3><p>Different uses need different scopes: cite a number, redact a row, chunk a section.</p></div>
+    </div>
+  </div>
+  </div>
+  <div class="footer"><span class="act">M3Grounder</span><span>Task</span></div>
+</section>
+
+<!-- ====== 10 · M3G ARCHITECTURE FIG ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · Architecture</div>
+  <h2>VLM + three MLP heads + promptable segmenter</h2>
+  <figure class="fig framed" style="flex:1">
+    <img src="assets/m3_model.png" alt="M3Grounder architecture" style="max-height:64vh">
+  </figure>
+  <p class="small" style="text-align:center;margin-top:.8vh">① VLM encodes page + question · ② answer with interleaved <span class="tok">[GROUND]</span> · ③ hidden states h̃<sub>k</sub> · ④ 3 granularity MLP heads<br>⑤ dense features z, encoded once · ⑥ mask decoder → hierarchical masks</p>
+  <p class="tiny" style="text-align:center;margin-top:.4vh">Backbones: InternVL3.5-8B (-I) / Qwen3-VL-8B (-Q) · segmenter: SAM, backbone-agnostic · grounding adds <b>+63 ms</b> per sample (508 vs 445 ms, 1×H100)</p>
+  <div class="footer"><span class="act">M3Grounder</span><span>Architecture</span></div>
+</section>
+
+<!-- ====== 11 · M3G INTERACTIVE ====== -->
+<section class="slide iframe-slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · Interactive</div>
+  <h2 style="font-size:3.4vh">The forward pass, animated — a lab report walks through the model</h2>
+  <div class="ifwrap"><iframe data-src="interactive/m3grounder.html" loading="lazy" title="M3Grounder interactive walkthrough"></iframe></div>
+  <div class="ifbar">
+    <span class="small">Click inside to drive it · <kbd>Space</kbd> pause · <kbd>R</kbd> restart · <kbd>F</kbd> fit — then use ‹ › to continue the talk</span>
+    <a href="interactive/m3grounder.html" target="_blank">open standalone ↗</a>
+  </div>
+  <div class="footer"><span class="act">M3Grounder</span><span>Interactive architecture</span></div>
+</section>
+
+<!-- ====== 13a · M3G OBJECTIVE ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · Training objective</div>
+  <h2>One objective, four losses</h2>
+  <div class="vc">
+  <div class="eqrow">
+    <div class="eqb">λ<sub>lm</sub>𝓛<sub>lm</sub></div><div class="eqop">+</div>
+    <div class="eqb">λ<sub>seg</sub>𝓛<sub>seg</sub></div><div class="eqop">+</div>
+    <div class="eqb hl">λ<sub>bleed</sub>𝓛<sub>bleed</sub></div><div class="eqop">+</div>
+    <div class="eqb hl">λ<sub>hier</sub>𝓛<sub>hier</sub></div>
+  </div>
+  <div class="cols" style="grid-template-columns:repeat(4,1fr);gap:1.2vw;margin-top:2.6vh;align-items:stretch">
+    <div class="card frag"><h3>𝓛<sub>lm</sub></h3><p class="small">next-token cross-entropy — the answer text itself</p></div>
+    <div class="card frag"><h3>𝓛<sub>seg</sub></h3><p class="small">Dice + BCE on every mask, at each granularity</p></div>
+    <div class="card frag" style="border-top:4px solid var(--m3)"><h3>𝓛<sub>bleed</sub> <span style="font-size:1.5vh;color:var(--orange);font-weight:700">NOVEL</span></h3><p class="small">stay on the text — no spilling into graphics</p></div>
+    <div class="card frag" style="border-top:4px solid var(--m3)"><h3>𝓛<sub>hier</sub> <span style="font-size:1.5vh;color:var(--orange);font-weight:700">NOVEL</span></h3><p class="small">the three masks must nest: p ⊂ l ⊂ b</p></div>
+  </div>
+  <p class="small frag" style="text-align:center;margin-top:2.4vh">The two novel losses encode <b>document priors</b> the generic segmentation losses don't know about — next two slides.</p>
+  </div>
+  <div class="footer"><span class="act">M3Grounder</span><span>Objective</span></div>
+</section>
+
+<!-- ====== 13b · M3G BLEED ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · Novel loss ①</div>
+  <h2>𝓛<sub>bleed</sub> — don't spill <span class="k">off the text</span></h2>
+  <div class="cols vc" style="grid-template-columns:1.05fr .95fr;align-items:center">
+    <div class="card svgbox">
+      <svg viewBox="0 0 520 260" style="width:100%">
+        <g>
+          <rect x="14" y="30" width="230" height="190" rx="10" fill="#fbfdff" stroke="#c9d4de" stroke-width="1.5"/>
+          <rect x="30" y="48" width="130" height="9" rx="3" fill="#d5dee6"/>
+          <rect x="30" y="66" width="180" height="9" rx="3" fill="#d5dee6"/>
+          <circle cx="204" cy="110" r="26" fill="#ffe3c4" stroke="#F59222" stroke-width="2"/>
+          <path d="M204 96 v28 M191 110 h26" stroke="#F59222" stroke-width="3"/>
+          <rect x="30" y="96" width="120" height="28" rx="6" fill="#d5dee6"/>
+          <path d="M24 92 q80 -18 158 6 q30 12 26 30 q-6 22 -60 16 q-90 4 -124 -14 q-12 -14 0 -38z" fill="#b42318" opacity=".42"/>
+          <rect x="30" y="140" width="180" height="9" rx="3" fill="#d5dee6"/>
+          <text x="129" y="208" text-anchor="middle" font-size="13.5" font-weight="700" fill="#b42318">without 𝓛<tspan font-size="10" dy="2.5">bleed</tspan><tspan dy="-2.5">: spills into the icon</tspan></text>
+        </g>
+        <g>
+          <rect x="276" y="30" width="230" height="190" rx="10" fill="#fbfdff" stroke="#c9d4de" stroke-width="1.5"/>
+          <rect x="292" y="48" width="130" height="9" rx="3" fill="#d5dee6"/>
+          <rect x="292" y="66" width="180" height="9" rx="3" fill="#d5dee6"/>
+          <circle cx="466" cy="110" r="26" fill="#ffe3c4" stroke="#F59222" stroke-width="2"/>
+          <path d="M466 96 v28 M453 110 h26" stroke="#F59222" stroke-width="3"/>
+          <rect x="292" y="96" width="120" height="28" rx="6" fill="#d5dee6"/>
+          <rect x="288" y="92" width="128" height="36" rx="9" fill="#05539C" opacity=".55"/>
+          <rect x="292" y="140" width="180" height="9" rx="3" fill="#d5dee6"/>
+          <text x="391" y="208" text-anchor="middle" font-size="13.5" font-weight="700" fill="#05539C">with 𝓛<tspan font-size="10" dy="2.5">bleed</tspan><tspan dy="-2.5">: hugs the evidence</tspan></text>
+        </g>
+      </svg>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1.6vh;justify-content:center">
+      <div class="card" style="padding:3vh 2.6vh">
+        <div style="display:flex;align-items:center;gap:1.6vw;justify-content:center">
+          <div style="font-size:3.6vh;font-family:Georgia,serif;font-style:italic">𝓛<sub style="font-size:2vh;font-style:normal;font-family:-apple-system,sans-serif;font-weight:700">bleed</sub> =</div>
+          <div style="text-align:center">
+            <div style="font-size:2.35vh;color:#b42318;font-weight:700"><span class="sw" style="background:#b42318;opacity:.75"></span>mask mass off the text</div>
+            <div class="fracline"></div>
+            <div style="font-size:2.35vh;color:#05539C;font-weight:700"><span class="sw" style="background:#05539C;opacity:.75"></span>whole mask</div>
+          </div>
+        </div>
+        <p class="tiny" style="text-align:center;margin-top:1.6vh">= Σ M̂ ⊙ (1 − M<sub>text</sub>) / (Σ M̂ + ε) &nbsp;·&nbsp; M<sub>text</sub> = union of all text pixels</p>
+      </div>
+      <div class="card frag"><p class="small" style="font-size:2.1vh;text-align:center">A <b>fraction</b> — a small mask is policed as strictly as a large one.</p></div>
+    </div>
+  </div>
+  <div class="footer"><span class="act">M3Grounder</span><span>Novel loss · bleed suppression</span></div>
+</section>
+
+<!-- ====== 14 · M3G ENCLOSURE ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · Novel loss ②</div>
+  <h2>𝓛<sub>hier</sub> — make the masks <span class="k">nest</span></h2>
+  <div class="cols vc" style="grid-template-columns:1fr 1fr">
+    <div class="card svgbox" style="padding:2.4vh">
+    <svg viewBox="0 0 620 292" style="width:100%">
+      <defs><clipPath id="m3HierCapClip"><rect x="224" y="130" width="228" height="36" rx="18"/></clipPath></defs>
+      <rect x="150" y="40" width="320" height="190" rx="14" fill="#eaf1f8" stroke="#b9cfe4" stroke-width="1.5" stroke-dasharray="7 5"/>
+      <rect x="190" y="98" width="224" height="98" rx="10" fill="#cfe0f2" stroke="#8fb4d6" stroke-width="2" stroke-dasharray="7 5"/>
+      <rect x="224" y="130" width="228" height="36" rx="18" fill="#05539C"/>
+      <g clip-path="url(#m3HierCapClip)"><rect x="414" y="128" width="42" height="40" fill="#b42318" opacity="0.82"/></g>
+      <line x1="414" y1="130" x2="414" y2="166" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="4 3"/>
+      <g font-size="13" fill="#5b6b7a">
+        <text x="118" y="62" text-anchor="end">block (GT)</text>
+        <line x1="125" y1="58" x2="146" y2="58" stroke="#97a7b6" stroke-width="1"/><circle cx="150" cy="58" r="2.3" fill="#97a7b6"/>
+        <text x="118" y="116" text-anchor="end">line (GT)</text>
+        <line x1="125" y1="112" x2="186" y2="112" stroke="#97a7b6" stroke-width="1"/><circle cx="190" cy="112" r="2.3" fill="#97a7b6"/>
+        <text x="118" y="152" text-anchor="end">phrase (pred.)</text>
+        <line x1="125" y1="148" x2="219" y2="148" stroke="#97a7b6" stroke-width="1"/><circle cx="223" cy="148" r="2.3" fill="#97a7b6"/>
+      </g>
+      <circle cx="453" cy="148" r="2.3" fill="#b42318"/>
+      <line x1="456" y1="148" x2="474" y2="148" stroke="#b42318" stroke-width="1"/>
+      <text x="480" y="144" font-size="13.5" font-weight="700" fill="#b42318">escaped</text>
+      <text x="480" y="163" font-size="13" font-weight="600" fill="#b42318">→ penalized</text>
+      <rect x="482" y="30" width="118" height="88" rx="10" fill="#f7fafc" stroke="#dde5ec" stroke-width="1"/>
+      <path d="M493 45 l4.5 4.5 l8 -9" stroke="#05539C" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="512" y="51" font-size="12.5" fill="#5b6b7a">goal</text>
+      <rect x="494" y="60" width="94" height="50" rx="6" fill="#eaf1f8" stroke="#b9cfe4" stroke-width="1"/>
+      <rect x="506" y="71" width="70" height="28" rx="4" fill="#cfe0f2" stroke="#9fbfdd" stroke-width="1"/>
+      <rect x="517" y="78" width="48" height="14" rx="7" fill="#05539C"/>
+      <text x="310" y="268" text-anchor="middle" font-size="15" fill="#16222e">𝓛<tspan font-size="10.5" dy="3" font-weight="700">hier</tspan><tspan dy="-3">&#160;→ 0&#160;&#160;&#160;⇒&#160;&#160;&#160;phrase ⊂ line ⊂ block</tspan></text>
+    </svg>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1.6vh;justify-content:center">
+      <div class="card" style="padding:3vh 2.6vh">
+        <div style="display:flex;align-items:center;gap:1.6vw;justify-content:center">
+          <div style="font-size:3.6vh;font-family:Georgia,serif;font-style:italic">𝓛<sub style="font-size:2vh;font-style:normal;font-family:-apple-system,sans-serif;font-weight:700">hier</sub> =</div>
+          <div style="text-align:center">
+            <div style="font-size:2.35vh;color:#b42318;font-weight:700"><span class="sw" style="background:#b42318;opacity:.75"></span>finer mask outside the coarser</div>
+            <div class="fracline"></div>
+            <div style="font-size:2.35vh;color:#05539C;font-weight:700"><span class="sw" style="background:#05539C;opacity:.75"></span>finer mask</div>
+          </div>
+        </div>
+        <p class="tiny" style="text-align:center;margin-top:1.6vh">the coarser mask is the <b>ground truth</b> of the next level up · applied to (phrase→line) and (line→block)</p>
+      </div>
+      <div class="stat frag"><div class="v" style="font-size:3.6vh">74.0 → 78.2</div><div class="l">GDQA F1<sub>g</sub>, phrase — from adding 𝓛<sub>hier</sub> alone</div></div>
+      <p class="tiny frag" style="text-align:center">Charts are single-level — no line/block, so no 𝓛<sub>hier</sub> there.</p>
+    </div>
+  </div>
+  <div class="footer"><span class="act">M3Grounder</span><span>Losses · enclosure</span></div>
+</section>
+
+<!-- ====== 15a · M3G DATA ENGINE: PIPELINE 1 ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · Data engine · pipeline ①</div>
+  <h2>GroundingDocQA: <span class="k">200K docs · 2M QA</span> — no hand-drawn masks</h2>
+  <figure class="fig framed vc" style="width:100%"><img src="assets/m3_engine_row1.png" alt="Layout-aware documents pipeline" style="max-height:48vh;width:98%"></figure>
+  <div class="card" style="margin-top:1vh"><h3>① 140K layout-aware documents</h3><p class="small">REPLICA rebuilds each page as ID-tagged <b>"Fid-HTML"</b> (1A–1C) → an LLM writes QA citing <b>element IDs, never coordinates</b> (1D) → post-processing maps IDs back to boxes, Hi-SAM turns them into masks (1E) → grounded QA pairs (1F–1G). Hallucinated geometry is impossible by construction.</p></div>
+  <div class="footer"><span class="act">M3Grounder</span><span>Data engine · layout docs</span></div>
+</section>
+
+<!-- ====== 15b · M3G DATA ENGINE: CURVED ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · Data engine · pipeline ②</div>
+  <h2>Curved text: <span class="k">highlight, then ask</span></h2>
+  <figure class="fig framed vc" style="width:100%"><img src="assets/m3_engine_row2.png" alt="Curved text pipeline" style="max-height:48vh;width:96%"></figure>
+  <div class="card" style="margin-top:1vh"><h3>② 10K curved-text documents</h3><p class="small">curvature detection (2A) → the curved mask is overlaid on the page as a <b>Set-of-Mark highlight</b> (2B) → a VLM (2C) writes QA <b>strictly about the highlighted region</b> — the mask exists before the question does, so grounding is exact by construction.</p></div>
+  <div class="footer"><span class="act">M3Grounder</span><span>Data engine · curved text</span></div>
+</section>
+
+<!-- ====== 15c · M3G DATA ENGINE: CHARTS ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · Data engine · pipeline ③</div>
+  <h2>Charts: <span class="k">intercept the renderer</span></h2>
+  <figure class="fig framed vc" style="width:100%"><img src="assets/m3_engine_row3.png" alt="Charts pipeline" style="max-height:48vh;width:96%"></figure>
+  <div class="card" style="margin-top:1vh"><h3>③ 50K charts</h3><p class="small"><b>Renderer interception</b>: execute the plot script (3A), record every element's true position at render time — axes, ticks, bars, legends (3B–3D) → a VLM writes QA against the ID-tagged elements → IDs map back to exact masks. No detection step, no guessing.</p></div>
+  <p class="tiny" style="margin-top:.8vh;text-align:center">Every pair verified twice: E5-embedding similarity (span ↔ OCR of region) + LLM-judge (DeepSeek-R1) vs the source HTML · 52% single-span / 48% multi-span</p>
+  <div class="footer"><span class="act">M3Grounder</span><span>Data engine · charts</span></div>
+</section>
+
+<!-- ====== 16 · M3G BENCH ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · Benchmark</div>
+  <h2>GDQA-Bench — <span class="k">human-verified</span> evaluation</h2>
+  <div class="vc" style="display:flex;flex-direction:column;gap:2vh">
+  <div class="statrow" style="grid-auto-flow:column;margin:0">
+    <div class="stat"><div class="v">2.5K</div><div class="l">documents — charts, reports, forms, tables, webpages, infographics</div></div>
+    <div class="stat"><div class="v">5K</div><div class="l">QA pairs, manually curated &amp; verified</div></div>
+    <div class="stat"><div class="v">3</div><div class="l">mask granularities: phrase · line · block</div></div>
+  </div>
+  <div class="cols" style="grid-template-columns:1fr 1fr;align-items:stretch">
+    <div class="chartcard">
+      <h3>Composition</h3>
+      <div style="display:flex;flex-direction:column;gap:1.6vh;margin-top:1.2vh">
+        <div><p class="small" style="margin-bottom:.4vh">geometry</p>
+          <div style="display:flex;height:4vh;border-radius:8px;overflow:hidden;gap:2px">
+            <div style="flex:70;background:var(--m3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.9vh">70% straight</div>
+            <div style="flex:30;background:var(--orange);color:#5c3300;display:flex;align-items:center;justify-content:center;font-size:1.9vh">30% curved</div>
+          </div></div>
+        <div><p class="small" style="margin-bottom:.4vh">spans</p>
+          <div style="display:flex;height:4vh;border-radius:8px;overflow:hidden;gap:2px">
+            <div style="flex:56.4;background:var(--m3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.9vh">56.4% single</div>
+            <div style="flex:43.6;background:#6da7ec;color:#0c2c50;display:flex;align-items:center;justify-content:center;font-size:1.9vh">43.6% multi-span</div>
+          </div></div>
+      </div>
+    </div>
+    <div class="chartcard frag">
+      <h3>Scoring</h3>
+      <div style="display:flex;flex-direction:column;gap:1.2vh;margin-top:1.2vh;justify-content:center;flex:1">
+      <p class="small"><b>F1<sub>g</sub></b> at IoU &gt; 0.5 — single-span, multi-span (bipartite matching), and a separate curved/skewed split · <b>AQ</b> by G-Eval judge.</p>
+      <p class="small">Fairness: predictions are converted to <b>each benchmark's native annotation format</b> — boxes rasterized to masks, masks tightly boxed.</p>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="footer"><span class="act">M3Grounder</span><span>Benchmark</span></div>
+</section>
+
+<!-- ====== 17 · M3G RESULTS ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · Results</div>
+  <h2>Boxes plateau. Masks <span class="k">jump.</span></h2>
+  <div class="cols vc" style="grid-template-columns:1.25fr .75fr">
+    <div class="chartcard">
+      <h3>Grounding F1 on GDQA-Bench</h3><p class="sub">higher is better · 0–100</p>
+      <svg viewBox="0 0 664 300" role="img" aria-label="Bar chart of grounding F1 on GDQA-Bench">
+        <g stroke="#e1e0d9" stroke-width="1"><line x1="180" y1="16" x2="180" y2="264"/><line x1="295" y1="16" x2="295" y2="264"/><line x1="410" y1="16" x2="410" y2="264"/><line x1="525" y1="16" x2="525" y2="264"/><line x1="640" y1="16" x2="640" y2="264"/></g>
+        <g font-size="13" fill="#898781" text-anchor="middle"><text x="180" y="284">0</text><text x="295" y="284">25</text><text x="410" y="284">50</text><text x="525" y="284">75</text><text x="640" y="284">100</text></g>
+        <g font-size="14.5" fill="#16222e" text-anchor="end">
+          <text x="168" y="46">GPT-5</text><text x="168" y="94">Qwen3-VL-8B</text><text x="168" y="142">Gemini-2.5-Pro</text><text x="168" y="190">Qwen3-VL-8B ft</text><text x="168" y="238" font-weight="700">M3Grounder-Q</text>
+        </g>
+        <g>
+          <path d="M180 32 h16.7 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-16.7 z" fill="#7d8b99"><title>GPT-5 · 4.5</title></path>
+          <path d="M180 80 h54.9 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-54.9 z" fill="#7d8b99"><title>Qwen3-VL-8B · 12.8</title></path>
+          <path d="M180 128 h195.6 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-195.6 z" fill="#7d8b99"><title>Gemini-2.5-Pro · 43.4</title></path>
+          <path d="M180 176 h274.8 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-274.8 z" fill="#7d8b99"><title>Qwen3-VL-8B fine-tuned · 60.6</title></path>
+          <path d="M180 224 h359.4 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-359.4 z" fill="#05539C"><title>M3Grounder-Q · 79.0</title></path>
+        </g>
+        <g font-size="14" fill="#16222e">
+          <text x="208" y="46">4.5</text><text x="246" y="94">12.8</text><text x="387" y="142">43.4</text><text x="466" y="190">60.6</text><text x="551" y="238" font-weight="700">79.0</text>
+        </g>
+      </svg>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1.1vh;justify-content:center">
+      <p class="small">…and vs the best prior on every other benchmark:</p>
+      <div class="stat frag"><div class="v" style="font-size:3.4vh">70.0 → 81.4</div><div class="l">BoundingDocs-Test (vs Gemini-2.5-Pro)</div></div>
+      <div class="stat frag"><div class="v" style="font-size:3.4vh">66.4 → 73.3</div><div class="l">DOGR-Bench (vs DOGR, same 8B scale)</div></div>
+      <div class="stat frag"><div class="v" style="font-size:3.4vh">49.4 → 68.2</div><div class="l">MMDocBench IoU (vs Gemini-2.5-Pro)</div></div>
+      <p class="small frag">Answers stay top-tier: AQ 88.8 on BoundingDocs (GPT-5: 89.3 with F1<sub>g</sub> 5.4).</p>
+    </div>
+  </div>
+  <div class="footer"><span class="act">M3Grounder</span><span>Main results</span></div>
+</section>
+
+<!-- ====== 18 · M3G ABLATIONS ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · Ablations</div>
+  <h2>Ablations</h2>
+  <div class="cols vc" style="grid-template-columns:1.3fr .7fr;align-items:start">
+    <div class="chartcard">
+      <table class="abl">
+        <thead>
+          <tr><th rowspan="2" style="text-align:left">Setting (F1<sub>g</sub> ↑)</th><th rowspan="2">BD-T</th><th rowspan="2">DR-B</th><th rowspan="2">MD-B</th><th colspan="3">GDQA-Bench</th></tr>
+          <tr><th>phrase</th><th>line</th><th>block</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>w/o hierarchy (train phrase only)</td><td>74.8</td><td>58.2</td><td>54.7</td><td>71.3</td><td>–</td><td>–</td></tr>
+          <tr><td>1× shared MLP + SAM</td><td>64.2</td><td>61.7</td><td>53.5</td><td>63.6</td><td>69.3</td><td>77.6</td></tr>
+          <tr><td>𝓛<sub>lm</sub> + 𝓛<sub>seg</sub></td><td>78.3</td><td>70.1</td><td>65.6</td><td>74.0</td><td>77.6</td><td>84.4</td></tr>
+          <tr><td style="padding-left:2.6vh">+ 𝓛<sub>hier</sub></td><td>80.1</td><td>72.8</td><td>67.4</td><td>78.2</td><td>79.1</td><td>84.7</td></tr>
+          <tr><td style="padding-left:2.6vh">+ 𝓛<sub>bleed</sub></td><td>79.6</td><td>72.4</td><td>67.7</td><td>77.3</td><td>78.7</td><td>86.5</td></tr>
+          <tr><td>LoRA instead of full fine-tune</td><td>62.4</td><td>54.8</td><td>52.7</td><td>61.5</td><td>67.3</td><td>75.7</td></tr>
+          <tr class="ours"><td>M3Grounder-Q (all four losses)</td><td>81.4</td><td>73.3</td><td>68.2</td><td>79.0</td><td>81.4</td><td>87.5</td></tr>
+        </tbody>
+      </table>
+      <p class="tiny" style="margin-top:1vh">BD-T = BoundingDocs-Test · DR-B = DOGR-Bench · MD-B = MMDocBench, all at phrase level. Higher is better.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1.2vh;justify-content:center">
+      <div class="card frag"><h3>Three heads &gt; one</h3><p class="small">A single shared prompt MLP drops phrase F1<sub>g</sub> to <b>63.6</b> (vs 79.0).</p></div>
+      <div class="card frag"><h3>Hierarchy helps phrases</h3><p class="small">Training all 3 levels lifts phrase-only training from <b>71.3 → 79.0</b>.</p></div>
+      <div class="card frag"><h3>The two losses are complementary</h3><p class="small">Alone: +𝓛<sub>hier</sub> <b>78.2</b>, +𝓛<sub>bleed</sub> <b>77.3</b>. Together: <b>79.0</b>.</p></div>
+      <div class="card frag"><h3>LoRA can't localize</h3><p class="small">Fine-grained grounding needs full parameter updates: <b>61.5</b> vs 79.0.</p></div>
+    </div>
+  </div>
+  <div class="footer"><span class="act">M3Grounder</span><span>Ablations</span></div>
+</section>
+
+<!-- ====== 19 · M3G QUAL ====== -->
+<section class="slide iframe-slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · In the wild</div>
+  <h2 style="font-size:3.4vh">Grounded answers, live — finance, legal, transcripts, charts</h2>
+  <div class="ifwrap"><iframe data-src="interactive/m3g_examples.html" loading="lazy" title="M3Grounder qualitative examples demo"></iframe></div>
+  <div class="ifbar">
+    <span class="small"><b>Takeaway #1</b> — <b>SAM for documents</b>: the VLM points via [GROUND], SAM turns it into a mask. · Tabs switch examples · Phrase / Line / Block = granularity</span>
+    <a href="interactive/m3g_examples.html" target="_blank">open standalone ↗</a>
+  </div>
+  <div class="footer"><span class="act">M3Grounder</span><span>Examples · takeaway</span></div>
+</section>
+
+<!-- ====== TEAM · M3Grounder ====== -->
+<section class="slide" style="--accent:var(--m3)">
+  <div class="kicker">M3Grounder · the team</div>
+  <h2>Built by</h2>
+  <div class="team"><figure class="person"><span class="ph"><span class="ini">VK</span><img src="team/Kesav.jpg" alt="Venkata Kesav Venna" loading="lazy" onerror="this.remove()"></span><figcaption>Venkata Kesav Venna<sup>*</sup></figcaption></figure><figure class="person"><span class="ph"><span class="ini">SM</span><img src="team/SaiMadhu.jpg" alt="Sai Madhusudan Gunda" loading="lazy" onerror="this.remove()"></span><figcaption>Sai Madhusudan Gunda<sup>*</sup></figcaption></figure><figure class="person"><span class="ph"><span class="ini">JS</span><img src="team/Swaroopa.jpg" alt="Jyothi Swaroopa Jinka" loading="lazy" onerror="this.remove()"></span><figcaption>Jyothi Swaroopa Jinka<sup>†</sup></figcaption></figure><figure class="person"><span class="ph"><span class="ini">HS</span><img src="team/Hrithik.png" alt="Hrithik Sagar Rachakonda" loading="lazy" onerror="this.remove()"></span><figcaption>Hrithik Sagar Rachakonda<sup>†</sup></figcaption></figure><figure class="person"><span class="ph"><span class="ini">AS</span><img src="team/Anirudh.jpg" alt="Anirudh Srinivasan" loading="lazy" onerror="this.remove()"></span><figcaption>Anirudh Srinivasan<sup></sup></figcaption></figure><figure class="person"><span class="ph"><span class="ini">RK</span><img src="team/RaviKiran.jpg" alt="Ravi Kiran Sarvadevabhatla" loading="lazy" onerror="this.remove()"></span><figcaption>Ravi Kiran Sarvadevabhatla<sup></sup></figcaption></figure></div>
+  <div class="teamfoot">BharatGen · IIIT Hyderabad &nbsp; <span class="tiny">* equal contribution · † equal contribution</span></div>
+</section>
+
+<!-- ====== THANKS ====== -->
+<section class="slide hero" style="--accent:var(--m3)">
+  <h1 style="font-size:5.4vh">Thank you — <span class="k">questions?</span></h1>
+  <div class="qrrow">
+    <figure class="qrcard" style="--qc:var(--m3)"><img src="qr/m3grounder.png" alt="M3Grounder project page QR" onerror="this.closest('.qrcard').style.display='none'"><figcaption class="nm">M3Grounder</figcaption><span class="url">m3grounder.github.io</span></figure>
+  </div>
+  <div class="logos"><span><img src="assets/logo_bharatgen.png" alt="BharatGen"></span><span><img src="assets/logo_iiith.jpg" alt="IIIT Hyderabad"></span></div>
+  <p class="sub" style="font-size:1.85vh;margin-top:2.6vh">M3Grounder (CVPR 2026)<br>BharatGen · IIIT Hyderabad</p>
+</section>
+
+</div>
+
+<div id="bar"></div><div id="count"></div>
+
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];
+  const deck=document.getElementById('deck');
+  const bar=document.getElementById('bar'), count=document.getElementById('count');
+  let i=Math.max(0,Math.min(slides.length-1,(parseInt(location.hash.slice(1),10)||1)-1));
+  const ALL=location.search.includes('all');
+  function frags(s){return [...s.querySelectorAll('.frag')]}
+  function loadIframe(s){
+    const f=s.querySelector('iframe[data-src]');
+    if(f && !f.src){f.src=f.dataset.src}
+  }
+  function show(n,revealAll){
+    slides.forEach((s,j)=>s.classList.toggle('on',j===n));
+    frags(slides[n]).forEach(el=>el.classList.toggle('show',ALL||!!revealAll));
+    loadIframe(slides[n]);
+    // replaceState, not location.hash: one entry per slide would otherwise
+    // fill the browser's back history for the whole talk.
+    i=n; history.replaceState(null,'','#'+(n+1));
+    bar.style.width=((n+1)/slides.length*100)+'%';
+    count.textContent=(n+1)+' / '+slides.length;
+  }
+  function next(){
+    const f=frags(slides[i]).filter(el=>!el.classList.contains('show'));
+    if(f.length){f[0].classList.add('show');return}
+    if(i<slides.length-1)show(i+1,false);
+  }
+  function prev(){
+    const f=frags(slides[i]).filter(el=>el.classList.contains('show'));
+    if(f.length){f[f.length-1].classList.remove('show');return}
+    if(i>0)show(i-1,true);
+  }
+  window.deckNext=next; window.deckPrev=prev;
+  document.querySelectorAll('.iframe-slide').forEach(s=>{
+    const nb=document.createElement('div'); nb.className='navbtns';
+    const b1=document.createElement('button'); b1.textContent='‹'; b1.onclick=e=>{e.stopPropagation();prev()};
+    const b2=document.createElement('button'); b2.textContent='›'; b2.onclick=e=>{e.stopPropagation();next()};
+    nb.append(b1,b2); s.appendChild(nb);
+  });
+  addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();next()}
+    else if(e.key==='ArrowLeft'||e.key==='Backspace'||e.key==='PageUp'){e.preventDefault();prev()}
+    else if(e.key==='Home')show(0,false);
+    else if(e.key==='End')show(slides.length-1,true);
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+    else if(e.key==='g'||e.key==='G'){deck.classList.toggle('overview')}
+  });
+  deck.addEventListener('click',e=>{
+    if(deck.classList.contains('overview')){
+      const s=e.target.closest('.slide');
+      if(s){deck.classList.remove('overview');show(slides.indexOf(s),false)}
+      return;
+    }
+    if(e.target.closest('a'))return;
+    if(e.target.closest('.iframe-slide'))return;
+    (e.clientX>innerWidth*.35)?next():prev();
+  });
+  addEventListener('hashchange',()=>{
+    const n=(parseInt(location.hash.slice(1),10)||1)-1;
+    if(n!==i&&n>=0&&n<slides.length)show(n,false);
+  });
+  show(i,false);
+})();
+</script>
+</body>
+</html>
